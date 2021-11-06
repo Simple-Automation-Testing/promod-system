@@ -1,16 +1,18 @@
-import {seleniumWD} from 'promod';
 import {waitForCondition} from 'sat-utils';
 import {IWaitConditionOpts} from './interfaces';
 
-const {browser} = seleniumWD;
+let browserAction = {
+	getCurrentUrl: 'getCurrentUrl',
+	getTabs: 'getTabs',
+}
 
-async function waitForUrlIncludes(url: string, opts: IWaitConditionOpts = {}) {
+async function waitForUrlIncludes(browser, url: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
 
 	return waitForCondition(async () => {
-		const currentUrl = await browser.getCurrentUrl();
+		const currentUrl = await browser[browserAction.getCurrentUrl]();
 
 		createErrorMessage = () => `Current url ${currentUrl} should include ${url}`;
 
@@ -18,13 +20,27 @@ async function waitForUrlIncludes(url: string, opts: IWaitConditionOpts = {}) {
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
-async function waitForTabsQuantity(quantity: number, opts: IWaitConditionOpts = {}) {
+async function waitForUrlEquals(browser, url: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
 
 	return waitForCondition(async () => {
-		const browserTabs = await browser.getTabs();
+		const currentUrl = await browser[browserAction.getCurrentUrl]();
+
+		createErrorMessage = () => `Current url ${currentUrl} should include ${url}`;
+
+		return currentUrl === url;
+	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
+}
+
+async function waitForTabsQuantity(browser, quantity: number, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const browserTabs = await browser[browserAction.getTabs]();
 
 		createErrorMessage = () => `Current browser tabs quantity is ${browserTabs.length} expected quantity is ${quantity}`;
 
@@ -34,8 +50,9 @@ async function waitForTabsQuantity(quantity: number, opts: IWaitConditionOpts = 
 
 const browserWaiters = {
 	addDecorator(decorate: (originalWaiter: (...args: any[]) => Promise<void>, ...args: any[]) => unknown) {
-		// ignore *addDecorator* method
-		const keys = Object.getOwnPropertyNames(this).filter((key) => key !== 'addDecorator');
+		// ignore *addDecorator* and *updateBrowserActionsMap* methods
+		const keys = Object.getOwnPropertyNames(this)
+			.filter((key) => key !== 'addDecorator' && key !== 'updateBrowserActionsMap');
 		keys.forEach((key) => {
 			const initialMethodImplementation = this[key];
 			this[key] = function(...args) {
@@ -43,10 +60,24 @@ const browserWaiters = {
 			}
 		})
 	},
+	updateBrowserActionsMap(browserActionMap: typeof browserAction) {
+		browserAction = browserActionMap
+	},
 	waitForUrlIncludes,
 	waitForTabsQuantity,
+	waitForUrlEquals,
+}
+
+
+function createBrowserWaiters(browser) {
+	// ignore *addDecorator* and *updateBrowserActionsMap* methods
+	const keys = Object.getOwnPropertyNames(browserWaiters)
+		.filter((key) => key !== 'addDecorator' && key !== 'updateBrowserActionsMap');
+	keys.forEach((key) => browserWaiters[key].bind(browserWaiters, browser));
+
+	return browserWaiters;
 }
 
 export {
-	browserWaiters,
+	createBrowserWaiters,
 };

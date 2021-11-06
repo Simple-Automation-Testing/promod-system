@@ -1,10 +1,15 @@
-import {PromodSeleniumElementType} from 'promod';
 import {IWaitConditionOpts} from './interfaces';
 
 import {waitForCondition} from 'sat-utils';
 
+let elementAction = {
+	isEnabled: 'isEnabled',
+	isDisplayed: 'isDisplayed',
+	isPresent: 'isPresent',
+	getText: 'getText',
+}
 
-async function waitForEnabled(element: PromodSeleniumElementType, isEnabled: boolean, opts: IWaitConditionOpts = {}) {
+async function waitForEnabled(element, isEnabled: boolean, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -20,7 +25,7 @@ async function waitForEnabled(element: PromodSeleniumElementType, isEnabled: boo
 	});
 };
 
-async function waitForDisplayed(element: PromodSeleniumElementType, isDisplayed: boolean, opts: IWaitConditionOpts = {}) {
+async function waitForDisplayed(element, isDisplayed: boolean, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -36,7 +41,7 @@ async function waitForDisplayed(element: PromodSeleniumElementType, isDisplayed:
 	});
 }
 
-async function waitForPresented(element: PromodSeleniumElementType, isPresented: boolean, opts: IWaitConditionOpts = {}) {
+async function waitForPresented(element, isPresented: boolean, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -55,7 +60,8 @@ async function waitForPresented(element: PromodSeleniumElementType, isPresented:
 const elementWaiters = {
 	addDecorator(decorate: (originalWaiter: (...args: any[]) => Promise<void>, ...args: any[]) => unknown) {
 		// ignore *addDecorator* method
-		const keys = Object.getOwnPropertyNames(this).filter((key) => key !== 'addDecorator');
+		const keys = Object.getOwnPropertyNames(this)
+			.filter((key) => key !== 'addDecorator' && key !== 'updateElementActionsMap');
 		keys.forEach((key) => {
 			const initialMethodImplementation = this[key];
 			this[key] = function(...args) {
@@ -63,9 +69,16 @@ const elementWaiters = {
 			}
 		})
 	},
+	updateElementActionsMap(elementActionMap: typeof elementAction) {
+		elementAction = elementActionMap;
+	},
 	waitForDisplayed,
 	waitForEnabled,
 	waitForPresented,
+}
+
+function createBrowserWaiters() {
+	return elementWaiters
 }
 
 export {

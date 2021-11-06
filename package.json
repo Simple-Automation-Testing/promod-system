@@ -1,6 +1,6 @@
 {
   "name": "promod-system",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Library promod condition waitings",
   "main": "./built/index.js",
   "scripts": {
@@ -46,7 +46,6 @@
     "wait for conditions"
   ],
   "dependencies": {
-    "sat-utils": "0.0.20",
-    "promod": "0.0.28"
+    "sat-utils": "0.0.20"
   }
 }
