@@ -7,19 +7,68 @@ let elementAction = {
 	isDisplayed: 'isDisplayed',
 	isPresent: 'isPresent',
 	getText: 'getText',
+	getAttribute: 'getAttribute',
 }
 
-async function waitForEnabled(element, isEnabled: boolean, opts: IWaitConditionOpts = {}) {
+async function waitForAttributeIncludes(element, attribute: string, attributeValue: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
 
 	return waitForCondition(async () => {
-		const isElementItemEnabled = await element.isEnabled();
+		const elementAttribute: string = await element[elementAction.getAttribute](attribute);
 
-		createErrorMessage = () => `Expected element enabled state should be ${isEnabled} current state is ${isElementItemEnabled}`;
+		createErrorMessage = () => `Expected element "${attribute}" attribute which has ${elementAttribute} value should include "${attributeValue}"`;
 
-		return isEnabled === isElementItemEnabled;
+		return elementAttribute.includes(attributeValue);
+	}, {
+		createMessage: message ? () => message : createErrorMessage, ...rest,
+	});
+};
+
+async function waitForAttributeEquals(element, attribute: string, attributeValue: string, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const elementAttribute: string = await element[elementAction.getAttribute](attribute);
+
+		createErrorMessage = () => `Expected element "${attribute}" attribute which has ${elementAttribute} value should equal "${attributeValue}"`;
+
+		return elementAttribute === attributeValue;
+	}, {
+		createMessage: message ? () => message : createErrorMessage, ...rest,
+	});
+};
+
+async function waitForTextIncludes(element, text: string, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const elementText: string = await element[elementAction.getText]();
+
+		createErrorMessage = () => `Expected element "${elementText}" text should include "${text}"`;
+
+		return elementText.includes(text);
+	}, {
+		createMessage: message ? () => message : createErrorMessage, ...rest,
+	});
+};
+
+async function waitForTextEquals(element, text: string, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const elementText: string = await element[elementAction.getText]();
+
+		createErrorMessage = () => `Expected element "${elementText}" text should equal "${text}"`;
+
+		return elementText.includes(text);
 	}, {
 		createMessage: message ? () => message : createErrorMessage, ...rest,
 	});
@@ -31,7 +80,7 @@ async function waitForDisplayed(element, isDisplayed: boolean, opts: IWaitCondit
 	let createErrorMessage;
 
 	return waitForCondition(async () => {
-		const isElementItemDisplayed = await element.isDisplayed();
+		const isElementItemDisplayed = await element[elementAction.isDisplayed]();
 
 		createErrorMessage = () => `Expected element displayed state should be ${isDisplayed} current state is ${isElementItemDisplayed}`;
 
@@ -47,7 +96,7 @@ async function waitForPresented(element, isPresented: boolean, opts: IWaitCondit
 	let createErrorMessage;
 
 	return waitForCondition(async () => {
-		const isElementItemPresented = await element.isPresent();
+		const isElementItemPresented = await element[elementAction.isPresent]();
 
 		createErrorMessage = () => `Expected element presented state should be ${isPresented} current state is ${isElementItemPresented}`;
 
@@ -57,9 +106,25 @@ async function waitForPresented(element, isPresented: boolean, opts: IWaitCondit
 	});
 }
 
+async function waitForEnabled(element, isEnabled: boolean, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const isElementItemEnabled = await element[elementAction.isEnabled]();
+
+		createErrorMessage = () => `Expected element enabled state should be ${isEnabled} current state is ${isElementItemEnabled}`;
+
+		return isEnabled === isElementItemEnabled;
+	}, {
+		createMessage: message ? () => message : createErrorMessage, ...rest,
+	});
+};
+
 const elementWaiters = {
 	addDecorator(decorate: (originalWaiter: (...args: any[]) => Promise<void>, ...args: any[]) => unknown) {
-		// ignore *addDecorator* method
+		// ignore *addDecorator* *updateElementActionsMap* methods
 		const keys = Object.getOwnPropertyNames(this)
 			.filter((key) => key !== 'addDecorator' && key !== 'updateElementActionsMap');
 		keys.forEach((key) => {
@@ -75,12 +140,16 @@ const elementWaiters = {
 	waitForDisplayed,
 	waitForEnabled,
 	waitForPresented,
+	waitForTextIncludes,
+	waitForTextEquals,
+	waitForAttributeIncludes,
+	waitForAttributeEquals,
 }
 
-function createBrowserWaiters() {
-	return elementWaiters
+function createElementWaiters() {
+	return elementWaiters;
 }
 
 export {
-	elementWaiters,
+	createElementWaiters,
 };
