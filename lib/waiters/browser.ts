@@ -7,7 +7,9 @@ let browserAction = {
 	getTitle: 'getTitle',
 }
 
-async function waitForTabTitleEqual(browser, title: string, opts: IWaitConditionOpts = {}) {
+let browser;
+
+async function waitForTabTitleEqual(title: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -21,7 +23,7 @@ async function waitForTabTitleEqual(browser, title: string, opts: IWaitCondition
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
-async function waitForTabTitleIncludes(browser, title: string, opts: IWaitConditionOpts = {}) {
+async function waitForTabTitleIncludes(title: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -35,7 +37,7 @@ async function waitForTabTitleIncludes(browser, title: string, opts: IWaitCondit
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
-async function waitForUrlIncludes(browser, url: string, opts: IWaitConditionOpts = {}) {
+async function waitForUrlIncludes(url: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -49,7 +51,7 @@ async function waitForUrlIncludes(browser, url: string, opts: IWaitConditionOpts
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
-async function waitForUrlEquals(browser, url: string, opts: IWaitConditionOpts = {}) {
+async function waitForUrlEquals(url: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -63,7 +65,7 @@ async function waitForUrlEquals(browser, url: string, opts: IWaitConditionOpts =
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
-async function waitForTabsQuantity(browser, quantity: number, opts: IWaitConditionOpts = {}) {
+async function waitForTabsQuantity(quantity: number, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -100,11 +102,8 @@ const browserWaiters = {
 }
 
 
-function createBrowserWaiters(browser) {
-	// ignore *addDecorator* and *updateBrowserActionsMap* methods
-	const keys = Object.getOwnPropertyNames(browserWaiters)
-		.filter((key) => key !== 'addDecorator' && key !== 'updateBrowserActionsMap');
-	keys.forEach((key) => browserWaiters[key].bind(browserWaiters, browser));
+function createBrowserWaiters(browserClient) {
+	browser = browserClient;
 
 	return browserWaiters;
 }
