@@ -3,10 +3,16 @@
 	<img align="center" style="width:350px;height:300px;" src="./docs/promod-system.png"/>
 </p>
 
-### The purpose of this library is building of the TAF ecosystem which will not  regardless of library or framework which you use for your automation testing
+### Designed for [promod](https://www.npmjs.com/package/promod) - works with anyone
 
-### This library is designed for [promod](https://www.npmjs.com/package/promod), but it can be used with any library or framework.
 
+
+<h2> API </h2>
+<p>
+The purpose of this library is building of the TAF ecosystem which will not  regardless of library or framework which you use for your automation testing
+</p>
+<p><a href="/docs/element.md">Element(s)</a></p>
+<p><a href="/docs/browser.md">Browser</a></p>
 
 ## Usage. [promod](https://www.npmjs.com/package/promod) example.
 
