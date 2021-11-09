@@ -58,6 +58,22 @@ async function waitForTextIncludes(element, text: string, opts: IWaitConditionOp
 	});
 };
 
+async function waitForText(element, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const elementText: string = await element[elementAction.getText]();
+
+		createErrorMessage = () => `Expected element should have text content which is not empty`;
+
+		return elementText.length;
+	}, {
+		createMessage: message ? () => message : createErrorMessage, ...rest,
+	});
+};
+
 async function waitForTextEquals(element, text: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
@@ -144,6 +160,7 @@ const elementWaiters = {
 	waitForTextEquals,
 	waitForAttributeIncludes,
 	waitForAttributeEquals,
+	waitForText,
 }
 
 function createElementWaiters() {

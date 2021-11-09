@@ -7,6 +7,7 @@
 - [waitForDisplayed](#waitfordisplayed)
 - [waitForPresented](#waitforpresented)
 - [waitForEnabled](#waitforenabled)
+- [waitForText](#waitfortext)
 
 
 ## waitForAttributeIncludes
@@ -104,5 +105,19 @@
 
 	;(async function () {
 		await elementWaiters.waitForEnabled(el, true, {timeout: 5000});
+	})()
+```
+
+## waitForText
+```js
+	const {seleniumWD} = require('promod-system');
+	const {createElementWaiters} = require('promod-system');
+	const {$} = seleniumWD;
+
+	const elementWaiters = createElementWaiters();
+	const el = $('.class #id div a[href*="link"]');
+
+	;(async function () {
+		await elementWaiters.waitForText(el, {timeout: 5000});
 	})()
 ```
