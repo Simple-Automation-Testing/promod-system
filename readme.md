@@ -1,4 +1,7 @@
-# PROMOD-SYSTEM
+<p align="center">
+	<h1 align="center"> PROMOD </h1>
+	<img align="center" style="width:350px;height:300px;" src="./docs/promod-system.png"/>
+</p>
 
 ### The purpose of this library is building of the TAF ecosystem which will not  regardless of library or framework which you use for your automation testing
 
@@ -6,24 +9,22 @@
 
 
 ## Usage. [promod](https://www.npmjs.com/package/promod) example.
+
 ```js
-  const {seleniumWD} = require('promod');
-  const {createBrowserWaiters, createElementWaiters} = require('promod-system');
+const {seleniumWD} = require('promod');
+const {createBrowserWaiters, createElementWaiters} = require('promod-system');
 
-	const {browser, $} = seleniumWD;
-  ;(async () => {
+const {browser, $} = seleniumWD;
 
-    await getSeleniumDriver({seleniumAddress: 'http://localhost:4444/wd/hub'}, browser);
+;(async () => {
+	await getSeleniumDriver({seleniumAddress: 'http://localhost:4444/wd/hub'}, browser);
 
-		const browserWaiters = createBrowserWaiters(browser);
-		const elementWaiters = createElementWaiters();
+	const browserWaiters = createBrowserWaiters(browser);
+	const elementWaiters = createElementWaiters();
+	const documentBody = $('body');
 
-		const documentBody = $('body');
-
-    await browser.get('https://www.npmjs.com/');
-
-		await browserWaiters.waitForTabTitleIncludes('promod', {timeout: 10_000});
-		await elementWaiters.waitForTextIncludes(documentBody, 'promod' {timeout: 10_000});
-  })()
-
+	await browser.get('https://www.npmjs.com/');
+	await browserWaiters.waitForTabTitleIncludes('promod', {timeout: 10_000});
+	await elementWaiters.waitForTextIncludes(documentBody, 'promod' {timeout: 10_000});
+})()
 ```
