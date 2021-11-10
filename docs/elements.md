@@ -8,11 +8,14 @@
 - [waitForPresented](#waitforpresented)
 - [waitForEnabled](#waitforenabled)
 - [waitForText](#waitfortext)
+- [waitForElementsCountEquals](#waitforelementscountequals)
+- [waitForElementsCountNotEquals](#waitforelementscountnotequals)
+- [waitForElementsCountIsInRange](#waitforelementscountisinrange)
 
 
 ## waitForAttributeIncludes
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {$} = seleniumWD;
 
@@ -26,7 +29,7 @@
 
 ## waitForAttributeEquals
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {$} = seleniumWD;
 
@@ -40,7 +43,7 @@
 
 ## waitForTextIncludes
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {$} = seleniumWD;
 
@@ -54,7 +57,7 @@
 
 ## waitForTextEquals
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {$} = seleniumWD;
 
@@ -68,7 +71,7 @@
 
 ## waitForDisplayed
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {$} = seleniumWD;
 
@@ -82,7 +85,7 @@
 
 ## waitForPresented
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {$} = seleniumWD;
 
@@ -96,7 +99,7 @@
 
 ## waitForPresented
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {$} = seleniumWD;
 
@@ -110,7 +113,7 @@
 
 ## waitForText
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {$} = seleniumWD;
 
@@ -119,5 +122,47 @@
 
 	;(async function () {
 		await elementWaiters.waitForText(el, {timeout: 5000});
+	})()
+```
+
+## waitForElementsCountEquals
+```js
+	const {seleniumWD} = require('promod');
+	const {createElementWaiters} = require('promod-system');
+	const {$$} = seleniumWD;
+
+	const elementWaiters = createElementWaiters();
+	const els = $$('.class #id div a[href*="link"]');
+
+	;(async function () {
+		await elementWaiters.waitForElementsCountEquals(els, 10, {timeout: 5000});
+	})()
+```
+
+## waitForElementsCountNotEquals
+```js
+	const {seleniumWD} = require('promod');
+	const {createElementWaiters} = require('promod-system');
+	const {$$} = seleniumWD;
+
+	const elementWaiters = createElementWaiters();
+	const els = $$('.class #id div a[href*="link"]');
+
+	;(async function () {
+		await elementWaiters.waitForElementsCountNotEquals(els, 10, {timeout: 5000});
+	})()
+```
+
+## waitForElementsCountIsInRange
+```js
+	const {seleniumWD} = require('promod');
+	const {createElementWaiters} = require('promod-system');
+	const {$$} = seleniumWD;
+
+	const elementWaiters = createElementWaiters();
+	const els = $$('.class #id div a[href*="link"]');
+
+	;(async function () {
+		await elementWaiters.waitForElementsCountIsInRange(els, '>=10 and =<20', {timeout: 5000});
 	})()
 ```

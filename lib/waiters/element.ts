@@ -1,6 +1,6 @@
 import {IWaitConditionOpts} from './interfaces';
 
-import {waitForCondition} from 'sat-utils';
+import {waitForCondition, execNumberExpression} from 'sat-utils';
 
 let elementAction = {
 	isEnabled: 'isEnabled',
@@ -8,6 +8,7 @@ let elementAction = {
 	isPresent: 'isPresent',
 	getText: 'getText',
 	getAttribute: 'getAttribute',
+	count: 'count',
 }
 
 async function waitForAttributeIncludes(element, attribute: string, attributeValue: string, opts: IWaitConditionOpts = {}) {
@@ -138,6 +139,54 @@ async function waitForEnabled(element, isEnabled: boolean, opts: IWaitConditionO
 	});
 };
 
+async function waitForElementsCountEquals(elements, count: number, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const currentElementsCount = await elements[elementAction.count]();
+
+		createErrorMessage = () => `Expected elements count should be ${count} current count is ${currentElementsCount}`;
+
+		return currentElementsCount === count;
+	}, {
+		createMessage: message ? () => message : createErrorMessage, ...rest,
+	});
+}
+
+async function waitForElementsCountNotEquals(elements, count: number, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const currentElementsCount = await elements[elementAction.count]();
+
+		createErrorMessage = () => `Expected elements count should not be ${count} current count is ${currentElementsCount}`;
+
+		return currentElementsCount !== count;
+	}, {
+		createMessage: message ? () => message : createErrorMessage, ...rest,
+	});
+}
+
+async function waitForElementsCountIsInRange(elements, range: string, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const currentElementsCount = await elements[elementAction.count]();
+
+		createErrorMessage = () => `Expected elements count should be in range ${range} current count is ${currentElementsCount}`;
+
+		return execNumberExpression(range, currentElementsCount)
+	}, {
+		createMessage: message ? () => message : createErrorMessage, ...rest,
+	});
+}
+
 const elementWaiters = {
 	addDecorator(decorate: (originalWaiter: (...args: any[]) => Promise<void>, ...args: any[]) => unknown) {
 		// ignore *addDecorator* *updateElementActionsMap* methods
@@ -161,6 +210,9 @@ const elementWaiters = {
 	waitForAttributeIncludes,
 	waitForAttributeEquals,
 	waitForText,
+	waitForElementsCountEquals,
+	waitForElementsCountNotEquals,
+	waitForElementsCountIsInRange,
 }
 
 function createElementWaiters() {

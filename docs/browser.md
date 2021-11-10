@@ -9,7 +9,7 @@
 
 ## waitForTabTitleEqual
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {getSeleniumDriver, browser} = seleniumWD;
 
@@ -23,7 +23,7 @@
 
 ## waitForTabTitleIncludes
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {getSeleniumDriver, browser} = seleniumWD;
 
@@ -37,7 +37,7 @@
 
 ## waitForUrlIncludes
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {getSeleniumDriver, browser} = seleniumWD;
 
@@ -51,7 +51,7 @@
 
 ## waitForUrlEquals
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {getSeleniumDriver, browser} = seleniumWD;
 
@@ -65,7 +65,7 @@
 
 ## waitForTabsQuantity
 ```js
-	const {seleniumWD} = require('promod-system');
+	const {seleniumWD} = require('promod');
 	const {createElementWaiters} = require('promod-system');
 	const {getSeleniumDriver, browser} = seleniumWD;
 
