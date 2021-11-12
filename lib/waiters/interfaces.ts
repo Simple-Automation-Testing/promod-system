@@ -1,8 +1,11 @@
 interface IWaitConditionOpts {
 	timeout?: number;
-	message?: string;
 	interval?: number;
-	throwCustom?: (...args: any[]) => unknown;
+	dontThrow?: boolean;
+	message?: string;
+	throwCustom?: () => any;
+	createMessage?: (...args: any[]) => string;
+	waiterError?: new (...args: any[]) => any;
 }
 
 export {
