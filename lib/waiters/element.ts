@@ -8,7 +8,10 @@ let elementAction = {
 	isPresent: 'isPresent',
 	getText: 'getText',
 	getAttribute: 'getAttribute',
+	// elements
 	count: 'count',
+	// get element by index
+	get: 'get'
 }
 
 async function waitForAttributeIncludes(element, attribute: string, attributeValue: string, opts: IWaitConditionOpts = {}) {
@@ -187,6 +190,48 @@ async function waitForElementsCountIsInRange(elements, range: string, opts: IWai
 	});
 }
 
+async function waitForEveryElementTextIncludes(elements, text: string, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const currentElementsCount = await elements[elementAction.count]();
+
+		for (let i = 0; i < currentElementsCount; i++) {
+			const elementText = (await elements[elementAction.get](i)[elementAction.getText]() as string)
+			if (!elementText.includes(text)) {
+				createErrorMessage = () => `Expected element with index ${i} should include text ${text}, current element text is ${elementText}`;
+				return false;
+			}
+		}
+		return true;
+	}, {
+		createMessage: message ? () => message : createErrorMessage, ...rest,
+	});
+}
+
+async function waitForEveryElementTextEquals(elements, text: string, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const currentElementsCount = await elements[elementAction.count]();
+
+		for (let i = 0; i < currentElementsCount; i++) {
+			const elementText = (await elements[elementAction.get](i)[elementAction.getText]() as string)
+			if (elementText !== text) {
+				createErrorMessage = () => `Expected element with index ${i} should equal text ${text}, current element text is ${elementText}`;
+				return false;
+			}
+		}
+		return true;
+	}, {
+		createMessage: message ? () => message : createErrorMessage, ...rest,
+	});
+}
+
 const elementWaiters = {
 	addDecorator(decorate: (originalWaiter: (...args: any[]) => Promise<void>, ...args: any[]) => unknown) {
 		// ignore *addDecorator* *updateElementActionsMap* methods
@@ -213,6 +258,8 @@ const elementWaiters = {
 	waitForElementsCountEquals,
 	waitForElementsCountNotEquals,
 	waitForElementsCountIsInRange,
+	waitForEveryElementTextIncludes,
+	waitForEveryElementTextEquals,
 }
 
 function createElementWaiters() {

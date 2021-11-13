@@ -11,6 +11,8 @@
 - [waitForElementsCountEquals](#waitforelementscountequals)
 - [waitForElementsCountNotEquals](#waitforelementscountnotequals)
 - [waitForElementsCountIsInRange](#waitforelementscountisinrange)
+- [waitForEveryElementTextEquals](#waitforeveryelementtextequals)
+- [waitForEveryElementTextIncludes](#waitforeveryelementtextincludes)
 
 
 ## waitForAttributeIncludes
@@ -164,5 +166,33 @@
 
 	;(async function () {
 		await elementWaiters.waitForElementsCountIsInRange(els, '>=10 and =<20', {timeout: 5000});
+	})()
+```
+
+## waitForEveryElementTextEquals
+```js
+	const {seleniumWD} = require('promod');
+	const {createElementWaiters} = require('promod-system');
+	const {$$} = seleniumWD;
+
+	const elementWaiters = createElementWaiters();
+	const els = $$('.class #id div a[href*="link"]');
+
+	;(async function () {
+		await elementWaiters.waitForEveryElementTextEquals(els, 'Text equal', {timeout: 5000});
+	})()
+```
+
+## waitForEveryElementTextIncludes
+```js
+	const {seleniumWD} = require('promod');
+	const {createElementWaiters} = require('promod-system');
+	const {$$} = seleniumWD;
+
+	const elementWaiters = createElementWaiters();
+	const els = $$('.class #id div a[href*="link"]');
+
+	;(async function () {
+		await elementWaiters.waitForEveryElementTextIncludes(els, 'Text part', {timeout: 5000});
 	})()
 ```
