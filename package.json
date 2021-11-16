@@ -46,6 +46,6 @@
     "wait for conditions"
   ],
   "dependencies": {
-    "sat-utils": "0.0.21"
+    "sat-utils": "0.0.22"
   }
 }

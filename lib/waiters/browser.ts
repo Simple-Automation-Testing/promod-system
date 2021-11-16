@@ -51,6 +51,20 @@ async function waitForUrlIncludes(url: string, opts: IWaitConditionOpts = {}) {
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
+async function waitForUrlNotIncludes(url: string, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const currentUrl = await browser[browserAction.getCurrentUrl]();
+
+		createErrorMessage = () => `Current url ${currentUrl} should not include ${url}`;
+
+		return !currentUrl.includes(url)
+	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
+}
+
 async function waitForUrlEquals(url: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
@@ -62,6 +76,20 @@ async function waitForUrlEquals(url: string, opts: IWaitConditionOpts = {}) {
 		createErrorMessage = () => `Current url ${currentUrl} should equal ${url}`;
 
 		return currentUrl === url;
+	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
+}
+
+async function waitForUrlNotEquals(url: string, opts: IWaitConditionOpts = {}) {
+	const {message, ...rest} = opts;
+
+	let createErrorMessage;
+
+	return waitForCondition(async () => {
+		const currentUrl = await browser[browserAction.getCurrentUrl]();
+
+		createErrorMessage = () => `Current url ${currentUrl} should not equal ${url}`;
+
+		return currentUrl !== url;
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
@@ -99,6 +127,8 @@ const browserWaiters = {
 	waitForUrlEquals,
 	waitForTabTitleEqual,
 	waitForTabTitleIncludes,
+	waitForUrlNotEquals,
+	waitForUrlNotIncludes,
 }
 
 
