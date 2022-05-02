@@ -7,9 +7,7 @@ let browserAction = {
 	getTitle: 'getTitle',
 }
 
-let browser;
-
-async function waitForTabTitleEqual(title: string, opts: IWaitConditionOpts = {}) {
+async function waitForTabTitleEqual(browser, title: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -23,7 +21,7 @@ async function waitForTabTitleEqual(title: string, opts: IWaitConditionOpts = {}
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
-async function waitForTabTitleIncludes(title: string, opts: IWaitConditionOpts = {}) {
+async function waitForTabTitleIncludes(browser, title: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -37,7 +35,7 @@ async function waitForTabTitleIncludes(title: string, opts: IWaitConditionOpts =
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
-async function waitForUrlIncludes(url: string, opts: IWaitConditionOpts = {}) {
+async function waitForUrlIncludes(browser, url: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -51,7 +49,7 @@ async function waitForUrlIncludes(url: string, opts: IWaitConditionOpts = {}) {
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
-async function waitForUrlNotIncludes(url: string, opts: IWaitConditionOpts = {}) {
+async function waitForUrlNotIncludes(browser, url: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -65,7 +63,7 @@ async function waitForUrlNotIncludes(url: string, opts: IWaitConditionOpts = {})
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
-async function waitForUrlEquals(url: string, opts: IWaitConditionOpts = {}) {
+async function waitForUrlEquals(browser, url: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -79,7 +77,7 @@ async function waitForUrlEquals(url: string, opts: IWaitConditionOpts = {}) {
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
-async function waitForUrlNotEquals(url: string, opts: IWaitConditionOpts = {}) {
+async function waitForUrlNotEquals(browser, url: string, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -93,7 +91,7 @@ async function waitForUrlNotEquals(url: string, opts: IWaitConditionOpts = {}) {
 	}, {createMessage: message ? () => message : createErrorMessage, ...rest});
 }
 
-async function waitForTabsQuantity(quantity: number, opts: IWaitConditionOpts = {}) {
+async function waitForTabsQuantity(browser, quantity: number, opts: IWaitConditionOpts = {}) {
 	const {message, ...rest} = opts;
 
 	let createErrorMessage;
@@ -132,9 +130,7 @@ const browserWaiters = {
 }
 
 
-function createBrowserWaiters(browserClient) {
-	browser = browserClient;
-
+function createBrowserWaiters() {
 	return browserWaiters;
 }
 
