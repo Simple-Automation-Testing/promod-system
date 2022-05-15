@@ -8,7 +8,7 @@
 		"experimentalDecorators": true
 	},
 	"include": [
-		"lib"
+		"system"
 	],
 	"exclude": [
 		"node_modules",
