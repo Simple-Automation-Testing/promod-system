@@ -29,7 +29,7 @@ module.exports = {
 `;
 
 function createTemplateConfig() {
-  fs.writeFileSync(path.resolve(process.cwd(), './promod.generator.config.js'), template);
+  fs.writeFileSync(path.resolve(process.cwd(), './promod.system.config.js'), template);
 }
 
 export { createTemplateConfig };

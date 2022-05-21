@@ -1,5 +1,5 @@
-/* eslint-disable complexity */
-import { isObject, prettifyCamelCase, toArray, isArray, isPrimitive } from 'sat-utils';
+/* eslint-disable complexity, sonarjs/cognitive-complexity */
+import { isObject, toArray, isPrimitive } from 'sat-utils';
 import { getConfiguration } from './config';
 
 const stringifyBase = base =>
@@ -18,38 +18,44 @@ const getIntexesMessage = indexes =>
     ? ` where ${toArray(indexes).length === 1 ? 'index is' : 'indexes are'} ${toArray(indexes).join(',')}`
     : '';
 
-const getDescriptorMessage = (descriptorObj, initialMessage = ' where ') => {
+const getDescriptorMessage = (
+  descriptorObj,
+  initialMessage = ' where collection ',
+  pointer = ' where ',
+  description = 'state',
+) => {
   if (!descriptorObj) {
     return '';
   }
   if (isBase(Object.keys(descriptorObj))) {
-    return ` where element has state ${stringifyBase(descriptorObj)}`;
+    return ` where ${description} '${stringifyBase(descriptorObj)}' exists`;
   }
 
   return Object.keys(descriptorObj).reduce((contentMessage, key, index, keys) => {
-    const startAction = contentMessage ? `${contentMessage} element has state ` : 'element has state ';
+    const postFix = isObject(descriptorObj[key]) && !isBase(Object.keys(descriptorObj[key])) ? ' item ' : ' ';
+
+    const startAction = contentMessage
+      ? `${contentMessage}'${key}'${postFix}has ${description} `
+      : `element '${key}'${postFix}has ${description} `;
 
     if (keys.length - 1 === index && isPrimitive(descriptorObj[key])) {
-      return `${startAction}'${prettifyCamelCase(key)}' element has state ${descriptorObj[key]}`;
+      return `${startAction}'${descriptorObj[key]}'`;
     }
 
     if (keys.length - 1 === index && isObject(descriptorObj[key]) && isBase(Object.keys(descriptorObj[key]))) {
-      return `${startAction}'${prettifyCamelCase(key)}' element has state ${stringifyBase(descriptorObj[key])}`;
+      return `${startAction}'${stringifyBase(descriptorObj[key])}'`;
     }
 
     if (isObject(descriptorObj[key]) && isBase(Object.keys(descriptorObj[key]))) {
-      return `${startAction}'${prettifyCamelCase(key)}' element has state ${stringifyBase(descriptorObj[key])} and `;
+      return `${startAction}'${stringifyBase(descriptorObj[key])}' and `;
     }
 
-    if (isObject(descriptorObj[key]) && !isBase(Object.keys(descriptorObj[key])) && keys.length - 1 !== index) {
-      return `${startAction}fragment elements ${getDescriptorMessage(descriptorObj[key], contentMessage)} and `;
+    if (isObject(descriptorObj[key]) && keys.length - 1 !== index && !isBase(Object.keys(descriptorObj[key]))) {
+      return `${startAction}${getDescriptorMessage(descriptorObj[key], '', pointer, description)} and `;
     }
 
     if (isObject(descriptorObj[key]) && keys.length - 1 === index && !isBase(Object.keys(descriptorObj[key]))) {
-      return `${startAction}'${prettifyCamelCase(key)}' fragment elements ${getDescriptorMessage(
-        descriptorObj[key],
-        contentMessage,
-      )}`;
+      return `${startAction}${getDescriptorMessage(descriptorObj[key], '', pointer, description)}`;
     }
 
     return contentMessage;
@@ -65,7 +71,7 @@ const doesArgumentHaveCollection = obj => {
       return true;
     }
 
-    if (Object.values(collectionProps).length && Object.values(collectionProps).some(prop => prop === key)) {
+    if (Object.values(collectionProps).length && Object.values(collectionProps).includes(key)) {
       return true;
     }
 
@@ -79,20 +85,15 @@ const doesArgumentHaveCollection = obj => {
 
 const isPropValueCollection = (propName: string, propValue: { [k: string]: any }) => {
   const { collectionDescription } = getConfiguration();
-  const { collectionPropsId, collectionProps } = collectionDescription;
+  const { collectionPropsId, ...collectionProps } = collectionDescription;
 
   if (collectionPropsId && propName.endsWith(collectionPropsId)) {
     return true;
   }
 
-  if (
-    isArray(collectionProps) &&
-    collectionProps.some(prop => Object.keys(propValue).some(propValueProp => propValueProp === prop))
-  ) {
-    return true;
-  }
-
-  return false;
+  return (
+    isObject(propValue) && Object.values(collectionProps).some((prop: string) => Object.keys(propValue).includes(prop))
+  );
 };
 
 const getWaitingOptionsPrettyMessage = (waitingOptions?: { [key: string]: any }) => {

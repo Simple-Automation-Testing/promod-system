@@ -1,6 +1,6 @@
 {
   "name": "promod-system",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Library promod condition waitings",
   "main": "./built/index.js",
   "scripts": {
@@ -39,16 +39,16 @@
   },
   "keywords": [
     "promod",
+    "promod-system",
     "selenium-webdriver",
-    "protractor",
-    "protractor mod",
     "test automation",
     "selenium",
     "automation testing",
+    "automation framework",
     "wait for conditions"
   ],
   "dependencies": {
-    "sat-utils": "0.0.42",
+    "sat-utils": "^0.0.45",
     "yargs": "^17.5.0"
   }
 }

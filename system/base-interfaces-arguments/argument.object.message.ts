@@ -1,5 +1,6 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable complexity */
-import { isObject, prettifyCamelCase } from 'sat-utils';
+import { isObject, prettifyCamelCase, isString, isNull, isPrimitive } from 'sat-utils';
 
 import { getIntexesMessage, getDescriptorMessage, isPropValueCollection, getWaitingOptionsPrettyMessage } from './base';
 import { getConfiguration } from './config';
@@ -8,7 +9,10 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
   const getActionMessage = (dataObj, initialMessage = '') =>
     Object.keys(dataObj).reduce((actionMessage, key, index, keys) => {
       const { collectionDescription } = getConfiguration();
-      const startAction = actionMessage ? `${actionMessage} ${action.toLowerCase()} ` : `${action} `;
+
+      const startAction = actionMessage
+        ? `${actionMessage}${prettifyCamelCase(action).toLowerCase()} `
+        : `${prettifyCamelCase(action)} `;
 
       if (isPropValueCollection(key, dataObj[key])) {
         const action = dataObj[key][collectionDescription.action];
@@ -16,37 +20,37 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
         const visible = dataObj[key][collectionDescription.visible];
         const indexes = dataObj[key][collectionDescription.index];
 
-        const actionMessagePart = action ? getActionMessage(action) : '';
-        const whereMessagePart = getDescriptorMessage(where);
-        const visibleMessagePart = getDescriptorMessage(visible);
+        const startMessagePart = `${startAction}'${key}' collection items `;
+
+        const actionMessagePart = action ? getActionMessage(action, startMessagePart) : '';
+        const whereMessagePart = getDescriptorMessage(where, ' where collection ', 'state');
+
+        const visibleMessagePart = getDescriptorMessage(visible, ' where collection ', 'where', 'visibility');
         const indexesMessagePart = getIntexesMessage(indexes);
 
-        return `${startAction}'${prettifyCamelCase(
-          key,
-        )}' collection${actionMessagePart}${whereMessagePart}${visibleMessagePart}${indexesMessagePart}`;
+        return `${actionMessagePart}${whereMessagePart}${visibleMessagePart}${indexesMessagePart}`;
       }
 
-      if (keys.length === 1 && !isObject(dataObj[key])) {
-        return `${startAction}'${prettifyCamelCase(key)}'`;
+      if (keys.length - 1 === index && !isObject(dataObj[key]) && isNull(dataObj[key])) {
+        return `${startAction}'${key}' element`;
       }
 
-      if (keys.length - 1 === index && !isObject(dataObj[key])) {
-        return `${startAction}'${prettifyCamelCase(key)}'`;
+      if (keys.length - 1 === index && !isObject(dataObj[key]) && isPrimitive(dataObj[key])) {
+        return `${startAction}'${dataObj[key]}' to '${key}' element`;
       }
 
-      if (!isObject(dataObj[key])) {
-        return `${startAction}'${prettifyCamelCase(key)}' and than`;
+      if (!isObject(dataObj[key]) && isPrimitive(dataObj[key])) {
+        return `${startAction}'${dataObj[key]}' to '${key}' element and than `;
       }
 
       if (isObject(dataObj[key]) && keys.length - 1 !== index) {
-        return `${startAction}fragment elements ${getActionMessage(dataObj[key], actionMessage)} and than`;
+        const startMessagePart = `${startAction} '${key}' fragment elements `;
+        return `${getActionMessage(dataObj[key], startMessagePart)} and than `;
       }
 
       if (isObject(dataObj[key]) && keys.length - 1 === index) {
-        return `${startAction}'${prettifyCamelCase(key)}' fragment elements ${getActionMessage(
-          dataObj[key],
-          actionMessage,
-        )}`;
+        const startMessagePart = `${startAction} '${key}' fragment elements `;
+        return `${getActionMessage(dataObj[key], startMessagePart)}`;
       }
 
       return actionMessage;
