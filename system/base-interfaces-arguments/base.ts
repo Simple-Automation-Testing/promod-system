@@ -97,7 +97,7 @@ const isPropValueCollection = (propName: string, propValue: { [k: string]: any }
 };
 
 const getWaitingOptionsPrettyMessage = (waitingOptions?: { [key: string]: any }) => {
-  if (!waitingOptions) return '';
+  if (!isObject(waitingOptions)) return '';
   /** @info sat-utils compareToPattern */
   const { strictArrays, strictStrings } = waitingOptions;
   let waitingMessage = '\n';

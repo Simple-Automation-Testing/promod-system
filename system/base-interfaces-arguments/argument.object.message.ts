@@ -1,6 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable complexity */
-import { isObject, prettifyCamelCase, isString, isNull, isPrimitive } from 'sat-utils';
+import { isObject, prettifyCamelCase, isNull, isPrimitive } from 'sat-utils';
 
 import { getIntexesMessage, getDescriptorMessage, isPropValueCollection, getWaitingOptionsPrettyMessage } from './base';
 import { getConfiguration } from './config';
