@@ -1,18 +1,9 @@
-import { IWaitConditionOpts } from './interfaces';
-
 import { waitForCondition, execNumberExpression } from 'sat-utils';
 
-let elementAction = {
-  isEnabled: 'isEnabled',
-  isDisplayed: 'isDisplayed',
-  isPresent: 'isPresent',
-  getText: 'getText',
-  getAttribute: 'getAttribute',
-  // elements
-  count: 'count',
-  // get element by index
-  get: 'get',
-};
+import { IWaitConditionOpts } from './interfaces';
+import { getConfiguration } from '../config';
+
+const { elementAction } = getConfiguration();
 
 async function waitForAttributeIncludes(
   element,
@@ -317,7 +308,7 @@ const elementWaiters = {
     });
   },
   updateElementActionsMap(elementActionMap: typeof elementAction) {
-    elementAction = elementActionMap;
+    Object.assign(elementAction, elementActionMap);
   },
   waitForDisplayed,
   waitForEnabled,

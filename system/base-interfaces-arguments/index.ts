@@ -1,7 +1,7 @@
 import { isFunction, isUndefined } from 'sat-utils';
 import { getArgumentsMessage } from './argument.object.message';
 import { getDefaultMessage } from './argument.regular.message';
-import { getConfiguration } from './config';
+import { getConfiguration } from '../config';
 
 type TActionFormatter = {
   (action: string): string;

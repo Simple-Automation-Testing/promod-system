@@ -1,9 +1,8 @@
-/* eslint-disable sonarjs/cognitive-complexity */
-/* eslint-disable complexity */
+/* eslint-disable complexity, sonarjs/cognitive-complexity */
 import { isObject, prettifyCamelCase, isNull, isPrimitive } from 'sat-utils';
 
 import { getIntexesMessage, getDescriptorMessage, isPropValueCollection, getWaitingOptionsPrettyMessage } from './base';
-import { getConfiguration } from './config';
+import { getConfiguration } from '../config';
 
 const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') => {
   const getActionMessage = (dataObj, initialMessage = '') =>

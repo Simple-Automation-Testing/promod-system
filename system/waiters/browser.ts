@@ -1,11 +1,8 @@
 import { waitForCondition } from 'sat-utils';
 import { IWaitConditionOpts } from './interfaces';
+import { getConfiguration } from '../config';
 
-let browserAction = {
-  getCurrentUrl: 'getCurrentUrl',
-  getTabs: 'getTabs',
-  getTitle: 'getTitle',
-};
+const { browserAction } = getConfiguration();
 
 async function waitForTabTitleEqual(browser, title: string, opts: IWaitConditionOpts = {}) {
   const { message, ...rest } = opts;
@@ -141,7 +138,7 @@ const browserWaiters = {
     });
   },
   updateBrowserActionsMap(browserActionMap: typeof browserAction) {
-    browserAction = browserActionMap;
+    Object.assign(browserAction, browserActionMap);
   },
   waitForUrlIncludes,
   waitForTabsQuantity,

@@ -12,8 +12,8 @@
 <p>
 The purpose of this library is building of the TAF ecosystem which will not  regardless of library or framework which you use for your automation testing
 </p>
-<p><a href="/docs/elements.md">Element(s)</a></p>
-<p><a href="/docs/browser.md">Browser</a></p>
+<p><a href="/.docs/elements.md">Element(s)</a></p>
+<p><a href="/.docs/browser.md">Browser</a></p>
 
 ## Usage. [promod](https://www.npmjs.com/package/promod) example.
 

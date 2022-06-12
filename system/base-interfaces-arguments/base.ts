@@ -1,6 +1,6 @@
 /* eslint-disable complexity, sonarjs/cognitive-complexity */
 import { isObject, toArray, isPrimitive } from 'sat-utils';
-import { getConfiguration } from './config';
+import { getConfiguration } from '../config';
 
 const stringifyBase = base =>
   Object.keys(base).reduce(
