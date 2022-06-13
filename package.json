@@ -4,7 +4,7 @@
   "description": "Library promod condition waitings",
   "main": "./built/index.js",
   "scripts": {
-    "test": "mocha $(find specs -name '*.spec.*') --require ts-node/register --timeout 500000",
+    "test": "mocha $(find specs -name '*.spec.*') --file=./specs/setup.ts --require ts-node/register --timeout 500000",
     "lint": "eslint --ext .ts ./",
     "build": "rm -rf ./built && tsc"
   },
@@ -26,6 +26,7 @@
     "@types/node": "^17.0.30",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@typescript-eslint/parser": "^5.21.0",
+    "assertior": "^0.0.28",
     "eslint": "^8.14.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-jsdoc": "^39.2.9",

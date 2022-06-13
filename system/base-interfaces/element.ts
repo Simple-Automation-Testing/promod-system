@@ -1,4 +1,4 @@
-import { isString, isNumber, compareToPattern, getType, isNull } from 'sat-utils';
+import { isString, isNumber, compareToPattern, getType, isNull, safeHasOwnPropery } from 'sat-utils';
 import { promodLogger } from '../logger';
 
 import { getConfiguration } from '../config/config';
@@ -61,12 +61,12 @@ class PromodSystemElement {
   /**
    * @override
    */
-  async baseGetData(...args) {}
+  async baseGetData(...args): Promise<any> {}
 
   /**
    * @override
    */
-  async baseSendKeys(...args) {}
+  async baseSendKeys(...args): Promise<void> {}
 
   async sendKeys(action): Promise<void> {
     this.logger.log('PromodSystemElement sendKeys action call with data ', action);
@@ -78,13 +78,20 @@ class PromodSystemElement {
     await this.baseSendKeys(action);
   }
 
-  async action(action) {
+  async action(action: 'click' | 'hover' | 'focus' | 'scroll' | null) {
     this.logger.log('PromodSystemElement action action call with data ', action);
-    if (!isString(action) && !isNull(action)) {
-      throw new TypeError(`${this.identifier}: action(): argument should be a string or null ${getType(action)}`);
-    }
     if (isNull(action)) {
       action = 'click';
+    }
+
+    if (!isString(action)) {
+      throw new TypeError(`${this.identifier}: action(): argument should be a string or null ${getType(action)}`);
+    }
+
+    if (!(action in this)) {
+      throw new TypeError(`
+        PromodSystemElement ${action} action does not exist, seems custom action was not implemented
+      `);
     }
     await this[action]();
   }
@@ -94,6 +101,13 @@ class PromodSystemElement {
     await this.waitLoadedState();
 
     await this.rootElement[elementAction.click]();
+  }
+
+  private async focus(): Promise<void> {
+    this.logger.log('PromodSystemElement focus action call');
+    await this.waitLoadedState();
+
+    await this.rootElement[elementAction.focus]();
   }
 
   private async scroll(): Promise<void> {
@@ -110,7 +124,7 @@ class PromodSystemElement {
     await this.rootElement[elementAction.hover]();
   }
 
-  async get(action): Promise<any | unknown> {
+  async get(action?) {
     this.logger.log('PromodSystemElement get action call with data ', action);
     await this.waitLoadedState();
 
@@ -126,7 +140,7 @@ class PromodSystemElement {
     this.logger.log('PromodSystemElement compareContent action call', action);
     const elementContent = await this.get({ ...action });
 
-    const { result } = compareToPattern(action, elementContent);
+    const { result } = compareToPattern(elementContent, action);
 
     return result;
   }
@@ -138,4 +152,8 @@ class PromodSystemElement {
   }
 }
 
-export { PromodSystemElement };
+function updateElementActionsMap(elementActionMap) {
+  Object.assign(elementAction, elementActionMap);
+}
+
+export { PromodSystemElement, updateElementActionsMap };

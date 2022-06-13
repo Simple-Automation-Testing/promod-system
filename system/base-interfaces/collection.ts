@@ -1,5 +1,5 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/no-array-method-this-argument, prettier/prettier*/
-import { isArray, toArray, isNotEmptyObject, safeJSONstringify, isNumber } from 'sat-utils';
+import { isArray, toArray, isNotEmptyObject, safeJSONstringify, isNumber, isBoolean, isUndefined } from 'sat-utils';
 import { promodLogger } from '../logger';
 
 const collection = {
@@ -170,14 +170,14 @@ class PromodSystemCollection {
   private prepareFind({ _visible, _where, _whereNot }) {
     const callCompareQueue = [] as { compareData: any; method: string; conditionBoolean }[];
 
-    if (isNotEmptyObject(_visible)) {
+    if (isNotEmptyObject(_visible) || isBoolean(_visible)) {
       callCompareQueue.push({ compareData: _visible, method: 'compareVisibility', conditionBoolean: true });
     }
-    if (isNotEmptyObject(_where)) {
+    if (isNotEmptyObject(_where) || !isUndefined(_where)) {
       callCompareQueue.push({ compareData: _where, method: 'compareContent', conditionBoolean: true });
     }
-    if (isNotEmptyObject(_whereNot)) {
-      callCompareQueue.push({ compareData: _where, method: 'compareContent', conditionBoolean: false });
+    if (isNotEmptyObject(_whereNot) || !isUndefined(_whereNot)) {
+      callCompareQueue.push({ compareData: _whereNot, method: 'compareContent', conditionBoolean: false });
     }
 
     return callCompareQueue;
