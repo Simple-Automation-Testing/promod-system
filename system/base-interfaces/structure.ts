@@ -20,6 +20,8 @@ const structure = {
   },
 };
 
+const { collectionDescription = {} } = getConfiguration();
+
 class PromodSystemStructure {
   public rootLocator: any;
   public identifier: any;
@@ -30,9 +32,9 @@ class PromodSystemStructure {
 
   private logger: { log(...args: any[]): void };
 
-  constructor(locator, fragmentName, rootElement) {
+  constructor(locator, structureName, rootElement) {
     this.rootLocator = locator;
-    this.identifier = fragmentName;
+    this.identifier = structureName;
     this.rootElement = rootElement;
     this.parent = null;
     this.index = 0;
@@ -79,7 +81,7 @@ class PromodSystemStructure {
     }
   }
 
-  async get(action) {
+  async get(action): Promise<any> {
     this.logger.log('PromodSystemStructure get action call with data ', action);
     const alignedAction = this.alignActionData(action);
 
@@ -145,8 +147,6 @@ class PromodSystemStructure {
   }
 
   private async executeWaitingState(expectedData, options, method: 'get' | 'isDisplayed') {
-    const { collectionDescription = {} } = getConfiguration();
-
     const collectionActionProps = Object.values(collectionDescription).filter(key => {
       key !== 'length';
     });
@@ -223,8 +223,6 @@ class PromodSystemStructure {
   }
 
   private alignWaitConditionData(cloneData, component = this) {
-    const { collectionDescription = {} } = getConfiguration();
-
     const collectionActionProps = new Set(
       Object.values(collectionDescription).filter(key => {
         key !== 'length';
@@ -266,4 +264,8 @@ class PromodSystemStructure {
   }
 }
 
-export { PromodSystemStructure };
+function updateCollectionDescription(collectionDescriptionMap) {
+  Object.assign(collectionDescription, collectionDescriptionMap);
+}
+
+export { PromodSystemStructure, updateCollectionDescription };

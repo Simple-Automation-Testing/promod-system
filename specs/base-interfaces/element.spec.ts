@@ -33,6 +33,16 @@ describe('PromodSystemElement', function () {
       await browser.quitAll();
     });
 
+    it('click default with null', async () => {
+      const clickButton = $('#click');
+
+      const clickElement = new ElementTest('#click', 'Click button', clickButton);
+      await clickElement.action(null);
+
+      const result = await clickElement.get();
+      expect(result.background).toEqual('yellow');
+    });
+
     it('click', async () => {
       const clickButton = $('#click');
 
