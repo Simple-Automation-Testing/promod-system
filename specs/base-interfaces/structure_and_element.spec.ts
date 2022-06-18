@@ -9,25 +9,25 @@ import { actionFile } from './_misc';
 
 const { $, browser, getSeleniumDriver } = seleniumWD;
 
+const elementActionMap = {
+  click: 'click',
+  hover: 'hover',
+  focus: 'focus',
+  scrollIntoView: 'scrollIntoView',
+  isDisplayed: 'isDisplayed',
+};
+const collectionDescriptionMap = {
+  action: '_action',
+  where: '_where',
+  whereNot: '_whereNot',
+  visible: '_visible',
+  index: '_indexes',
+  count: '_count',
+  length: 'length',
+};
+
 describe('PromodSystemStructure', function () {
   describe('[P] Actions with element', function () {
-    const elementActionMap = {
-      click: 'click',
-      hover: 'hover',
-      focus: 'focus',
-      scrollIntoView: 'scrollIntoView',
-      isDisplayed: 'isDisplayed',
-    };
-    const collectionDescriptionMap = {
-      action: '_action',
-      where: '_where',
-      whereNot: '_whereNot',
-      visible: '_visible',
-      index: '_indexes',
-      count: '_count',
-      length: 'length',
-    };
-
     updateElementActionsMap(elementActionMap);
     updateCollectionDescription(collectionDescriptionMap);
 

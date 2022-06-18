@@ -29,6 +29,35 @@
       <button class="collection" onclick="clickCollectionItem(event)">5</button>
     </div>
 
+    <div id="section1">
+      <div id="section1_internal1">
+        <div id="collection1_section1">
+          <div class="section1_item">Item 1</div>
+          <div class="section1_item">Item 2</div>
+          <div class="section1_item">Item 3</div>
+          <div class="section1_item">Item 4</div>
+          <div class="section1_item">Item 5</div>
+        </div>
+      </div>
+      <div id="section1_internal2">
+        <div id="collection1_section1">
+          <input class="section1_field" />
+          <input class="section1_field" />
+          <input class="section1_field" />
+          <input class="section1_field" />
+          <input class="section1_field" />
+        </div>
+      </div>
+      <div id="section1_internal3">
+        <div id="userdata"></div>
+        <div id="userform">
+          <input id="username" />
+          <input id="password" />
+          <button id="user_submit" onclick="sublitForm(event)">Sumbit</button>
+        </div>
+      </div>
+    </div>
+
     <div style="margin-top: 2500px"><button id="scroll">scroll</button></div>
   </body>
 
@@ -36,6 +65,15 @@
     const blurItem = document.getElementById('hover');
     const focusItem = document.getElementById('focus');
     const clickItem = document.getElementById('click');
+
+    function sublitForm(event) {
+      const username = document.getElementById('username');
+      const password = document.getElementById('password');
+
+      const userdata = document.getElementById('userdata');
+
+      userdata.innerText = `${username.value} ${password.value}`;
+    }
 
     function clickCollectionItem(event) {
       document.getElementById('resulter').innerText = event.target.innerText;

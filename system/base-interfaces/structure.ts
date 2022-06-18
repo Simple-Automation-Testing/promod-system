@@ -94,6 +94,7 @@ class PromodSystemStructure {
     const values = {};
 
     for (const [key, value] of Object.entries(alignedAction)) {
+      this.logger.log(`PromodSystemStructure get action execution cycle for ${key} with data `, action);
       values[key] = await this[key].get(value);
     }
     return values;
@@ -106,6 +107,7 @@ class PromodSystemStructure {
     const values = {};
 
     for (const [key, value] of Object.entries(alignedAction)) {
+      this.logger.log(`PromodSystemStructure isDisplayed action execution cycle for ${key} with data `, action);
       values[key] = await this[key].isDisplayed(value);
     }
 
@@ -119,6 +121,7 @@ class PromodSystemStructure {
     const alignedAction = this.alignActionData(action);
 
     for (const [key, value] of Object.entries(alignedAction)) {
+      this.logger.log(`PromodSystemStructure action action execution cycle for ${key} with data `, action);
       await this[key].action(value);
     }
   }
@@ -126,6 +129,7 @@ class PromodSystemStructure {
   async compareContent(action): Promise<boolean> {
     this.logger.log('PromodSystemElement compareContent action call', action);
     for (const [key, value] of Object.entries(action)) {
+      this.logger.log(`PromodSystemStructure compareContent action execution cycle for ${key} with data `, action);
       if (!(await this[key].compareContent(value))) {
         return false;
       }
@@ -136,6 +140,7 @@ class PromodSystemStructure {
   async compareVisibility(action): Promise<boolean> {
     this.logger.log('PromodSystemElement compareVisibility action call', action);
     for (const [key, value] of Object.entries(action)) {
+      this.logger.log(`PromodSystemStructure compareVisibility action execution cycle for ${key} with data `, action);
       if (!(await this[key].compareVisibility(value))) {
         return false;
       }
@@ -212,7 +217,7 @@ class PromodSystemStructure {
           !isAsyncFunction(this[propertyName]),
       )
       .reduce((propertyNames, value) => {
-        if (!this[value]?.constructor.name.includes('Fragment')) {
+        if (!this[value]?.constructor.name.includes(baseLibraryDescription.fragmentId)) {
           propertyNames[value] = null;
         }
         return propertyNames;
@@ -274,4 +279,8 @@ function updateBaseLibraryDescription(baseLibraryDescriptionMap) {
   Object.assign(baseLibraryDescription, baseLibraryDescriptionMap);
 }
 
-export { PromodSystemStructure, updateCollectionDescription, updateBaseLibraryDescription };
+function updateSystemPropsList(systemPropsListArr) {
+  Object.assign(systemPropsList, systemPropsListArr);
+}
+
+export { PromodSystemStructure, updateCollectionDescription, updateBaseLibraryDescription, updateSystemPropsList };
