@@ -1,4 +1,4 @@
-import { isString, isNumber, compareToPattern, getType, isNull, safeHasOwnPropery } from 'sat-utils';
+import { isString, isNumber, compareToPattern, getType, isNull } from 'sat-utils';
 import { promodLogger } from '../logger';
 
 import { getConfiguration } from '../config/config';
@@ -11,17 +11,17 @@ const element = {
   },
 };
 
-class PromodSystemElement {
-  public rootLocator: string;
-  public identifier: string;
-  public rootElement: any;
-  public parent: any;
-  public index: number;
-  public name: string;
+class PromodSystemElement<BaseLibraryElementType = any> {
+  protected rootLocator: string;
+  protected identifier: string;
+  protected rootElement: BaseLibraryElementType;
+  protected parent;
+  protected index: number;
+  protected name: string;
 
-  private logger: { log(...args: any[]): void };
+  protected logger: { log(...args: any[]): void };
 
-  constructor(locator, elementName, rootElement) {
+  constructor(locator: string, elementName: string, rootElement: any) {
     this.rootLocator = locator;
     this.identifier = elementName;
     this.rootElement = rootElement;
@@ -61,12 +61,12 @@ class PromodSystemElement {
   /**
    * @override
    */
-  async baseGetData(...args): Promise<any> {}
+  protected async baseGetData(...args): Promise<any> {}
 
   /**
    * @override
    */
-  async baseSendKeys(...args): Promise<void> {}
+  protected async baseSendKeys(...args): Promise<void> {}
 
   async sendKeys(action): Promise<void> {
     this.logger.log('PromodSystemElement sendKeys action call with data ', action);

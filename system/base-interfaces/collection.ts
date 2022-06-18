@@ -2,15 +2,19 @@
 import { isArray, toArray, isNotEmptyObject, safeJSONstringify, isNumber, isBoolean, isUndefined } from 'sat-utils';
 import { promodLogger } from '../logger';
 
+import { getConfiguration } from '../config/config';
+
 const collection = {
   log(...data) {
     promodLogger.promodSystem('[PROMOD SYSTEM COLLECTION]', ...data);
   },
 };
 
-class PromodSystemCollection {
+const { elementAction = {}, baseLibraryDescription = {} } = getConfiguration();
+
+class PromodSystemCollection<BaseLibraryElementsType = any> {
   public rootLocator: string;
-  public rootElements: any;
+  public rootElements: BaseLibraryElementsType;
   public identifier: any;
   public CollectionItemClass: any;
   public overrideCollectionItems: any;
@@ -29,7 +33,7 @@ class PromodSystemCollection {
   }
 
   async getRoot(index) {
-    return this.rootElements.get(index);
+    return this.rootElements[baseLibraryDescription.getBaseElementFromCollectionByIndex](index);
   }
 
   set collectionLogger(logger: { log: (...args) => void }) {
@@ -190,7 +194,7 @@ class PromodSystemCollection {
   async getElements() {
     await this.waitLoadedState();
 
-    const count = await this.rootElements.count();
+    const count = await this.rootElements[elementAction.count]();
 
     return await Array.from({ length: count })
       .map((_item, index) => index)
@@ -217,7 +221,7 @@ class PromodSystemCollection {
     const instance = new this.CollectionItemClass(
       this.rootLocator,
       `${this.identifier} item ${index}`,
-      this.rootElements.get(index),
+      this.rootElements[baseLibraryDescription.getBaseElementFromCollectionByIndex](index),
     );
     if (this.overrideCollectionItems.length) {
       this.overrideCollectionItems.forEach(method => instance.overrideBaseMethods(method));
@@ -254,4 +258,12 @@ class PromodSystemCollection {
   }
 }
 
-export { PromodSystemCollection };
+function updateElementActionsMap(elementActionMap) {
+  Object.assign(elementAction, elementActionMap);
+}
+
+function updateBaseLibraryDescription(baseLibraryDescriptionMap) {
+  Object.assign(baseLibraryDescription, baseLibraryDescriptionMap);
+}
+
+export { PromodSystemCollection, updateElementActionsMap, updateBaseLibraryDescription };

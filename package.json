@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha $(find specs -name '*.spec.*') --require ts-node/register --timeout 500000",
     "lint": "eslint --ext .ts ./",
-    "build": "rm -rf ./built && tsc"
+    "tsc": "rm -rf ./built && tsc"
   },
   "repository": {
     "type": "git",

@@ -1,5 +1,6 @@
 import { expect } from 'assertior';
 import { PromodSystemCollection } from '../../system/base-interfaces/collection';
+import * as collection from '../../system/base-interfaces/collection';
 import { seleniumWD } from 'promod';
 import { updateElementActionsMap } from '../../system/base-interfaces/element';
 import { ElementTest } from './_misc.element';
@@ -28,9 +29,29 @@ const elementActionMap = {
   focus: 'focus',
   scrollIntoView: 'scrollIntoView',
   isDisplayed: 'isDisplayed',
+  count: 'count',
+  get: 'get',
+};
+
+const baseLibraryDescription = {
+  entityId: 'identifier',
+  rootLocatorId: 'rootLocator',
+  pageId: 'Page',
+  fragmentId: 'Fragment',
+  collectionId: 'Collection',
+  collectionItemId: 'CollectionItemClass',
+  collectionRootElementsId: 'rootElements',
+  waitOptionsId: 'IWaitOpts',
+  collectionActionId: 'ICollectionAction',
+  collectionCheckId: 'ICollectionCheck',
+  getDataMethod: 'get',
+  getVisibilityMethod: 'isDisplayed',
+  getBaseElementFromCollectionByIndex: 'get',
 };
 
 updateElementActionsMap(elementActionMap);
+collection.updateElementActionsMap(elementActionMap);
+collection.updateBaseLibraryDescription(baseLibraryDescription);
 
 describe('PromodSystemCollection', function () {
   describe('[P] Actions', function () {

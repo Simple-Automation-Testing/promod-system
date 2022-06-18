@@ -22,15 +22,15 @@ const structure = {
 
 const { systemPropsList = [], collectionDescription = {}, baseLibraryDescription = {} } = getConfiguration();
 
-class PromodSystemStructure {
-  public rootLocator: any;
-  public identifier: any;
-  public rootElement: any;
-  public parent: any;
-  public index: any;
-  public name: any;
+class PromodSystemStructure<BaseLibraryElementType = any> {
+  protected rootLocator: any;
+  protected identifier: any;
+  protected rootElement: BaseLibraryElementType;
+  protected parent: any;
+  protected index: any;
+  protected name: any;
 
-  private logger: { log(...args: any[]): void };
+  protected logger: { log(...args: any[]): void };
 
   constructor(locator, structureName, rootElement) {
     this.rootLocator = locator;
@@ -95,6 +95,9 @@ class PromodSystemStructure {
 
     for (const [key, value] of Object.entries(alignedAction)) {
       this.logger.log(`PromodSystemStructure get action execution cycle for ${key} with data `, action);
+      if (!this[key]) {
+        throw new TypeError(`${key} is not found in ${this.identifier}`);
+      }
       values[key] = await this[key].get(value);
     }
     return values;
@@ -108,6 +111,9 @@ class PromodSystemStructure {
 
     for (const [key, value] of Object.entries(alignedAction)) {
       this.logger.log(`PromodSystemStructure isDisplayed action execution cycle for ${key} with data `, action);
+      if (!this[key]) {
+        throw new TypeError(`${key} is not found in ${this.identifier}`);
+      }
       values[key] = await this[key].isDisplayed(value);
     }
 
@@ -122,6 +128,9 @@ class PromodSystemStructure {
 
     for (const [key, value] of Object.entries(alignedAction)) {
       this.logger.log(`PromodSystemStructure action action execution cycle for ${key} with data `, action);
+      if (!this[key]) {
+        throw new TypeError(`${key} is not found in ${this.identifier}`);
+      }
       await this[key].action(value);
     }
   }
