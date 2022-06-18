@@ -43,6 +43,22 @@ const elementAction = {
   get: 'get',
 };
 
+const baseLibraryDescription = {
+  entityId: 'identifier',
+  rootLocatorId: 'rootLocator',
+  pageId: 'Page',
+  fragmentId: 'Fragment',
+  collectionId: 'Collection',
+  collectionItemId: 'CollectionItemClass',
+  collectionRootElementsId: 'rootElements',
+  waitOptionsId: 'IWaitOpts',
+  collectionActionId: 'ICollectionAction',
+  collectionCheckId: 'ICollectionCheck',
+  getDataMethod: 'get',
+  getVisibilityMethod: 'isDisplayed',
+  getBaseElementFromCollectionByIndex: 'get'
+};
+
 const baseResultData = ['attribute', 'color', 'backgroundColor', 'tagName', 'text', 'isSelected'];
 
 module.exports = {
@@ -50,6 +66,7 @@ module.exports = {
 	baseResultData,
 	prettyMethodName,
   elementAction,
+  baseLibraryDescription,
 };
 `;
 

@@ -32,6 +32,10 @@ class PromodSystemCollection {
     return this.rootElements.get(index);
   }
 
+  set collectionLogger(logger: { log: (...args) => void }) {
+    this.logger = logger;
+  }
+
   set setParent(parent) {
     this.parent = parent;
   }

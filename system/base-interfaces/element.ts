@@ -39,7 +39,7 @@ class PromodSystemElement {
     this.index = index;
   }
 
-  set elementLogger(logger) {
+  set elementLogger(logger: { log: (...args) => void }) {
     this.logger = logger;
   }
 
@@ -140,7 +140,10 @@ class PromodSystemElement {
     this.logger.log('PromodSystemElement compareContent action call', action);
     const elementContent = await this.get({ ...action });
 
-    const { result } = compareToPattern(elementContent, action);
+    const { result, message } = compareToPattern(elementContent, action);
+
+    this.logger.log('PromodSystemElement compareContent action result', result);
+    this.logger.log('PromodSystemElement compareContent action message', message);
 
     return result;
   }
@@ -148,7 +151,13 @@ class PromodSystemElement {
   async compareVisibility(action: boolean): Promise<boolean> {
     this.logger.log('PromodSystemElement compareVisibility action call', action);
     const elementVisibility = await this.isDisplayed();
-    return elementVisibility === action;
+
+    const { result, message } = compareToPattern(elementVisibility, action);
+
+    this.logger.log('PromodSystemElement compareVisibility action result', result);
+    this.logger.log('PromodSystemElement compareVisibility action message', message);
+
+    return result;
   }
 }
 

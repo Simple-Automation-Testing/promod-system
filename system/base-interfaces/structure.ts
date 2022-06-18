@@ -16,11 +16,11 @@ import { promodLogger } from '../logger';
 
 const structure = {
   log(...data) {
-    promodLogger.promodSystem('[PROMOD SYSTEM STUCTURE]', ...data);
+    promodLogger.promodSystem('[PROMOD SYSTEM STRUCTURE]', ...data);
   },
 };
 
-const { collectionDescription = {} } = getConfiguration();
+const { systemPropsList = [], collectionDescription = {}, baseLibraryDescription = {} } = getConfiguration();
 
 class PromodSystemStructure {
   public rootLocator: any;
@@ -40,6 +40,10 @@ class PromodSystemStructure {
     this.index = 0;
 
     this.logger = structure;
+  }
+
+  set structureLogger(logger: { log: (...args) => void }) {
+    this.logger = logger;
   }
 
   set setParent(parent) {
@@ -70,7 +74,7 @@ class PromodSystemStructure {
    */
   async waitLoadedState() {}
 
-  async sendKeys(action) {
+  async sendKeys(action): Promise<void> {
     this.logger.log('PromodSystemStructure sendKeys action call with data ', action);
     await this.waitLoadedState();
     for (const [key, value] of Object.entries(action)) {
@@ -95,7 +99,7 @@ class PromodSystemStructure {
     return values;
   }
 
-  async isDisplayed(action) {
+  async isDisplayed(action): Promise<any> {
     this.logger.log('PromodSystemStructure isDisplayed action call with data ', action);
     const alignedAction = this.alignActionData(action);
 
@@ -108,7 +112,7 @@ class PromodSystemStructure {
     return values;
   }
 
-  async action(action) {
+  async action(action): Promise<void> {
     this.logger.log('PromodSystemStructure action action call with data ', action);
     await this.waitLoadedState();
 
@@ -119,19 +123,20 @@ class PromodSystemStructure {
     }
   }
 
-  async isSameContent(action) {
+  async compareContent(action): Promise<boolean> {
     this.logger.log('PromodSystemElement compareContent action call', action);
     for (const [key, value] of Object.entries(action)) {
-      if (!(await this[key].isSameContent(value))) {
+      if (!(await this[key].compareContent(value))) {
         return false;
       }
     }
     return true;
   }
 
-  async isSameVisibility(action) {
+  async compareVisibility(action): Promise<boolean> {
+    this.logger.log('PromodSystemElement compareVisibility action call', action);
     for (const [key, value] of Object.entries(action)) {
-      if (!(await this[key].isSameVisibility(value))) {
+      if (!(await this[key].compareVisibility(value))) {
         return false;
       }
     }
@@ -147,9 +152,7 @@ class PromodSystemStructure {
   }
 
   private async executeWaitingState(expectedData, options, method: 'get' | 'isDisplayed') {
-    const collectionActionProps = Object.values(collectionDescription).filter(key => {
-      key !== 'length';
-    });
+    const collectionActionProps = Object.values(collectionDescription).filter(key => key !== 'length');
 
     const mergedOpts = {
       // this props from compareToPattern sat-utils lib
@@ -169,6 +172,10 @@ class PromodSystemStructure {
       ...options,
     };
     const getStateData = this.alignWaitConditionData(JSON.parse(JSON.stringify(expectedData)));
+
+    this.logger.log('PromodSystemElement executeWaitingState action', method);
+    this.logger.log('PromodSystemElement executeWaitingState action expected data', expectedData);
+    this.logger.log('PromodSystemElement executeWaitingState action mergedOptions data', mergedOpts);
 
     let actualDataError: string;
     await waitForCondition(
@@ -197,7 +204,6 @@ class PromodSystemStructure {
   }
 
   private getStructureActionFields() {
-    const { systemPropsList } = getConfiguration();
     const properties = Object.getOwnPropertyNames(this)
       .filter(
         propertyName =>
@@ -223,11 +229,7 @@ class PromodSystemStructure {
   }
 
   private alignWaitConditionData(cloneData, component = this) {
-    const collectionActionProps = new Set(
-      Object.values(collectionDescription).filter(key => {
-        key !== 'length';
-      }),
-    );
+    const collectionActionProps = new Set(Object.values(collectionDescription).filter(key => key !== 'length'));
     const { length, ...rest } = cloneData;
 
     for (const key of Object.keys(rest)) {
@@ -237,10 +239,10 @@ class PromodSystemStructure {
         component[key] instanceof PromodSystemCollection &&
         !safeHasOwnPropery(rest[key], '_action')
       ) {
-        const itemsArrayChild = new component[key].CollectionItemClass(
+        const itemsArrayChild = new component[key][baseLibraryDescription.collectionItemId](
           component[key].rootLocator,
           component[key].identifier,
-          component[key].rootElements.get(0),
+          component[key].rootElements[baseLibraryDescription.getBaseElementFromCollectionByIndex](0),
         );
         const { _visible, index, _whereNot, _where, ...itemsArrRest } = rest[key];
 
@@ -268,4 +270,8 @@ function updateCollectionDescription(collectionDescriptionMap) {
   Object.assign(collectionDescription, collectionDescriptionMap);
 }
 
-export { PromodSystemStructure, updateCollectionDescription };
+function updateBaseLibraryDescription(baseLibraryDescriptionMap) {
+  Object.assign(baseLibraryDescription, baseLibraryDescriptionMap);
+}
+
+export { PromodSystemStructure, updateCollectionDescription, updateBaseLibraryDescription };
