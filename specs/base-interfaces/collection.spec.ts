@@ -3,7 +3,7 @@ import { PromodSystemCollection } from '../../system/base-interfaces/collection'
 import { seleniumWD } from 'promod';
 import { updateElementActionsMap } from '../../system/base-interfaces/element';
 import { ElementTest } from './_misc.element';
-import * as path from 'path';
+import { actionFile } from './_misc';
 
 const { $$, $, getSeleniumDriver, browser } = seleniumWD;
 
@@ -34,8 +34,6 @@ updateElementActionsMap(elementActionMap);
 
 describe('PromodSystemCollection', function () {
   describe('[P] Actions', function () {
-    const actionFile = `file://${path.resolve(__dirname, '../_misc/action.html')}`;
-
     before(async () => {
       await getSeleniumDriver(browser);
     });
@@ -114,8 +112,6 @@ describe('PromodSystemCollection', function () {
   });
 
   describe('[P] collection properties', function () {
-    const actionFile = `file://${path.resolve(__dirname, '../_misc/action.html')}`;
-
     before(async () => {
       await getSeleniumDriver(browser);
     });

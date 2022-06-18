@@ -85,7 +85,7 @@ class PromodSystemCollection {
     await elements[0].sendKeys(_action);
   }
 
-  async get(action) {
+  async get(action): Promise<any> {
     this.logger.log('PromodSystemCollection get action call with data ', action);
 
     await this.waitLoadedState();

@@ -1,9 +1,9 @@
 import { expect } from 'assertior';
 import { updateElementActionsMap } from '../../system/base-interfaces/element';
 import { seleniumWD } from 'promod';
-import * as path from 'path';
 
 import { ElementTest } from './_misc.element';
+import { actionFile } from './_misc';
 
 const { $, browser, getSeleniumDriver } = seleniumWD;
 
@@ -18,8 +18,6 @@ describe('PromodSystemElement', function () {
     };
 
     updateElementActionsMap(elementActionMap);
-
-    const actionFile = `file://${path.resolve(__dirname, '../_misc/action.html')}`;
 
     before(async () => {
       await getSeleniumDriver(browser);

@@ -2,10 +2,10 @@ import { expect } from 'assertior';
 import { updateElementActionsMap } from '../../system/base-interfaces/element';
 import { updateCollectionDescription } from '../../system/base-interfaces/structure';
 import { seleniumWD } from 'promod';
-import * as path from 'path';
 
 import { ElementTest } from './_misc.element';
 import { StructureTest } from './_misc.structure';
+import { actionFile } from './_misc';
 
 const { $, browser, getSeleniumDriver } = seleniumWD;
 
@@ -30,8 +30,6 @@ describe('PromodSystemStructure', function () {
 
     updateElementActionsMap(elementActionMap);
     updateCollectionDescription(collectionDescriptionMap);
-
-    const actionFile = `file://${path.resolve(__dirname, '../_misc/action.html')}`;
 
     before(async () => {
       await getSeleniumDriver(browser);
@@ -98,6 +96,60 @@ describe('PromodSystemStructure', function () {
       const result = await structure.get({ focusButton: null, hoverButton: null });
       expect(result.focusButton.background).toEqual('pink');
       expect(result.hoverButton.background).toEqual('red');
+    });
+
+    it('scroll', async () => {
+      const structure = new StructureTest('body', 'Test structure', $('body'));
+
+      structure.init('scrollButton', '#scroll', 'Focus button', ElementTest);
+
+      const resultBeforeScroll = await structure.get({ scrollButton: null });
+      await structure.action({ scrollButton: 'scroll' });
+      const resultAfterScroll = await structure.get({ scrollButton: null });
+
+      expect(resultBeforeScroll.scrollButton.rect.bottom).toNotEqual(resultAfterScroll.scrollButton.rect.bottom);
+    });
+
+    it('[P] waitContent', async () => {
+      const structure = new StructureTest('body', 'Test structure', $('body'));
+
+      structure.init('scrollButton', '#scroll', 'Focus button', ElementTest);
+
+      await structure.waitContent({ scrollButton: { text: 'scroll' } });
+    });
+
+    it('[N] waitContent', async () => {
+      const structure = new StructureTest('body', 'Test structure', $('body'));
+
+      structure.init('scrollButton', '#scroll', 'Focus button', ElementTest);
+
+      try {
+        await structure.waitContent({ scrollButton: { text: 'scrollsss' } }, { timeout: 2500 });
+      } catch (error) {
+        expect(error.toString()).stringIncludesSubstring(
+          'scrollButton->text->Message: expected: scrollsss, actual: scroll.',
+        );
+      }
+    });
+
+    it('[P] waitVisibility', async () => {
+      const structure = new StructureTest('body', 'Test structure', $('body'));
+
+      structure.init('scrollButton', '#scroll', 'Focus button', ElementTest);
+
+      await structure.waitVisibility({ scrollButton: true });
+    });
+
+    it('[N] waitVisibility', async () => {
+      const structure = new StructureTest('body', 'Test structure', $('body'));
+
+      structure.init('scrollButton', '#scroll', 'Focus button', ElementTest);
+
+      try {
+        await structure.waitVisibility({ scrollButton: false }, { timeout: 2500 });
+      } catch (error) {
+        expect(error.toString()).stringIncludesSubstring('scrollButton->Message: expected: false, actual: true.');
+      }
     });
   });
 });

@@ -138,11 +138,11 @@ class PromodSystemStructure {
     return true;
   }
 
-  async waitForVisibilityState(data, options) {
+  async waitVisibility(data, options?) {
     return this.executeWaitingState(data, options, 'isDisplayed');
   }
 
-  async waitForContentState(data, options) {
+  async waitContent(data, options?) {
     return this.executeWaitingState(data, options, 'get');
   }
 
@@ -158,6 +158,14 @@ class PromodSystemStructure {
       isEql: true,
       timeout: 30_000,
       message: `Structure ${this.identifier} state was not met`,
+      createMessage: (timeout, initialError) => {
+        return `${mergedOpts.message}.
+          Required structure ${this.identifier} state - ${safeJSONstringify(expectedData)}.
+          ${actualDataError}.
+          time: ${timeout},
+          ${initialError ? `error ${initialError}` : ''}
+          `;
+      },
       ...options,
     };
     const getStateData = this.alignWaitConditionData(JSON.parse(JSON.stringify(expectedData)));
@@ -183,15 +191,7 @@ class PromodSystemStructure {
       },
       {
         timeout: mergedOpts.timeout,
-        createMessage: (timeout, initialError) =>
-          ({
-            message: `${mergedOpts.message}.
-          Required structure ${this.identifier} state - ${safeJSONstringify(expectedData)}.
-          ${actualDataError}.
-          time: ${timeout},
-          ${initialError ? `error ${initialError}` : ''}
-        `,
-          } as any),
+        createMessage: mergedOpts.createMessage,
       },
     );
   }
