@@ -26,8 +26,12 @@ class StructureAsPage extends PromodSystemStructure {
     super(locator, structureName, $(locator));
   }
 
-  init(locator: string, name: string, Child: new (...args) => any, ...rest) {
-    return new Child(locator, name, this.rootElement.$(locator), ...rest);
+  init(locator: string, name: string, Child: new (...args) => any) {
+    return new Child(locator, name, this.rootElement.$(locator));
+  }
+
+  initCollection(locator: string, name: string, Collection: new (...args) => any, Child: new (...args) => any) {
+    return new Collection(locator, name, this.rootElement.$$(locator), Child);
   }
 
   async waitLoadedState() {

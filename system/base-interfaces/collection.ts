@@ -13,14 +13,22 @@ const collection = {
 const { elementAction = {}, baseLibraryDescription = {} } = getConfiguration();
 
 class PromodSystemCollection<BaseLibraryElementsType = any> {
-  public rootLocator: string;
-  public rootElements: BaseLibraryElementsType;
-  public identifier: any;
-  public CollectionItemClass: any;
-  public overrideCollectionItems: any;
-  public parent: any;
+  protected rootLocator: string;
+  protected rootElements: BaseLibraryElementsType;
+  protected identifier: any;
+  protected CollectionItemClass: any;
+  protected overrideCollectionItems: any;
+  protected parent: any;
 
   private logger: { log(...args: any[]): void };
+
+  static updateElementActionsMap(elementActionMap) {
+    Object.assign(elementAction, elementActionMap);
+  }
+
+  static updateBaseLibraryDescription(baseLibraryDescriptionMap) {
+    Object.assign(baseLibraryDescription, baseLibraryDescriptionMap);
+  }
 
   constructor(locator, collectionName, rootElements, CollectionItemClass) {
     this.rootLocator = locator;

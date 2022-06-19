@@ -32,6 +32,18 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
 
   protected logger: { log(...args: any[]): void };
 
+  static updateCollectionDescription(collectionDescriptionMap) {
+    Object.assign(collectionDescription, collectionDescriptionMap);
+  }
+
+  static updateBaseLibraryDescription(baseLibraryDescriptionMap) {
+    Object.assign(baseLibraryDescription, baseLibraryDescriptionMap);
+  }
+
+  static updateSystemPropsList(systemPropsListArr) {
+    Object.assign(systemPropsList, systemPropsListArr);
+  }
+
   constructor(locator, structureName, rootElement) {
     this.rootLocator = locator;
     this.identifier = structureName;

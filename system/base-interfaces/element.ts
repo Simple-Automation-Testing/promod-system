@@ -21,6 +21,10 @@ class PromodSystemElement<BaseLibraryElementType = any> {
 
   protected logger: { log(...args: any[]): void };
 
+  static updateElementActionsMap(elementActionMap) {
+    Object.assign(elementAction, elementActionMap);
+  }
+
   constructor(locator: string, elementName: string, rootElement: any) {
     this.rootLocator = locator;
     this.identifier = elementName;
