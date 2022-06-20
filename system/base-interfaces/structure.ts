@@ -22,6 +22,67 @@ const structure = {
 
 const { systemPropsList = [], collectionDescription = {}, baseLibraryDescription = {} } = getConfiguration();
 
+/**
+ * PromodSystemStructure is used for defining framework (pages and fragments),it has
+ * required methods to interact with all level abstrations
+ *
+ * PromodSystemElement expects that base library will have lazy element search.
+ *
+ * Designed for promod library but works with any other library or framework.
+ *
+ * @example
+ * import { PromodSeleniumElementType } from 'promod';
+ * import { waitForCondition } from 'sat-utils';
+ * import { PromodSystemElement, PromodSystemStructure } from 'promod-system';
+ *
+ * class Button extends PromodSystemElement<PromodSeleniumElementType> {
+ *   constructor(locator: string, elementName: string, root: PromodSeleniumElementType) {
+ *     super(locator, elementName, root);
+ *   }
+ *
+ *   protected async baseGetData(): Promise<string> {
+ *     return await this.rootElement.getText();
+ *   }
+ *
+ *   async waitLoadedState() {
+ *      return await waitForCondition(
+ *        () => this.rootElement.isDisplayed(),
+ *        {timeout: 10_000, message: `${this.identifier} does not become visible during 10 seconds`}
+ *      )
+ *   }
+ *
+ *   protected async baseSendKeys() {
+ *     throw new TypeError(`${this.identifier} is a Button, please check usage of this element, button should not be used for sendKeys purpose.`)
+ *   }
+ * }
+ *
+ * class BaseFragment extends PromodSystemStructure<PromodSeleniumElementType> {
+ *    constructor(locator, structureName, rootElement) {
+ *      super(locator, structureName, rootElement);
+ *    }
+ *
+ *    init(locator: string, name: string, Child: new (...args) => any, ...rest) {
+ *         return new Child(locator, name, this.rootElement.$(locator), ...rest);
+ *    }
+ * }
+ *
+ * class ButtonsFragment extends BaseFragment {
+ *    private button1: Button;
+ *    private button2: Button;
+ *
+ *    constructor(locator, structureName, rootElement) {
+ *      super(locator, structureName, rootElement);
+ *
+ *      this.button1 = this.init('#butto1', 'Button 1', Button);
+ *      this.button2 = this.init('#butto2', 'Button 2', Button);
+ *    }
+ * }
+ * @constructor
+ * @param {string} locator element locator
+ * @param {string} elementName element name
+ * @param {any} rootElement root element object
+ * @returns {PromodSystemElement}
+ */
 class PromodSystemStructure<BaseLibraryElementType = any> {
   protected rootLocator: any;
   protected identifier: any;
@@ -148,7 +209,7 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
   }
 
   async compareContent(action): Promise<boolean> {
-    this.logger.log('PromodSystemElement compareContent action call', action);
+    this.logger.log('PromodSystemStructure compareContent action call', action);
     for (const [key, value] of Object.entries(action)) {
       this.logger.log(`PromodSystemStructure compareContent action execution cycle for ${key} with data `, action);
       if (!(await this[key].compareContent(value))) {
@@ -159,7 +220,7 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
   }
 
   async compareVisibility(action): Promise<boolean> {
-    this.logger.log('PromodSystemElement compareVisibility action call', action);
+    this.logger.log('PromodSystemStructure compareVisibility action call', action);
     for (const [key, value] of Object.entries(action)) {
       this.logger.log(`PromodSystemStructure compareVisibility action execution cycle for ${key} with data `, action);
       if (!(await this[key].compareVisibility(value))) {
@@ -185,7 +246,7 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
       strictArrays: true,
       strictStrings: true,
       isEql: true,
-      timeout: 30_000,
+      timeout: 5000,
       message: `Structure ${this.identifier} state was not met`,
       createMessage: (timeout, initialError) => {
         return `${mergedOpts.message}.
@@ -199,9 +260,9 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
     };
     const getStateData = this.alignWaitConditionData(JSON.parse(JSON.stringify(expectedData)));
 
-    this.logger.log('PromodSystemElement executeWaitingState action', method);
-    this.logger.log('PromodSystemElement executeWaitingState action expected data', expectedData);
-    this.logger.log('PromodSystemElement executeWaitingState action mergedOptions data', mergedOpts);
+    this.logger.log('PromodSystemStructure executeWaitingState action', method);
+    this.logger.log('PromodSystemStructure executeWaitingState action expected data', expectedData);
+    this.logger.log('PromodSystemStructure executeWaitingState action mergedOptions data', mergedOpts);
 
     let actualDataError: string;
     await waitForCondition(

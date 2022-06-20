@@ -11,6 +11,48 @@ const element = {
   },
 };
 
+/**
+ * PromodSystemElement is used for defining base elements library, it has
+ * required methods to interact with base page element, but some of them should be
+ * overrided due to base library specific.
+ *
+ * PromodSystemElement expects that base library will have lazy element search.
+ *
+ * Designed for promod library but works with any other library or framework.
+ *
+ * @example
+ * import { PromodSeleniumElementType } from 'promod';
+ * import { waitForCondition } from 'sat-utils';
+ * import { PromodSystemElement } from 'promod-system';
+ *
+ * class Button extends PromodSystemElement<PromodSeleniumElementType> {
+ *   constructor(locator: string, elementName: string, root: PromodSeleniumElementType) {
+ *     super(locator, elementName, root);
+ *   }
+ *
+ *   protected async baseGetData(): Promise<string> {
+ *     return await this.rootElement.getText();
+ *   }
+ *
+ *   async waitLoadedState() {
+ *      return await waitForCondition(
+ *        () => this.rootElement.isDisplayed(),
+ *        {timeout: 10_000, message: `${this.identifier} does not become visible during 10 seconds`}
+ *      )
+ *   }
+ *
+ *   protected async baseSendKeys() {
+ *     throw new TypeError(`${this.identifier} is a Button, please check usage of this element, button should not be used for sendKeys purpose.`)
+ *   }
+ * }
+ *
+ *
+ * @constructor
+ * @param {string} locator element locator
+ * @param {string} elementName element name
+ * @param {any} rootElement root element object
+ * @returns {PromodSystemElement}
+ */
 class PromodSystemElement<BaseLibraryElementType = any> {
   protected rootLocator: string;
   protected identifier: string;
