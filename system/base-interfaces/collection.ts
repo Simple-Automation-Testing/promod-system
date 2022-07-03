@@ -17,7 +17,7 @@ class PromodSystemCollection<BaseLibraryElementsType = any> {
   protected rootElements: BaseLibraryElementsType;
   protected identifier: any;
   protected CollectionItemClass: any;
-  protected overrideCollectionItems: any;
+  protected overrideCollectionItems: any[];
   protected parent: any;
 
   private logger: { log(...args: any[]): void };
@@ -55,22 +55,32 @@ class PromodSystemCollection<BaseLibraryElementsType = any> {
   /**
    * @override
    */
-  overrideBaseMethods(...methods) {}
-
-  /**
-   * @override
-   */
-  overrideChildrenBaseMethods(...methods) {}
-
-  /**
-   * @override
-   */
   async updateRoot() {}
 
   /**
    * @override
    */
   async waitLoadedState() {}
+
+  overrideChildrenBaseMethods(...methods) {
+    this.overrideCollectionItems.push(...methods);
+  }
+
+  overrideBaseMethods(...methods) {
+    const methodsWhatCanBeOverridden = /^get|action|sendKeys|isDisplayed|compareContent|compareVisibility/;
+
+    for (const method of methods) {
+      const { name } = method;
+      const [methodToOverride] = name.match(methodsWhatCanBeOverridden) || [];
+      if (!methodToOverride) {
+        throw new Error(`Element does not have method "${name}".
+        PromodSystemCollection available methods to override: get|action|sendKeys|isDisplayed|compareContent|compareVisibility`);
+      }
+
+      this[`${methodToOverride}Initial`] = this[methodToOverride];
+      this[methodToOverride] = method.bind(this);
+    }
+  }
 
   private alignActionData(action) {
     if (action) {
@@ -232,7 +242,7 @@ class PromodSystemCollection<BaseLibraryElementsType = any> {
       this.rootElements[baseLibraryDescription.getBaseElementFromCollectionByIndex](index),
     );
     if (this.overrideCollectionItems.length) {
-      this.overrideCollectionItems.forEach(method => instance.overrideBaseMethods(method));
+      instance.overrideBaseMethods(...this.overrideCollectionItems);
     }
 
     const parent = this;

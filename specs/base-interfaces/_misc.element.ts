@@ -1,10 +1,10 @@
 import { waitForCondition } from 'sat-utils';
-import { seleniumWD } from 'promod';
+import { seleniumWD, PromodSeleniumElementType } from 'promod';
 import { PromodSystemElement } from '../../system/base-interfaces/element';
 
 const { browser } = seleniumWD;
 
-class ElementTest extends PromodSystemElement {
+class ElementTest extends PromodSystemElement<PromodSeleniumElementType> {
   constructor(locator, name, rootElement) {
     super(locator, name, rootElement);
   }

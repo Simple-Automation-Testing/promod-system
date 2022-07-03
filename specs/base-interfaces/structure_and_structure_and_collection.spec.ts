@@ -129,7 +129,7 @@ describe('PromodSystemStructure', function () {
       });
       expect(result4.collection.length).toEqual(1);
 
-      await complexPage.waitContent({ collection: { field1: { text: 'field1 item1' } } });
+      await complexPage.waitContent({ collection: { field1: { text: 'field1 item1' } } }, { isEql: false });
     });
 
     it('complex page waiters', async () => {

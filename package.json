@@ -1,6 +1,6 @@
 {
   "name": "promod-system",
-  "version": "0.2.0",
+  "version": "0.2.0rc-0",
   "description": "Library promod condition waitings",
   "main": "./built/index.js",
   "scripts": {

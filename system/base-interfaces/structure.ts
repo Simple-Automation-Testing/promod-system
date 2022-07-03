@@ -14,6 +14,23 @@ import { PromodSystemCollection } from './collection';
 import { getConfiguration } from '../config/config';
 import { promodLogger } from '../logger';
 
+type IWaiterOpts = {
+  timeout?: number;
+  interval?: number;
+  message?: string;
+  throwCustom?: (currentError?: any) => any;
+  createMessage?: (...args: any[]) => string;
+  analyseResult?: (...args: any[]) => boolean | Promise<boolean>;
+  waiterError?: new (...args: any[]) => any;
+  callEveryCycle?: () => Promise<void> | any;
+  dontThrow?: boolean;
+  falseIfError?: boolean;
+  stopIfNoError?: boolean;
+  strictArrays?: boolean;
+  strictStrings?: boolean;
+  isEql?: boolean;
+};
+
 const structure = {
   log(...data) {
     promodLogger.promodSystem('[PROMOD SYSTEM STRUCTURE]', ...data);
@@ -130,12 +147,7 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
   /**
    * @override
    */
-  overrideBaseMethods(...methods) {}
-
-  /**
-   * @override
-   */
-  init(...methods) {}
+  init(...args) {}
 
   /**
    * @override
@@ -146,6 +158,22 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
    * @override
    */
   async waitLoadedState() {}
+
+  overrideBaseMethods(...methods) {
+    const methodsWhatCanBeOverridden = /^get|action|sendKeys|isDisplayed|compareContent|compareVisibility/;
+
+    for (const method of methods) {
+      const { name } = method;
+      const [methodToOverride] = name.match(methodsWhatCanBeOverridden) || [];
+      if (!methodToOverride) {
+        throw new Error(`Element does not have method "${name}".
+        Available methods to override: get|action|sendKeys|isDisplayed|compareContent|compareVisibility`);
+      }
+
+      this[`${methodToOverride}Initial`] = this[methodToOverride];
+      this[methodToOverride] = method.bind(this);
+    }
+  }
 
   async sendKeys(action): Promise<void> {
     this.logger.log('PromodSystemStructure sendKeys action call with data ', action);
@@ -230,14 +258,17 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
     return true;
   }
 
-  async waitVisibility(data, options?) {
+  async waitVisibility(data, options?: IWaiterOpts) {
     return this.executeWaitingState(data, options, 'isDisplayed');
   }
 
-  async waitContent(data, options?) {
+  async waitContent(data, options?: IWaiterOpts) {
     return this.executeWaitingState(data, options, 'get');
   }
 
+  /**
+   * @private
+   */
   private async executeWaitingState(expectedData, options, method: 'get' | 'isDisplayed') {
     const collectionActionProps = Object.values(collectionDescription).filter(key => key !== 'length');
 
@@ -324,6 +355,7 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
         isObject(rest[key]) &&
         !collectionActionProps.has(key) &&
         component[key] instanceof PromodSystemCollection &&
+        // TODO this approach should be updated
         !safeHasOwnPropery(rest[key], '_action')
       ) {
         const itemsArrayChild = new component[key][baseLibraryDescription.collectionItemId](
@@ -331,11 +363,13 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
           component[key].identifier,
           component[key].rootElements[baseLibraryDescription.getBaseElementFromCollectionByIndex](0),
         );
+        // TODO this approach should be updated
         const { _visible, index, _whereNot, _where, ...itemsArrRest } = rest[key];
 
+        // TODO this approach should be updated
         rest[key] = {
-          _visible,
           index,
+          _visible,
           _whereNot,
           _where,
           _action: this.alignWaitConditionData(itemsArrRest, itemsArrayChild),

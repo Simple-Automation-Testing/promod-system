@@ -1,8 +1,6 @@
 ./specs
 ./units
-./lib
 .eslin*
-lib
 specs
 promod.system.config.js
 .vscode

@@ -63,10 +63,28 @@ class PromodSystemElement<BaseLibraryElementType = any> {
 
   protected logger: { log(...args: any[]): void };
 
+  /**
+   * @param {{
+   *  click: string;
+   *  focus: string;
+   *  scrollIntoView: string;
+   *  hover: string;
+   *  isDisplayed: string;
+   * }} elementActionMap element action map that will be used to call required action
+   *            based on library/framework
+   */
   static updateElementActionsMap(elementActionMap) {
     Object.assign(elementAction, elementActionMap);
   }
 
+  /**
+   * @constructor
+   * @param {string} locator element locator
+   * @param {string} elementName element name
+   * @param {any} rootElement root elemetn (depends on library/framework)
+   *
+   * @returns {PromodSystemElement}
+   */
   constructor(locator: string, elementName: string, rootElement: any) {
     this.rootLocator = locator;
     this.identifier = elementName;
@@ -92,11 +110,6 @@ class PromodSystemElement<BaseLibraryElementType = any> {
   /**
    * @override
    */
-  overrideBaseMethods(...methods) {}
-
-  /**
-   * @override
-   */
   async updateRoot() {}
 
   /**
@@ -114,6 +127,22 @@ class PromodSystemElement<BaseLibraryElementType = any> {
    */
   protected async baseSendKeys(...args): Promise<void> {}
 
+  overrideBaseMethods(...methods) {
+    const methodsWhatCanBeOverridden = /^get|action|sendKeys|isDisplayed|compareContent|compareVisibility/;
+
+    for (const method of methods) {
+      const { name } = method;
+      const [methodToOverride] = name.match(methodsWhatCanBeOverridden) || [];
+      if (!methodToOverride) {
+        throw new Error(`Element does not have method "${name}".
+        PromodSystemElement available methods to override: get|action|sendKeys|isDisplayed|compareContent|compareVisibility`);
+      }
+
+      this[`${methodToOverride}Initial`] = this[methodToOverride];
+      this[methodToOverride] = method.bind(this);
+    }
+  }
+
   async sendKeys(action): Promise<void> {
     this.logger.log('PromodSystemElement sendKeys action call with data ', action);
     if (!isString(action) && !isNumber(action)) {
@@ -124,6 +153,10 @@ class PromodSystemElement<BaseLibraryElementType = any> {
     await this.baseSendKeys(action);
   }
 
+  /**
+   * @param {string|null} action action that will be called
+   * @returns {Promise<void>}
+   */
   async action(action: 'click' | 'hover' | 'focus' | 'scroll' | null) {
     this.logger.log('PromodSystemElement action action call with data ', action);
     if (isNull(action)) {
@@ -142,6 +175,9 @@ class PromodSystemElement<BaseLibraryElementType = any> {
     await this[action]();
   }
 
+  /**
+   * @private
+   */
   private async click(): Promise<void> {
     this.logger.log('PromodSystemElement click action call');
     await this.waitLoadedState();
@@ -149,6 +185,9 @@ class PromodSystemElement<BaseLibraryElementType = any> {
     await this.rootElement[elementAction.click]();
   }
 
+  /**
+   * @private
+   */
   private async focus(): Promise<void> {
     this.logger.log('PromodSystemElement focus action call');
     await this.waitLoadedState();
@@ -156,6 +195,9 @@ class PromodSystemElement<BaseLibraryElementType = any> {
     await this.rootElement[elementAction.focus]();
   }
 
+  /**
+   * @private
+   */
   private async scroll(): Promise<void> {
     this.logger.log('PromodSystemElement scroll action call');
     await this.waitLoadedState();
@@ -163,6 +205,9 @@ class PromodSystemElement<BaseLibraryElementType = any> {
     return this.rootElement[elementAction.scrollIntoView]();
   }
 
+  /**
+   * @private
+   */
   private async hover(): Promise<void> {
     this.logger.log('PromodSystemElement hover action call');
     await this.waitLoadedState();
@@ -170,7 +215,7 @@ class PromodSystemElement<BaseLibraryElementType = any> {
     await this.rootElement[elementAction.hover]();
   }
 
-  async get(action?) {
+  async get(action?): Promise<any> {
     this.logger.log('PromodSystemElement get action call with data ', action);
     await this.waitLoadedState();
 
@@ -207,6 +252,16 @@ class PromodSystemElement<BaseLibraryElementType = any> {
   }
 }
 
+/**
+ * @param {{
+ *  click: string;
+ *  focus: string;
+ *  scrollIntoView: string;
+ *  hover: string;
+ *  isDisplayed: string;
+ * }} elementActionMap element action map that will be used to call required action
+ *            based on library/framework
+ */
 function updateElementActionsMap(elementActionMap) {
   Object.assign(elementAction, elementActionMap);
 }
