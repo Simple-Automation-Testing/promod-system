@@ -1,5 +1,5 @@
 import { expect } from 'assertior';
-import { updateElementActionsMap } from '../../system/base-interfaces/element';
+import { PromodSystemElement } from '../../system/base-interfaces/element';
 import { seleniumWD } from 'promod';
 
 import { ElementTest } from './_misc.element';
@@ -17,7 +17,7 @@ describe('PromodSystemElement', function () {
       isDisplayed: 'isDisplayed',
     };
 
-    updateElementActionsMap(elementActionMap);
+    PromodSystemElement.updateElementActionsMap(elementActionMap);
 
     before(async () => {
       await getSeleniumDriver(browser);

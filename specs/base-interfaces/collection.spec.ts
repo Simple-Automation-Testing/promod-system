@@ -1,8 +1,6 @@
 import { expect } from 'assertior';
-import { PromodSystemCollection } from '../../system/base-interfaces/collection';
-import * as collection from '../../system/base-interfaces/collection';
+import { PromodSystemCollection, PromodSystemElement } from '../../system/base-interfaces';
 import { seleniumWD } from 'promod';
-import { updateElementActionsMap } from '../../system/base-interfaces/element';
 import { ElementTest } from './_misc.element';
 import { actionFile } from './_misc';
 
@@ -49,9 +47,9 @@ const baseLibraryDescription = {
   getBaseElementFromCollectionByIndex: 'get',
 };
 
-updateElementActionsMap(elementActionMap);
-collection.updateElementActionsMap(elementActionMap);
-collection.updateBaseLibraryDescription(baseLibraryDescription);
+PromodSystemElement.updateElementActionsMap(elementActionMap);
+PromodSystemCollection.updateElementActionsMap(elementActionMap);
+PromodSystemCollection.updateBaseLibraryDescription(baseLibraryDescription);
 
 describe('PromodSystemCollection', function () {
   describe('[P] Actions', function () {

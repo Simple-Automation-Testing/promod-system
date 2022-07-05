@@ -1,6 +1,6 @@
 import { expect } from 'assertior';
-import { updateElementActionsMap } from '../../system/base-interfaces/element';
-import { updateCollectionDescription } from '../../system/base-interfaces/structure';
+import { PromodSystemElement } from '../../system/base-interfaces/element';
+import { PromodSystemStructure } from '../../system/base-interfaces/structure';
 import { seleniumWD } from 'promod';
 
 import { ElementTest } from './_misc.element';
@@ -28,8 +28,8 @@ const collectionDescriptionMap = {
 
 describe('PromodSystemStructure', function () {
   describe('[P] Actions with element', function () {
-    updateElementActionsMap(elementActionMap);
-    updateCollectionDescription(collectionDescriptionMap);
+    PromodSystemElement.updateElementActionsMap(elementActionMap);
+    PromodSystemStructure.updateCollectionDescription(collectionDescriptionMap);
 
     before(async () => {
       await getSeleniumDriver(browser);

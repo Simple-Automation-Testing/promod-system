@@ -276,12 +276,4 @@ class PromodSystemCollection<BaseLibraryElementsType = any> {
   }
 }
 
-function updateElementActionsMap(elementActionMap) {
-  Object.assign(elementAction, elementActionMap);
-}
-
-function updateBaseLibraryDescription(baseLibraryDescriptionMap) {
-  Object.assign(baseLibraryDescription, baseLibraryDescriptionMap);
-}
-
-export { PromodSystemCollection, updateElementActionsMap, updateBaseLibraryDescription };
+export { PromodSystemCollection };

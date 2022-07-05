@@ -252,18 +252,4 @@ class PromodSystemElement<BaseLibraryElementType = any> {
   }
 }
 
-/**
- * @param {{
- *  click: string;
- *  focus: string;
- *  scrollIntoView: string;
- *  hover: string;
- *  isDisplayed: string;
- * }} elementActionMap element action map that will be used to call required action
- *            based on library/framework
- */
-function updateElementActionsMap(elementActionMap) {
-  Object.assign(elementAction, elementActionMap);
-}
-
-export { PromodSystemElement, updateElementActionsMap };
+export { PromodSystemElement };

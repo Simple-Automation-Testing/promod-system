@@ -387,16 +387,4 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
   }
 }
 
-function updateCollectionDescription(collectionDescriptionMap) {
-  Object.assign(collectionDescription, collectionDescriptionMap);
-}
-
-function updateBaseLibraryDescription(baseLibraryDescriptionMap) {
-  Object.assign(baseLibraryDescription, baseLibraryDescriptionMap);
-}
-
-function updateSystemPropsList(systemPropsListArr) {
-  Object.assign(systemPropsList, systemPropsListArr);
-}
-
-export { PromodSystemStructure, updateCollectionDescription, updateBaseLibraryDescription, updateSystemPropsList };
+export { PromodSystemStructure };
