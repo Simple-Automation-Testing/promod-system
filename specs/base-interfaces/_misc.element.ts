@@ -1,5 +1,5 @@
-import { waitForCondition } from 'sat-utils';
 import { seleniumWD, PromodSeleniumElementType } from 'promod';
+import { waitForCondition } from 'sat-utils';
 import { PromodSystemElement } from '../../system/base-interfaces/element';
 
 const { browser } = seleniumWD;

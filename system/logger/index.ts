@@ -1,4 +1,6 @@
-import { logger } from 'sat-utils';
+import { createLogger } from 'sat-utils';
+
+const logger = createLogger();
 
 logger.addCustomLevel('promodSystem', 'PROMOD_SYSTEM', 'PROMOD_SYSTEM', 'info', 'BgGreen', 'Underscore');
 

@@ -11,15 +11,12 @@ import {
   safeJSONstringify,
 } from 'sat-utils';
 import { PromodSystemCollection } from './collection';
-import { getConfiguration } from '../config/config';
 import { promodLogger } from '../logger';
 
 type IWaiterOpts = {
   timeout?: number;
   interval?: number;
   message?: string;
-  throwCustom?: (currentError?: any) => any;
-  createMessage?: (...args: any[]) => string;
   analyseResult?: (...args: any[]) => boolean | Promise<boolean>;
   waiterError?: new (...args: any[]) => any;
   callEveryCycle?: () => Promise<void> | any;
@@ -37,7 +34,42 @@ const structure = {
   },
 };
 
-const { systemPropsList = [], collectionDescription = {}, baseLibraryDescription = {} } = getConfiguration();
+const systemPropsList = [
+  'index',
+  'rootLocator',
+  'rootElements',
+  'identifier',
+  'CollectionItemClass',
+  'overrideElement',
+  'parent',
+  'loaderLocator',
+  'rootElement',
+  'logger',
+];
+const collectionDescription = {
+  action: '_action',
+  where: '_where',
+  whereNot: '_whereNot',
+  visible: '_visible',
+  index: '_indexes',
+  count: '_count',
+  length: 'length',
+};
+const baseLibraryDescription = {
+  entityId: 'identifier',
+  rootLocatorId: 'rootLocator',
+  pageId: 'Page',
+  fragmentId: 'Fragment',
+  collectionId: 'Collection',
+  collectionItemId: 'CollectionItemClass',
+  collectionRootElementsId: 'rootElements',
+  waitOptionsId: 'IWaitOpts',
+  collectionActionId: 'ICollectionAction',
+  collectionCheckId: 'ICollectionCheck',
+  getDataMethod: 'get',
+  getVisibilityMethod: 'isDisplayed',
+  getBaseElementFromCollectionByIndex: 'get',
+};
 
 /**
  * PromodSystemStructure is used for defining framework (pages and fragments),it has
@@ -278,9 +310,8 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
       strictStrings: true,
       isEql: true,
       timeout: 5000,
-      message: `Structure ${this.identifier} state was not met`,
-      createMessage: (timeout, initialError) => {
-        return `${mergedOpts.message}.
+      message: (timeout, initialError) => {
+        return `Structure ${this.identifier} state was not met.
           Required structure ${this.identifier} state - ${safeJSONstringify(expectedData)}.
           ${actualDataError}.
           time: ${timeout},
@@ -314,10 +345,7 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
 
         return result === mergedOpts.isEql;
       },
-      {
-        timeout: mergedOpts.timeout,
-        createMessage: mergedOpts.createMessage,
-      },
+      { timeout: mergedOpts.timeout, message: mergedOpts.message },
     );
   }
 

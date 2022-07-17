@@ -1,72 +1,11 @@
 import { expect } from 'assertior';
-import * as collection from '../../system/base-interfaces/collection';
-import { updateElementActionsMap } from '../../system/base-interfaces/element';
-import {
-  updateCollectionDescription,
-  updateSystemPropsList,
-  updateBaseLibraryDescription,
-} from '../../system/base-interfaces/structure';
 import { seleniumWD } from 'promod';
 import { TestPage, TestComplexPage } from './_misc.complex';
 import { actionFile } from './_misc';
 
 const { browser, getSeleniumDriver } = seleniumWD;
 
-const elementActionMap = {
-  click: 'click',
-  hover: 'hover',
-  focus: 'focus',
-  scrollIntoView: 'scrollIntoView',
-  isDisplayed: 'isDisplayed',
-  count: 'count',
-  get: 'get',
-};
-
-const baseLibraryDescription = {
-  entityId: 'identifier',
-  rootLocatorId: 'rootLocator',
-  pageId: 'Page',
-  fragmentId: 'Fragment',
-  collectionId: 'Collection',
-  collectionItemId: 'CollectionItemClass',
-  collectionRootElementsId: 'rootElements',
-  waitOptionsId: 'IWaitOpts',
-  collectionActionId: 'ICollectionAction',
-  collectionCheckId: 'ICollectionCheck',
-  getDataMethod: 'get',
-  getVisibilityMethod: 'isDisplayed',
-  getBaseElementFromCollectionByIndex: 'get',
-};
-
-const collectionDescriptionMap = {
-  action: '_action',
-  where: '_where',
-  whereNot: '_whereNot',
-  visible: '_visible',
-  index: '_indexes',
-  count: '_count',
-  length: 'length',
-};
-const systemPropsList = [
-  'index',
-  'rootLocator',
-  'rootElements',
-  'identifier',
-  'CollectionItemClass',
-  'overrideElement',
-  'parent',
-  'loaderLocator',
-  'rootElement',
-  'logger',
-];
-
 describe('PromodSystemStructure', function () {
-  updateElementActionsMap(elementActionMap);
-  updateCollectionDescription(collectionDescriptionMap);
-  updateBaseLibraryDescription(baseLibraryDescription);
-  updateSystemPropsList(systemPropsList);
-  collection.updateBaseLibraryDescription(baseLibraryDescription);
-
   describe('[P] actions', function () {
     before(async () => {
       await getSeleniumDriver(browser);

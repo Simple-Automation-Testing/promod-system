@@ -1,6 +1,4 @@
 import { expect } from 'assertior';
-import { PromodSystemElement } from '../../system/base-interfaces/element';
-import { PromodSystemStructure } from '../../system/base-interfaces/structure';
 import { seleniumWD } from 'promod';
 
 import { ElementTest } from './_misc.element';
@@ -9,28 +7,8 @@ import { actionFile } from './_misc';
 
 const { $, browser, getSeleniumDriver } = seleniumWD;
 
-const elementActionMap = {
-  click: 'click',
-  hover: 'hover',
-  focus: 'focus',
-  scrollIntoView: 'scrollIntoView',
-  isDisplayed: 'isDisplayed',
-};
-const collectionDescriptionMap = {
-  action: '_action',
-  where: '_where',
-  whereNot: '_whereNot',
-  visible: '_visible',
-  index: '_indexes',
-  count: '_count',
-  length: 'length',
-};
-
 describe('PromodSystemStructure', function () {
   describe('[P] Actions with element', function () {
-    PromodSystemElement.updateElementActionsMap(elementActionMap);
-    PromodSystemStructure.updateCollectionDescription(collectionDescriptionMap);
-
     before(async () => {
       await getSeleniumDriver(browser);
     });

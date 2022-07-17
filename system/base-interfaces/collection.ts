@@ -2,15 +2,36 @@
 import { isArray, toArray, isNotEmptyObject, safeJSONstringify, isNumber, isBoolean, isUndefined } from 'sat-utils';
 import { promodLogger } from '../logger';
 
-import { getConfiguration } from '../config/config';
-
 const collection = {
   log(...data) {
     promodLogger.promodSystem('[PROMOD SYSTEM COLLECTION]', ...data);
   },
 };
 
-const { elementAction = {}, baseLibraryDescription = {} } = getConfiguration();
+const elementAction = {
+  click: 'click',
+  hover: 'hover',
+  focus: 'focus',
+  scrollIntoView: 'scrollIntoView',
+  isDisplayed: 'isDisplayed',
+  count: 'count',
+  get: 'get',
+};
+const baseLibraryDescription = {
+  entityId: 'identifier',
+  rootLocatorId: 'rootLocator',
+  pageId: 'Page',
+  fragmentId: 'Fragment',
+  collectionId: 'Collection',
+  collectionItemId: 'CollectionItemClass',
+  collectionRootElementsId: 'rootElements',
+  waitOptionsId: 'IWaitOpts',
+  collectionActionId: 'ICollectionAction',
+  collectionCheckId: 'ICollectionCheck',
+  getDataMethod: 'get',
+  getVisibilityMethod: 'isDisplayed',
+  getBaseElementFromCollectionByIndex: 'get',
+};
 
 class PromodSystemCollection<BaseLibraryElementsType = any> {
   protected rootLocator: string;

@@ -1,5 +1,4 @@
 import { expect } from 'assertior';
-import { PromodSystemElement } from '../../system/base-interfaces/element';
 import { seleniumWD } from 'promod';
 
 import { ElementTest } from './_misc.element';
@@ -9,16 +8,6 @@ const { $, browser, getSeleniumDriver } = seleniumWD;
 
 describe('PromodSystemElement', function () {
   describe('[P] Actions', function () {
-    const elementActionMap = {
-      click: 'click',
-      hover: 'hover',
-      focus: 'focus',
-      scrollIntoView: 'scrollIntoView',
-      isDisplayed: 'isDisplayed',
-    };
-
-    PromodSystemElement.updateElementActionsMap(elementActionMap);
-
     before(async () => {
       await getSeleniumDriver(browser);
     });

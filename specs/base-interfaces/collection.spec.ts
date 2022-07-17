@@ -21,36 +21,6 @@ function getCollectionWithInvisibility() {
   );
 }
 
-const elementActionMap = {
-  click: 'click',
-  hover: 'hover',
-  focus: 'focus',
-  scrollIntoView: 'scrollIntoView',
-  isDisplayed: 'isDisplayed',
-  count: 'count',
-  get: 'get',
-};
-
-const baseLibraryDescription = {
-  entityId: 'identifier',
-  rootLocatorId: 'rootLocator',
-  pageId: 'Page',
-  fragmentId: 'Fragment',
-  collectionId: 'Collection',
-  collectionItemId: 'CollectionItemClass',
-  collectionRootElementsId: 'rootElements',
-  waitOptionsId: 'IWaitOpts',
-  collectionActionId: 'ICollectionAction',
-  collectionCheckId: 'ICollectionCheck',
-  getDataMethod: 'get',
-  getVisibilityMethod: 'isDisplayed',
-  getBaseElementFromCollectionByIndex: 'get',
-};
-
-PromodSystemElement.updateElementActionsMap(elementActionMap);
-PromodSystemCollection.updateElementActionsMap(elementActionMap);
-PromodSystemCollection.updateBaseLibraryDescription(baseLibraryDescription);
-
 describe('PromodSystemCollection', function () {
   describe('[P] Actions', function () {
     before(async () => {
