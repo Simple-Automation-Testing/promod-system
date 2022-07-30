@@ -10,8 +10,8 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
   const getActionMessage = (dataObj, initialMessage = '') => {
     return Object.keys(dataObj).reduce((actionMessage, key, index, keys) => {
       const startAction = actionMessage
-        ? `${actionMessage}${prettifyCamelCase(action).toLowerCase()} `
-        : `${prettifyCamelCase(action)} `;
+        ? `${actionMessage}${prettifyCamelCase(action).toLowerCase()}`
+        : `${prettifyCamelCase(action)}`;
 
       if (isPropValueCollection(key, dataObj[key])) {
         const {
@@ -22,7 +22,7 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
           ...restDescription
         } = dataObj[key];
 
-        const startMessagePart = `${startAction}'${key}' collection items `;
+        const startMessagePart = `${startAction} '${key}' collection items `;
 
         const actionMessagePart = collectionAction ? getActionMessage(collectionAction, startMessagePart) : '';
 
@@ -44,11 +44,11 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
       }
 
       if (keys.length - 1 === index && !isObject(dataObj[key]) && isPrimitive(dataObj[key])) {
-        return `${startAction}'${dataObj[key]}' to '${key}' element`;
+        return `${startAction} '${dataObj[key]}' to '${key}' element`;
       }
 
       if (!isObject(dataObj[key]) && isPrimitive(dataObj[key])) {
-        return `${startAction}'${dataObj[key]}' to '${key}' element and than `;
+        return `${startAction} '${dataObj[key]}' to '${key}' element and than `;
       }
 
       if (isObject(dataObj[key]) && keys.length - 1 !== index) {

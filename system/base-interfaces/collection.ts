@@ -2,6 +2,7 @@
 import { isArray, toArray, isNotEmptyObject, safeJSONstringify, isNumber, isBoolean, isUndefined } from 'sat-utils';
 import { promodLogger } from '../logger';
 import { getCollectionElementInstance, getCollectionActionData } from './utils';
+import { config } from '../config';
 
 const collection = {
   log(...data) {
@@ -9,41 +10,41 @@ const collection = {
   },
 };
 
-const collectionDescription = {
-  action: '_action',
-  where: '_where',
-  whereNot: '_whereNot',
-  visible: '_visible',
-  index: '_indexes',
-  count: '_count',
-  length: 'length',
-};
-
-const elementAction = {
-  click: 'click',
-  hover: 'hover',
-  focus: 'focus',
-  scrollIntoView: 'scrollIntoView',
-  isDisplayed: 'isDisplayed',
-  count: 'count',
-  get: 'get',
-};
-
-const baseLibraryDescription = {
-  entityId: 'identifier',
-  rootLocatorId: 'rootLocator',
-  pageId: 'Page',
-  fragmentId: 'Fragment',
-  collectionId: 'Collection',
-  collectionItemId: 'CollectionItemClass',
-  collectionRootElementsId: 'rootElements',
-  waitOptionsId: 'IWaitOpts',
-  collectionActionId: 'ICollectionAction',
-  collectionCheckId: 'ICollectionCheck',
-  getDataMethod: 'get',
-  getVisibilityMethod: 'isDisplayed',
-  getBaseElementFromCollectionByIndex: 'get',
-};
+const {
+  collectionDescription = {
+    action: '_action',
+    where: '_where',
+    whereNot: '_whereNot',
+    visible: '_visible',
+    index: '_indexes',
+    count: '_count',
+    length: 'length',
+  },
+  elementAction = {
+    click: 'click',
+    hover: 'hover',
+    focus: 'focus',
+    scrollIntoView: 'scrollIntoView',
+    isDisplayed: 'isDisplayed',
+    count: 'count',
+    get: 'get',
+  },
+  baseLibraryDescription = {
+    entityId: 'identifier',
+    rootLocatorId: 'rootLocator',
+    pageId: 'Page',
+    fragmentId: 'Fragment',
+    collectionId: 'Collection',
+    collectionItemId: 'CollectionItemClass',
+    collectionRootElementsId: 'rootElements',
+    waitOptionsId: 'IWaitOpts',
+    collectionActionId: 'ICollectionAction',
+    collectionCheckId: 'ICollectionCheck',
+    getDataMethod: 'get',
+    getVisibilityMethod: 'isDisplayed',
+    getBaseElementFromCollectionByIndex: 'get',
+  },
+} = config.get();
 
 class PromodSystemCollection {
   protected rootLocator: string;

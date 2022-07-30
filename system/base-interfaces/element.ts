@@ -1,15 +1,18 @@
 import { isString, isNumber, compareToPattern, getType, isNull } from 'sat-utils';
 import { promodLogger } from '../logger';
+import { config } from '../config';
 
-const elementAction = {
-  click: 'click',
-  hover: 'hover',
-  focus: 'focus',
-  scrollIntoView: 'scrollIntoView',
-  isDisplayed: 'isDisplayed',
-  count: 'count',
-  get: 'get',
-};
+const {
+  elementAction = {
+    click: 'click',
+    hover: 'hover',
+    focus: 'focus',
+    scrollIntoView: 'scrollIntoView',
+    isDisplayed: 'isDisplayed',
+    count: 'count',
+    get: 'get',
+  },
+} = config.get();
 
 const element = {
   log(...data) {

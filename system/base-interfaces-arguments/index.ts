@@ -13,7 +13,7 @@ const getActionArgumentsMessagePart = (
   waitionOption?: TActionFormatter | { [k: string]: any },
   actionFormatter?: TActionFormatter,
 ) => {
-  const { prettyMethodName } = config.get();
+  const { prettyMethodName = {} } = config.get();
 
   if (isFunction(waitionOption)) {
     actionFormatter = waitionOption as TActionFormatter;
@@ -31,6 +31,7 @@ const getActionArgumentsMessagePart = (
   const action = Object.values(prettyMethodName as { [k: string]: string }).find((prettyActionName: string) =>
     methodName.toLowerCase().includes(prettyActionName.toLowerCase()),
   );
+
   if (action && actionFormatter) {
     return getArgumentsMessage(argumentObj, actionFormatter(action), '', waitionOption);
   }
