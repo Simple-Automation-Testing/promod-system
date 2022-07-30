@@ -1,6 +1,6 @@
 /* eslint-disable complexity, sonarjs/cognitive-complexity */
 import { isObject, toArray, isPrimitive } from 'sat-utils';
-import { getConfiguration } from '../config';
+import { config } from '../config';
 
 const stringifyBase = base =>
   Object.keys(base).reduce(
@@ -9,7 +9,7 @@ const stringifyBase = base =>
   );
 
 const isBase = keys => {
-  const { baseResultData } = getConfiguration();
+  const { baseResultData } = config.get();
   return keys.some(key => baseResultData.includes(key));
 };
 
@@ -18,12 +18,7 @@ const getIntexesMessage = indexes =>
     ? ` where ${toArray(indexes).length === 1 ? 'index is' : 'indexes are'} ${toArray(indexes).join(',')}`
     : '';
 
-const getDescriptorMessage = (
-  descriptorObj,
-  initialMessage = ' where collection ',
-  pointer = ' where ',
-  description = 'state',
-) => {
+const getDescriptorMessage = (descriptorObj, initialMessage = ' where collection ', description = 'state') => {
   if (!descriptorObj) {
     return '';
   }
@@ -51,11 +46,11 @@ const getDescriptorMessage = (
     }
 
     if (isObject(descriptorObj[key]) && keys.length - 1 !== index && !isBase(Object.keys(descriptorObj[key]))) {
-      return `${startAction}${getDescriptorMessage(descriptorObj[key], '', pointer, description)} and `;
+      return `${startAction}${getDescriptorMessage(descriptorObj[key], '', description)} and `;
     }
 
     if (isObject(descriptorObj[key]) && keys.length - 1 === index && !isBase(Object.keys(descriptorObj[key]))) {
-      return `${startAction}${getDescriptorMessage(descriptorObj[key], '', pointer, description)}`;
+      return `${startAction}${getDescriptorMessage(descriptorObj[key], '', description)}`;
     }
 
     return contentMessage;
@@ -63,7 +58,7 @@ const getDescriptorMessage = (
 };
 
 const doesArgumentHaveCollection = obj => {
-  const { collectionDescription } = getConfiguration();
+  const { collectionDescription } = config.get();
   const { collectionPropsId, ...collectionProps } = collectionDescription;
 
   return Object.keys(obj).some(key => {
@@ -84,7 +79,7 @@ const doesArgumentHaveCollection = obj => {
 };
 
 const isPropValueCollection = (propName: string, propValue: { [k: string]: any }) => {
-  const { collectionDescription } = getConfiguration();
+  const { collectionDescription } = config.get();
   const { collectionPropsId, ...collectionProps } = collectionDescription;
 
   if (collectionPropsId && propName.endsWith(collectionPropsId)) {

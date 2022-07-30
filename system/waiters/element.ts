@@ -1,9 +1,9 @@
 import { waitForCondition, execNumberExpression } from 'sat-utils';
 
 import { IWaitConditionOpts } from './interfaces';
-import { getConfiguration } from '../config';
+import { config } from '../config';
 
-const { elementAction } = getConfiguration();
+const { elementAction } = config.get();
 
 async function waitForAttributeIncludes(
   element,
@@ -11,8 +11,6 @@ async function waitForAttributeIncludes(
   attributeValue: string,
   opts: IWaitConditionOpts = {},
 ) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -24,10 +22,7 @@ async function waitForAttributeIncludes(
 
       return elementAttribute.includes(attributeValue);
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
@@ -37,8 +32,6 @@ async function waitForAttributeEquals(
   attributeValue: string,
   opts: IWaitConditionOpts = {},
 ) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -50,16 +43,11 @@ async function waitForAttributeEquals(
 
       return elementAttribute === attributeValue;
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
 async function waitForTextIncludes(element, text: string, opts: IWaitConditionOpts = {}) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -70,16 +58,11 @@ async function waitForTextIncludes(element, text: string, opts: IWaitConditionOp
 
       return elementText.includes(text);
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
 async function waitForText(element, opts: IWaitConditionOpts = {}) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -90,16 +73,11 @@ async function waitForText(element, opts: IWaitConditionOpts = {}) {
 
       return elementText.length;
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
 async function waitForTextEquals(element, text: string, opts: IWaitConditionOpts = {}) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -110,16 +88,11 @@ async function waitForTextEquals(element, text: string, opts: IWaitConditionOpts
 
       return elementText.includes(text);
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
 async function waitForDisplayed(element, isDisplayed: boolean, opts: IWaitConditionOpts = {}) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -131,16 +104,11 @@ async function waitForDisplayed(element, isDisplayed: boolean, opts: IWaitCondit
 
       return isDisplayed === isElementItemDisplayed;
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
 async function waitForPresented(element, isPresented: boolean, opts: IWaitConditionOpts = {}) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -152,16 +120,11 @@ async function waitForPresented(element, isPresented: boolean, opts: IWaitCondit
 
       return isPresented === isElementItemPresented;
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
 async function waitForEnabled(element, isEnabled: boolean, opts: IWaitConditionOpts = {}) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -173,16 +136,11 @@ async function waitForEnabled(element, isEnabled: boolean, opts: IWaitConditionO
 
       return isEnabled === isElementItemEnabled;
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
 async function waitForElementsCountEquals(elements, count: number, opts: IWaitConditionOpts = {}) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -193,16 +151,11 @@ async function waitForElementsCountEquals(elements, count: number, opts: IWaitCo
 
       return currentElementsCount === count;
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
 async function waitForElementsCountNotEquals(elements, count: number, opts: IWaitConditionOpts = {}) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -214,16 +167,11 @@ async function waitForElementsCountNotEquals(elements, count: number, opts: IWai
 
       return currentElementsCount !== count;
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
 async function waitForElementsCountIsInRange(elements, range: string, opts: IWaitConditionOpts = {}) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -235,16 +183,11 @@ async function waitForElementsCountIsInRange(elements, range: string, opts: IWai
 
       return execNumberExpression(range, currentElementsCount);
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
 async function waitForEveryElementTextIncludes(elements, text: string, opts: IWaitConditionOpts = {}) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -261,16 +204,11 @@ async function waitForEveryElementTextIncludes(elements, text: string, opts: IWa
       }
       return true;
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 
 async function waitForEveryElementTextEquals(elements, text: string, opts: IWaitConditionOpts = {}) {
-  const { message, ...rest } = opts;
-
   let createErrorMessage;
 
   return waitForCondition(
@@ -287,10 +225,7 @@ async function waitForEveryElementTextEquals(elements, text: string, opts: IWait
       }
       return true;
     },
-    {
-      createMessage: message ? () => message : createErrorMessage,
-      ...rest,
-    },
+    { ...opts, message: opts.message ? opts.message : createErrorMessage },
   );
 }
 

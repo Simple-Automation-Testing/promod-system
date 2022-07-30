@@ -12,12 +12,13 @@ import {
 } from 'sat-utils';
 import { PromodSystemCollection } from './collection';
 import { promodLogger } from '../logger';
+import { getCollectionElementInstance, getCollectionActionData } from './utils';
 
 type IWaiterOpts = {
   timeout?: number;
   interval?: number;
   message?: string;
-  analyseResult?: (...args: any[]) => boolean | Promise<boolean>;
+  analyseEResult?: (...args: any[]) => boolean | Promise<boolean>;
   waiterError?: new (...args: any[]) => any;
   callEveryCycle?: () => Promise<void> | any;
   dontThrow?: boolean;
@@ -105,7 +106,7 @@ const baseLibraryDescription = {
  *   }
  * }
  *
- * class BaseFragment extends PromodSystemStructure<PromodSeleniumElementType> {
+ * class BaseFragment extends PromodSystemStructure {
  *    constructor(locator, structureName, rootElement) {
  *      super(locator, structureName, rootElement);
  *    }
@@ -383,24 +384,14 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
         isObject(rest[key]) &&
         !collectionActionProps.has(key) &&
         component[key] instanceof PromodSystemCollection &&
-        // TODO this approach should be updated
-        !safeHasOwnPropery(rest[key], '_action')
+        !safeHasOwnPropery(rest[key], collectionDescription.action)
       ) {
-        const itemsArrayChild = new component[key][baseLibraryDescription.collectionItemId](
-          component[key].rootLocator,
-          component[key].identifier,
-          component[key].rootElements[baseLibraryDescription.getBaseElementFromCollectionByIndex](0),
-        );
-        // TODO this approach should be updated
-        const { _visible, index, _whereNot, _where, ...itemsArrRest } = rest[key];
+        const itemsArrayChild = getCollectionElementInstance(component[key], baseLibraryDescription);
+        const { _outOfDescription, ...data } = getCollectionActionData(rest[key], collectionDescription);
 
-        // TODO this approach should be updated
         rest[key] = {
-          index,
-          _visible,
-          _whereNot,
-          _where,
-          _action: this.alignWaitConditionData(itemsArrRest, itemsArrayChild),
+          ...data,
+          [collectionDescription.action]: this.alignWaitConditionData(_outOfDescription, itemsArrayChild),
         };
       } else if (isObject(rest[key]) && !collectionActionProps.has(key)) {
         rest[key] = this.alignWaitConditionData(rest[key], component[key]);

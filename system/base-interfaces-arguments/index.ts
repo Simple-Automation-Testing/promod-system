@@ -1,7 +1,7 @@
 import { isFunction, isUndefined } from 'sat-utils';
 import { getArgumentsMessage } from './argument.object.message';
 import { getDefaultMessage } from './argument.regular.message';
-import { getConfiguration } from '../config';
+import { config } from '../config';
 
 type TActionFormatter = {
   (action: string): string;
@@ -13,6 +13,8 @@ const getActionArgumentsMessagePart = (
   waitionOption?: TActionFormatter | { [k: string]: any },
   actionFormatter?: TActionFormatter,
 ) => {
+  const { prettyMethodName } = config.get();
+
   if (isFunction(waitionOption)) {
     actionFormatter = waitionOption as TActionFormatter;
     waitionOption = null;
@@ -25,8 +27,6 @@ const getActionArgumentsMessagePart = (
   if (isUndefined(argumentObj)) {
     return '';
   }
-
-  const { prettyMethodName } = getConfiguration();
 
   const action = Object.values(prettyMethodName as { [k: string]: string }).find((prettyActionName: string) =>
     methodName.toLowerCase().includes(prettyActionName.toLowerCase()),

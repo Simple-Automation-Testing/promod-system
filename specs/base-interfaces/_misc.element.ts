@@ -4,7 +4,7 @@ import { PromodSystemElement } from '../../system/base-interfaces/element';
 
 const { browser } = seleniumWD;
 
-class ElementTest extends PromodSystemElement<PromodSeleniumElementType> {
+class ElementTest extends PromodSystemElement {
   constructor(locator, name, rootElement) {
     super(locator, name, rootElement);
   }

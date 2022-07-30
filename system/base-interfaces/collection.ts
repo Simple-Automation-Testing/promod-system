@@ -1,11 +1,22 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/no-array-method-this-argument, prettier/prettier*/
 import { isArray, toArray, isNotEmptyObject, safeJSONstringify, isNumber, isBoolean, isUndefined } from 'sat-utils';
 import { promodLogger } from '../logger';
+import { getCollectionElementInstance, getCollectionActionData } from './utils';
 
 const collection = {
   log(...data) {
     promodLogger.promodSystem('[PROMOD SYSTEM COLLECTION]', ...data);
   },
+};
+
+const collectionDescription = {
+  action: '_action',
+  where: '_where',
+  whereNot: '_whereNot',
+  visible: '_visible',
+  index: '_indexes',
+  count: '_count',
+  length: 'length',
 };
 
 const elementAction = {
@@ -17,6 +28,7 @@ const elementAction = {
   count: 'count',
   get: 'get',
 };
+
 const baseLibraryDescription = {
   entityId: 'identifier',
   rootLocatorId: 'rootLocator',
@@ -33,9 +45,9 @@ const baseLibraryDescription = {
   getBaseElementFromCollectionByIndex: 'get',
 };
 
-class PromodSystemCollection<BaseLibraryElementsType = any> {
+class PromodSystemCollection {
   protected rootLocator: string;
-  protected rootElements: BaseLibraryElementsType;
+  protected rootElements: any;
   protected identifier: any;
   protected CollectionItemClass: any;
   protected overrideCollectionItems: any[];
@@ -45,6 +57,10 @@ class PromodSystemCollection<BaseLibraryElementsType = any> {
 
   static updateElementActionsMap(elementActionMap) {
     Object.assign(elementAction, elementActionMap);
+  }
+
+  static updateCollectionDescription(collectionDescriptionMap) {
+    Object.assign(collectionDescription, collectionDescriptionMap);
   }
 
   static updateBaseLibraryDescription(baseLibraryDescriptionMap) {
@@ -103,18 +119,19 @@ class PromodSystemCollection<BaseLibraryElementsType = any> {
     }
   }
 
+  // TODO add type definition
   private alignActionData(action) {
     if (action) {
-      const { _indexes, _count, _action, _where, _visible, _whereNot, ...description } = action;
-      return { _action, _indexes, _count, _where, _visible, _whereNot };
+      const { _outOfDescription, ...rest } = getCollectionActionData(action, collectionDescription);
+      return rest;
     } else {
-      return { _action: null };
+      return { [collectionDescription.action]: null };
     }
   }
 
   async action(action) {
     await this.waitLoadedState();
-    const { _action, ...descriptionInteractionElements } = this.alignActionData(action);
+    const { [collectionDescription.action]: _action, ...descriptionInteractionElements } = this.alignActionData(action);
 
     const elements = await this.getInteractionElements(descriptionInteractionElements);
 
@@ -125,7 +142,7 @@ class PromodSystemCollection<BaseLibraryElementsType = any> {
     this.logger.log('PromodSystemCollection sendKeys action call with data ', action);
 
     await this.waitLoadedState();
-    const { _action, ...descriptionInteractionElements } = this.alignActionData(action);
+    const { [collectionDescription.action]: _action, ...descriptionInteractionElements } = this.alignActionData(action);
 
     const elements = await this.getInteractionElements(descriptionInteractionElements);
 
@@ -136,7 +153,7 @@ class PromodSystemCollection<BaseLibraryElementsType = any> {
     this.logger.log('PromodSystemCollection get action call with data ', action);
 
     await this.waitLoadedState();
-    const { _action, ...descriptionInteractionElements } = this.alignActionData(action);
+    const { [collectionDescription.action]: _action, ...descriptionInteractionElements } = this.alignActionData(action);
 
     const elements = await this.getInteractionElements(descriptionInteractionElements);
 
@@ -154,12 +171,13 @@ class PromodSystemCollection<BaseLibraryElementsType = any> {
     this.logger.log('PromodSystemCollection isDisplayed action call with data ', action);
 
     await this.waitLoadedState();
-    const { _action, ...descriptionInteractionElements } = this.alignActionData(action);
+    const { [collectionDescription.action]: _action, ...descriptionInteractionElements } = this.alignActionData(action);
 
     const elements = await this.getInteractionElements(descriptionInteractionElements);
 
     const count = elements.length;
     const data = [];
+
     for (let getDataIndex = 0; getDataIndex < count; getDataIndex++) {
       data.push(await elements[getDataIndex].isDisplayed(_action));
     }
@@ -241,14 +259,16 @@ class PromodSystemCollection<BaseLibraryElementsType = any> {
   }
 
   async getInteractionElements(action) {
-    const { _count, _indexes, _visible, _where, _whereNot } = action;
+    const { _visible, _where, _whereNot } = action;
     const findDescription = { _visible, _where, _whereNot };
 
     let requiredElements;
-    if (isNumber(_count)) {
-      requiredElements = await Array.from({ length: _count }).map((_item, index) => this.getElement(index));
-    } else if (isNumber(_indexes) || isArray(_indexes)) {
-      requiredElements = await toArray(_indexes).map(index => this.getElement(index));
+    if (isNumber(action[collectionDescription.count])) {
+      requiredElements = await Array.from({ length: action[collectionDescription.count] }).map((_item, index) =>
+        this.getElement(index),
+      );
+    } else if (isNumber(action[collectionDescription.index]) || isArray(action[collectionDescription.index])) {
+      requiredElements = await toArray(action[collectionDescription.index]).map(index => this.getElement(index));
     } else {
       requiredElements = await this.getElements();
     }
@@ -257,11 +277,8 @@ class PromodSystemCollection<BaseLibraryElementsType = any> {
   }
 
   getElement(index) {
-    const instance = new this.CollectionItemClass(
-      this.rootLocator,
-      `${this.identifier} item ${index}`,
-      this.rootElements[baseLibraryDescription.getBaseElementFromCollectionByIndex](index),
-    );
+    const instance = getCollectionElementInstance(this, baseLibraryDescription, index);
+
     if (this.overrideCollectionItems.length) {
       instance.overrideBaseMethods(...this.overrideCollectionItems);
     }

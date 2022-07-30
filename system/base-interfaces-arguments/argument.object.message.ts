@@ -2,32 +2,41 @@
 import { isObject, prettifyCamelCase, isNull, isPrimitive } from 'sat-utils';
 
 import { getIntexesMessage, getDescriptorMessage, isPropValueCollection, getWaitingOptionsPrettyMessage } from './base';
-import { getConfiguration } from '../config';
+import { config } from '../config';
 
 const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') => {
-  const getActionMessage = (dataObj, initialMessage = '') =>
-    Object.keys(dataObj).reduce((actionMessage, key, index, keys) => {
-      const { collectionDescription } = getConfiguration();
+  const { collectionDescription } = config.get();
 
+  const getActionMessage = (dataObj, initialMessage = '') => {
+    return Object.keys(dataObj).reduce((actionMessage, key, index, keys) => {
       const startAction = actionMessage
         ? `${actionMessage}${prettifyCamelCase(action).toLowerCase()} `
         : `${prettifyCamelCase(action)} `;
 
       if (isPropValueCollection(key, dataObj[key])) {
-        const action = dataObj[key][collectionDescription.action];
-        const where = dataObj[key][collectionDescription.where];
-        const visible = dataObj[key][collectionDescription.visible];
-        const indexes = dataObj[key][collectionDescription.index];
+        const {
+          [collectionDescription.action]: collectionAction,
+          [collectionDescription.index]: index,
+          // TODO - add possibility to add count information
+          [collectionDescription.count]: count,
+          ...restDescription
+        } = dataObj[key];
 
         const startMessagePart = `${startAction}'${key}' collection items `;
 
-        const actionMessagePart = action ? getActionMessage(action, startMessagePart) : '';
-        const whereMessagePart = getDescriptorMessage(where, ' where collection ', 'state');
+        const actionMessagePart = collectionAction ? getActionMessage(collectionAction, startMessagePart) : '';
 
-        const visibleMessagePart = getDescriptorMessage(visible, ' where collection ', 'where', 'visibility');
-        const indexesMessagePart = getIntexesMessage(indexes);
+        const descriptionMessage = Object.keys(restDescription).reduce((description, key) => {
+          return `${description}${getDescriptorMessage(
+            restDescription[key],
+            ' where collection ',
+            prettifyCamelCase(key.replace(/[^\da-z]/gi, '')).toLowerCase(),
+          )}`;
+        }, '');
 
-        return `${actionMessagePart}${whereMessagePart}${visibleMessagePart}${indexesMessagePart}`;
+        const indexesMessagePart = getIntexesMessage(index);
+
+        return `${actionMessagePart}${descriptionMessage}${indexesMessagePart}`;
       }
 
       if (keys.length - 1 === index && !isObject(dataObj[key]) && isNull(dataObj[key])) {
@@ -54,6 +63,7 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
 
       return actionMessage;
     }, initialMessage);
+  };
 
   return getActionMessage(argumentObj, message);
 };

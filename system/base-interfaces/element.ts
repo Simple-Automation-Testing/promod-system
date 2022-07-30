@@ -59,10 +59,10 @@ const element = {
  * @param {any} rootElement root element object
  * @returns {PromodSystemElement}
  */
-class PromodSystemElement<BaseLibraryElementType = any> {
+class PromodSystemElement {
   protected rootLocator: string;
   protected identifier: string;
-  protected rootElement: BaseLibraryElementType;
+  protected rootElement: any;
   protected parent;
   protected index: number;
   protected name: string;
