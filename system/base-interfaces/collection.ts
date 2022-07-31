@@ -224,10 +224,12 @@ class PromodSystemCollection {
     }
 
     if (!requiredCollectionItems.length) {
-      throw new Error(
+      const error = new Error(
         `PromodSystemCollection ${this.identifier} with item ${this.CollectionItemClass.name} does not have required items,
 				root elements count is ${count}${visibilityPart}${wherePart}${whereNotPart}`,
       );
+
+      promodLogger.error(error);
     }
 
     return requiredCollectionItems;

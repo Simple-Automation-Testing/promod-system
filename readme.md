@@ -17,11 +17,15 @@ The purpose of this library is building of the TAF ecosystem which will not rega
 
 ## Usage. [promod](https://www.npmjs.com/package/promod) example.
 
-```js
-const {seleniumWD} = require('promod');
-const {createBrowserWaiters, createElementWaiters} = require('promod-system');
+- [Waiters](#waiters)
+- [Core](#core)
 
-const {browser, $} = seleniumWD;
+### Waiters
+```ts
+import { seleniumWD } from 'promod';
+import { createBrowserWaiters, createElementWaiters } from 'promod-system';
+
+const { browser, $ } = seleniumWD;
 
 ;(async () => {
 	await getSeleniumDriver({seleniumAddress: 'http://localhost:4444/wd/hub'}, browser);
@@ -33,5 +37,118 @@ const {browser, $} = seleniumWD;
 	await browser.get('https://www.npmjs.com/');
 	await browserWaiters.waitForTabTitleIncludes('promod', {timeout: 10_000});
 	await elementWaiters.waitForTextIncludes(documentBody, 'promod' {timeout: 10_000});
-})()
+})();
+```
+
+### Core
+```ts
+import { waitForCondition } from 'sat-utils';
+import { seleniumWD, PromodSeleniumElementType } from 'promod';
+import { PromodSystemStructure } from 'promod-system';
+
+const timeouts = {
+	s: 5000,
+	m: 10000,
+	l: 15000,
+	xl: 25000,
+}
+
+
+class BaseElement extends PromodSystemElement {
+  constructor(locator, name, rootElement: PromodSeleniumElementType) {
+    super(locator, name, rootElement);
+  }
+
+	/**
+	 * @info
+	 * this method should be overridden, it will be execute to wait visibility before next base methods
+	 * sendKeys, get, action
+	 * ! for isDisplayed method waitLoadedState will not be executed.
+	 */
+  async waitLoadedState() {
+    await waitForCondition(async () => this.rootElement.isDisplayed(), {
+			message: `Element ${this.identifier} with root selector ${this.rootLocator} should become visible during ${timeouts.l} ms.`
+			timeout: timeouts.l
+		});
+  }
+
+	/**
+	 * @info
+	 * this method should be overridden, it will be execute inside sendKeys method, depends on base library/framework specific
+	 */
+  async baseSendKeys(value): Promise<void> {
+    await this.rootElement.sendKeys(value);
+  }
+
+	/**
+	 * @info
+	 * this method should be overridden, it will be execute inside get method, depends on base library/framework specific
+	 */
+  async baseGetData(): Promise<{ background: any; value: any }> {
+    return browser.executeScript(
+      `	const background = arguments[0].style.background;
+				const value = arguments[0].value;
+				const rect = arguments[0].getBoundingClientRect();
+				const text = arguments[0].innerText.trim()
+
+				return {background, value, rect, text}
+			`,
+      await this.rootElement.getWebDriverElement(),
+    );
+  }
+}
+
+class BaseFragment extends PromodSystemStructure {
+  constructor(locator: string, structureName: string, rootElement: PromodSeleniumElementType) {
+    super(locator, structureName, rootElement);
+  }
+
+  init(locator: string, name: string, Child: new (...args) => any, ...rest) {
+    return new Child(locator, name, this.rootElement.$(locator), ...rest);
+  }
+
+	initCollection(locator: string, name: string, Collection: new (...args) => any, Child: new (...args) => any) {
+    return new Collection(locator, name, this.rootElement.$$(locator), Child);
+  }
+
+	/**
+	 * @info
+	 * this method should be overridden, it will be execute to wait visibility before next base methods
+	 * sendKeys, get, action
+	 * ! for isDisplayed method waitLoadedState will not be executed.
+	 */
+  async waitLoadedState() {
+    await waitForCondition(async () => this.rootElement.isDisplayed(), {
+			message: `Fragment ${this.identifier} with root selector ${this.rootLocator} should become visible during ${timeouts.l} ms.`
+			timeout: timeouts.l
+		});
+  }
+}
+
+class BasePage extends PromodSystemStructure {
+  constructor(locator: string, pageName: string) {
+    super(locator, structureName, $(locator));
+  }
+
+  init(locator: string, name: string, Child: new (...args) => any) {
+    return new Child(locator, name, this.rootElement.$(locator));
+  }
+
+  initCollection(locator: string, name: string, Collection: new (...args) => any, Child: new (...args) => any) {
+    return new Collection(locator, name, this.rootElement.$$(locator), Child);
+  }
+
+	/**
+	 * @info
+	 * this method should be overridden, it will be execute to wait visibility before next base methods
+	 * sendKeys, get, action
+	 * ! for isDisplayed method waitLoadedState will not be executed.
+	 */
+  async waitLoadedState() {
+    await waitForCondition(async () => this.rootElement.isDisplayed(), {
+			message: `Page ${this.identifier} with root selector ${this.rootLocator} should become visible during ${timeouts.l} ms.`
+			timeout: timeouts.l
+		});
+  }
+}
 ```

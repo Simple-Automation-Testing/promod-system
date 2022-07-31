@@ -21,6 +21,16 @@ function getCollectionWithInvisibility() {
   );
 }
 
+function getCollectionWithElementsThatAreNotExist() {
+  const collectionItems = $$('#collection_with_visibility > .not_exist_element');
+  return new PromodSystemCollection(
+    '#collection_with_visibility > button',
+    'Collection button',
+    collectionItems,
+    ElementTest,
+  );
+}
+
 describe('PromodSystemCollection', function () {
   describe('[P] Actions', function () {
     before(async () => {
@@ -160,6 +170,13 @@ describe('PromodSystemCollection', function () {
       const result = await promodCollection.get({ _visible: true, _indexes: [0, 1, 2] });
 
       expect(result.map(i => i.text)).toDeepEqual(['1', '3']);
+    });
+
+    it('[P] elements that are not exist default view', async () => {
+      const promodCollection = getCollectionWithElementsThatAreNotExist();
+      const result = await promodCollection.isDisplayed(null);
+
+      expect(result.length).toEqual(0);
     });
   });
 });

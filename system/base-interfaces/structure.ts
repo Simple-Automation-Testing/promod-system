@@ -133,10 +133,10 @@ const baseLibraryDescription = {
  * @param {any} rootElement root element object
  * @returns {PromodSystemElement}
  */
-class PromodSystemStructure<BaseLibraryElementType = any> {
+class PromodSystemStructure {
   protected rootLocator: any;
   protected identifier: any;
-  protected rootElement: BaseLibraryElementType;
+  protected rootElement: any;
   protected parent: any;
   protected index: any;
   protected name: any;
@@ -189,6 +189,10 @@ class PromodSystemStructure<BaseLibraryElementType = any> {
 
   /**
    * @override
+   * @info
+   * this method should be overridden, it will be execute to wait visibility before next base methods
+   * sendKeys, get, action
+   * ! for isDisplayed method waitLoadedState will not be executed.
    */
   async waitLoadedState() {}
 
