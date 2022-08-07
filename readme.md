@@ -152,3 +152,13 @@ class BasePage extends PromodSystemStructure {
   }
 }
 ```
+
+## Improvement/new features plan
+ * [ ] Fix hardcoded values
+ * [ ] Config validation
+ * [ ] Logging
+ * [ ] Error messages
+ * [ ] Generate config `baseElementsActionsDescription` part based on base elements library
+ * [ ] Generate base library
+ * [ ] Generate project example
+ * [ ] Вepth level flow generation

@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 /* eslint-disable */
-
 process.title = 'promod-system';
 
 const fs = require('fs');
@@ -10,7 +9,7 @@ const { hideBin } = require('yargs/helpers');
 
 const argv = yargs(hideBin(process.argv)).argv;
 
-const { createPageStructure } = require('../built/generate');
+const { createPageStructure } = require('../built/generator/generate');
 const { createTemplateConfig } = require('../built/config/config.template');
 
 if (argv.clihelp) {
@@ -18,12 +17,24 @@ if (argv.clihelp) {
     Usage:
       --clihelp                     - get usage description
       --generate-config             - generate base config
+      --file="/path/to/page.ts"                       - generate actions for required page
+      --folder="/path/to/pages" --pattern=".page.js"  - generate actions for all pages in folder
   `);
   process.exit(0);
 }
 
 if (argv['generate-config']) {
   createTemplateConfig();
+} else if (argv.folder && argv.pattern) {
+  const folderPath = path.isAbsolute(argv.folder) ? argv.folder : path.resolve(process.cwd(), argv.folder);
+
+  if (fs.existsSync(folderPath)) {
+    getDirFilesList(folderPath)
+      .filter(file => file.includes(argv.pattern))
+      .forEach(createPageStructure);
+  } else {
+    throw new Error(`folder ${argv.folder} does not exist`);
+  }
 } else if (!argv.file) {
   throw new Error('"file" argument should exist');
 } else if (!fs.existsSync(argv.file)) {
