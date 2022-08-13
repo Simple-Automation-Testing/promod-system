@@ -6,7 +6,7 @@ function getCollectionTypesImport() {
   const types = Object.values(collectionActionTypes);
   if (types.length === 1) return `${types[0]}, `;
 
-  return types.reduce((allTypes, itemType) => `${allTypes}, ${itemType},`);
+  return types.reduce((allTypes, itemType) => `${allTypes}${itemType},`, '');
 }
 
 function getElementImportType(elementName) {

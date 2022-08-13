@@ -10,19 +10,29 @@ import {
   isCollectionWithItemFragment,
 } from './utils.collection';
 
-function getColletionActionType(collectionsItem, getTypes, collectionActionType) {
+function getColletionActionType(collectionsItem, getTypes, collectionActionType, collectionActionDescriptor?) {
   return Object.keys(collectionActionType).reduce((typeString, actionKey, index, allActions) => {
     const actionDescriptor = collectionActionType[actionKey] as { action: string; actionType: string };
 
     if (allActions.length - 1 === index) {
-      return (typeString += `${getTypes(collectionsItem, actionDescriptor.action, actionDescriptor.actionType)}`);
+      return (typeString += `${getTypes(
+        collectionsItem,
+        actionDescriptor.action,
+        actionDescriptor.actionType,
+        collectionActionDescriptor,
+      )}`);
     }
 
-    return (typeString += `${getTypes(collectionsItem, actionDescriptor.action, actionDescriptor.actionType)},`);
+    return (typeString += `${getTypes(
+      collectionsItem,
+      actionDescriptor.action,
+      actionDescriptor.actionType,
+      collectionActionDescriptor,
+    )},`);
   }, '');
 }
 
-function getCollectionTypes(instance, action, actionType) {
+function getCollectionTypes(instance, action, actionType, collectionActionDescriptor?) {
   const { baseCollectionActionsDescription, baseElementsActionsDescription } = config.get();
 
   const collectionsItem = getCollectionItemInstance(instance);
@@ -40,10 +50,15 @@ function getCollectionTypes(instance, action, actionType) {
   }
 
   const types = {};
+  collectionActionDescriptor = collectionActionDescriptor || baseCollectionActionsDescription[action][actionType];
+  const { generic, endType, ...actionDescriptor } = collectionActionDescriptor;
 
-  const { generic, endType, ...actionDescriptor } = baseCollectionActionsDescription[action][actionType];
-
-  let colletionItemType = getColletionActionType(collectionsItem, getTypeHandler, actionDescriptor);
+  let colletionItemType = getColletionActionType(
+    collectionsItem,
+    getTypeHandler,
+    actionDescriptor,
+    collectionActionDescriptor,
+  );
 
   if (generic) {
     colletionItemType = `${generic}<${colletionItemType}>`;
@@ -56,13 +71,13 @@ function getCollectionTypes(instance, action, actionType) {
   return types;
 }
 
-function getFragmentTypes(instance, action, actionType) {
+function getFragmentTypes(instance, action, actionType, collectionActionDescriptor?) {
   const { resultActionsMap, baseLibraryDescription } = config.get();
 
   if (resultActionsMap[action] === 'void' && actionType === 'resultType') return 'void';
 
   if (instance.constructor.name === baseLibraryDescription.collectionId) {
-    const types = getCollectionTypes(instance, action, actionType);
+    const types = getCollectionTypes(instance, action, actionType, collectionActionDescriptor);
 
     return createType(types, action);
   }
@@ -91,7 +106,9 @@ function getFragmentTypes(instance, action, actionType) {
     .map(itemFiledName => {
       // logger here
       return {
-        [itemFiledName]: { [action]: getFragmentTypes(instance[itemFiledName], action, actionType) },
+        [itemFiledName]: {
+          [action]: getFragmentTypes(instance[itemFiledName], action, actionType, collectionActionDescriptor),
+        },
       };
     });
 
@@ -110,7 +127,10 @@ function getFragmentTypes(instance, action, actionType) {
       // logger here
       return {
         [itemFiledName]: {
-          [action]: createType(getCollectionTypes(instance[itemFiledName], action, actionType), action),
+          [action]: createType(
+            getCollectionTypes(instance[itemFiledName], action, actionType, collectionActionDescriptor),
+            action,
+          ),
         },
       };
     });
