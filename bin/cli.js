@@ -23,6 +23,16 @@ if (argv.clihelp) {
   process.exit(0);
 }
 
+if (argv.ts) {
+  require('ts-node').register({
+    compilerOptions: {
+      module: 'commonjs',
+    },
+    disableWarnings: true,
+    fast: true,
+  });
+}
+
 if (argv['generate-config']) {
   createTemplateConfig();
 } else if (argv.folder && argv.pattern) {

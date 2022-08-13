@@ -83,6 +83,12 @@ const baseElementsActionsDescription = {
   },
 };
 
+const collectionActionTypes = {
+  action: 'CollectionActionType',
+  check: 'CollectionWaitingType',
+  compare: 'CollectionCompareType',
+};
+
 const baseCollectionActionsDescription = {
   waitForContentState: {
     entryType: {
@@ -249,8 +255,6 @@ const baseLibraryDescription = {
   collectionItemId: 'CollectionItemClass',
   collectionRootElementsId: 'rootElements',
   waitOptionsId: 'IWaitOpts',
-  collectionActionId: 'ICollectionAction',
-  collectionCheckId: 'ICollectionCheck',
   getDataMethod: 'get',
   getVisibilityMethod: 'isDisplayed',
   getBaseElementFromCollectionByIndex: 'get',
@@ -272,6 +276,7 @@ module.exports = {
   actionWithWaitOpts,
   baseElementsActionsDescription,
   baseCollectionActionsDescription,
+  collectionActionTypes,
 };
 `;
 

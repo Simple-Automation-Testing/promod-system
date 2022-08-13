@@ -1,5 +1,14 @@
 import { config } from '../config/config';
 
+function getCollectionTypesImport() {
+  const { collectionActionTypes } = config.get();
+
+  const types = Object.values(collectionActionTypes);
+  if (types.length === 1) return `${types[0]}, `;
+
+  return types.reduce((allTypes, itemType) => `${allTypes}, ${itemType},`);
+}
+
 function getElementImportType(elementName) {
   const { baseElementsActionsDescription } = config.get();
 
@@ -19,7 +28,7 @@ function getBaseImport(baseElements) {
   const uniqBaseElements = Array.from(new Set(baseElements));
 
   const collectionActionsImportPart = uniqBaseElements.includes(baseLibraryDescription.collectionId)
-    ? `${baseLibraryDescription.collectionActionId}, ${baseLibraryDescription.collectionCheckId},`
+    ? `${getCollectionTypesImport()}`
     : '';
 
   return uniqBaseElements
