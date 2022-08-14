@@ -1,8 +1,8 @@
 import { expect } from 'assertior';
-import { PromodSystemCollection, PromodSystemElement } from '../../system/base-interfaces';
+import { PromodSystemCollection } from '../../system/base-interfaces';
 import { seleniumWD } from 'promod';
-import { ElementTest } from './_misc.element';
-import { actionFile } from './_misc';
+import { ElementTest } from '../setup/base/element';
+import { actionFile } from '../.misc/setup';
 
 const { $$, $, getSeleniumDriver, browser } = seleniumWD;
 

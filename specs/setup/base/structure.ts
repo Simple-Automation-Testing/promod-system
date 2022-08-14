@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import { waitForCondition } from 'sat-utils';
 import { seleniumWD } from 'promod';
-import { PromodSystemStructure } from '../../system/base-interfaces/structure';
+import { PromodSystemStructure } from '../../../system/base-interfaces/structure';
 
 const { $ } = seleniumWD;
 
@@ -15,9 +15,7 @@ class StructureTest extends PromodSystemStructure {
   }
 
   async waitLoadedState() {
-    await waitForCondition(async () => {
-      return this.rootElement.isDisplayed();
-    });
+    await waitForCondition(async () => this.rootElement.isDisplayed());
   }
 }
 

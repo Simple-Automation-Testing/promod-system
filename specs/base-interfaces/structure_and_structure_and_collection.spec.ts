@@ -1,7 +1,7 @@
 import { expect } from 'assertior';
 import { seleniumWD } from 'promod';
-import { TestPage, TestComplexPage } from './_misc.complex';
-import { actionFile } from './_misc';
+import { TestPage, TestComplexPage } from '../setup/complex';
+import { actionFile } from '../.misc/setup';
 
 const { browser, getSeleniumDriver } = seleniumWD;
 

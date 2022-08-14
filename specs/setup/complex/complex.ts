@@ -1,6 +1,6 @@
-import { ElementTest } from './_misc.element';
-import { StructureAsFragment, StructureAsPage } from './_misc.structure';
-import { PromodSystemCollection } from '../../system/base-interfaces/collection';
+import { ElementTest } from '../base/element';
+import { StructureAsFragment, StructureAsPage } from '../base/structure';
+import { PromodSystemCollection } from '../../../system/base-interfaces/collection';
 
 class TestUserFormFragment extends StructureAsFragment {
   private username: ElementTest;

@@ -1,6 +1,6 @@
 import { seleniumWD, PromodSeleniumElementType } from 'promod';
 import { waitForCondition } from 'sat-utils';
-import { PromodSystemElement } from '../../system/base-interfaces/element';
+import { PromodSystemElement } from '../../../system/base-interfaces/element';
 
 const { browser } = seleniumWD;
 
@@ -10,9 +10,7 @@ class ElementTest extends PromodSystemElement {
   }
 
   async waitLoadedState() {
-    await waitForCondition(async () => {
-      return this.rootElement.isDisplayed();
-    });
+    await waitForCondition(async () => this.rootElement.isDisplayed());
   }
 
   async baseSendKeys(value): Promise<void> {
