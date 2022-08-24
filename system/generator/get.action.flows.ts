@@ -1,16 +1,44 @@
-/* eslint-disable sonarjs/no-nested-template-literals */
-import { camelize } from 'sat-utils';
+/* eslint-disable sonarjs/no-nested-template-literals, no-console */
+import { camelize, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../config/config';
 import { getElementsTypes, getFragmentTypes } from './get.instance.elements.type';
 import { checkThatFragmentHasItemsToAction } from './check.that.action.exists';
 import { checkThatElementHasAction } from './get.base';
 
 function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field }) {
+  const { repeatingActions = [] } = config.get();
+
+  const isActionVoid = flowResultType === 'void';
+  const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
+  const additionalArguments = optionsSecondArgument ? ', opts' : '';
+
+  let entryDataType = `${typeName}${optionsSecondArgument}`;
+
+  let flowBody = `${
+    isActionVoid ? 'return' : `const { ${field} } =`
+  } await page.${action}({ ${field}: data }${additionalArguments});${isActionVoid ? '' : `\n\treturn ${field};`}`;
+
+  /**
+   * @info
+   * repeat action is not allowed for actions that return values
+   * but for void actions we can repeat action, i.e click, set data to input fieds.
+   */
+  if (!isRepeatingAllowed && isArray(repeatingActions) && repeatingActions.includes(action)) {
+    // TODO use logger here
+    console.info(
+      `${action} result type is not void, but action exists in 'repeatingActions' list. Repeat is not allowed here`,
+    );
+  } else if (isRepeatingAllowed) {
+    entryDataType = `${typeName} | ${typeName}[]${optionsSecondArgument}`;
+
+    flowBody = `for (const actionData of toArray(data)) {
+      await page.${action}({ ${field}: actionData }${additionalArguments})
+    }`;
+  }
+
   return `type ${typeName} = ${flowArgumentType}
-  const ${name} = async function(data: ${typeName}${optionsSecondArgument}): Promise<${flowResultType}> {
-    ${flowResultType === 'void' ? 'return' : `const { ${field} } =`} await page.${action}({ ${field}: data }${
-    optionsSecondArgument ? ', opts' : ''
-  });${flowResultType === 'void' ? '' : `\n\treturn ${field};`}
+  const ${name} = async function(data: ${entryDataType}): Promise<${flowResultType}> {
+    ${flowBody}
   };`;
 }
 
