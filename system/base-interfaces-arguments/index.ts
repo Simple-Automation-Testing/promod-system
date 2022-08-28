@@ -3,26 +3,12 @@ import { getArgumentsMessage } from './argument.object.message';
 import { getDefaultMessage } from './argument.regular.message';
 import { config } from '../config';
 
-type TActionFormatter = {
-  (action: string): string;
-};
-
 const getActionArgumentsMessagePart = (
   methodName: string,
   argumentObj: { [k: string]: any },
-  waitionOption?: TActionFormatter | { [k: string]: any },
-  actionFormatter?: TActionFormatter,
+  waitionOption?: { [k: string]: any },
 ) => {
-  const { prettyMethodName = {} } = config.get();
-
-  if (isFunction(waitionOption)) {
-    actionFormatter = waitionOption as TActionFormatter;
-    waitionOption = null;
-  }
-
-  if (!isFunction(actionFormatter) && !isUndefined(actionFormatter)) {
-    throw new TypeError('getActionArgumentsMessagePart(): third or fourth argument should be a function or undefined');
-  }
+  const { prettyMethodName = {}, actionFormatter } = config.get();
 
   if (isUndefined(argumentObj)) {
     return '';
@@ -32,7 +18,7 @@ const getActionArgumentsMessagePart = (
     methodName.toLowerCase().includes(prettyActionName.toLowerCase()),
   );
 
-  if (action && actionFormatter) {
+  if (action && isFunction(actionFormatter)) {
     return getArgumentsMessage(argumentObj, actionFormatter(action), '', waitionOption);
   }
   if (action) {
