@@ -48,7 +48,7 @@ function getFlowEntryType(dataObj) {
     ? {
         typeName,
         type: `type ${typeName} = {
-  field?: ${getFieldsEnumList(_fields)};
+  field: ${getFieldsEnumList(_fields)};
 ${exectLikePart}
 };`,
       }
@@ -125,7 +125,7 @@ const ${name} = async function(data: ${typeName} = {${
 
   return getRandomArrayItem(
     ${lastKey}
-      .map(item => item${type.includes('field?:') ? '[data.field]' : ''}.text)
+      .map(item => item${type.includes('field:') ? '[data.field]' : ''}.text)
       .filter(fieldText => !excludeValues.includes(fieldText))
       .filter(fieldText => (includeValues.length ? includeValues.some(item => fieldText.includes(item)) : true)),
   );
