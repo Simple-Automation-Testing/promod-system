@@ -116,7 +116,7 @@ function createFlowTemplates(asActorAndPage, dataObj) {
   return `\n
 ${type}
 const ${name} = async function(data: ${typeName} = {${
-    type.includes('field?') ? `field: '${finTypedObject(dataObj)._fields[0]}'` : ''
+    type.includes('field:') ? `field: '${finTypedObject(dataObj)._fields[0]}'` : ''
   }}): Promise<string> {
   const ${returnTemplate} = await page.${baseLibraryDescription.getDataMethod}(${argumentTemplate});
 

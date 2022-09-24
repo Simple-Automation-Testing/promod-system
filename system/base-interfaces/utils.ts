@@ -19,17 +19,25 @@ type TCollectionAction = {
 /**
  * @example config
  * const config = {
- * 		action: '_action',
- * 		where: '_where',
- *   	whereNot: '_whereNot',
- *   	visible: '_visible',
- *   	index: '_indexes',
- *   	count: '_count',
- *   	length: 'length',
+ *   action: '_action',
+ *   where: '_where',
+ *   repeatActionForEveryFoundElement: '_forAll',
+ *   reversFoundElementCollection: '_reverse',
+ *   whereNot: '_whereNot',
+ *   visible: '_visible',
+ *
+ *   index: '_indexes',
+ *   count: '_count',
+ *
+ *   length: 'length',
  * };
  */
 function getCollectionActionData(dataObj, config: TCollectionAction): { [k: string]: any; _outOfDescription: any } {
   const copied = { ...dataObj };
+
+  // remove length from data obj
+  delete copied.length;
+
   const data: any = {};
 
   Object.values(config).forEach(key => {

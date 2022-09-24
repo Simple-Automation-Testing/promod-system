@@ -94,16 +94,16 @@ const isPropValueCollection = (propName: string, propValue: { [k: string]: any }
 const getWaitingOptionsPrettyMessage = (waitingOptions?: { [key: string]: any }) => {
   if (!isObject(waitingOptions)) return '';
   /** @info sat-utils compareToPattern */
-  const { strictArrays, strictStrings } = waitingOptions;
+  const { everyArrayItem, stringIncludes } = waitingOptions;
   let waitingMessage = '\n';
 
   waitingMessage =
-    strictArrays === false
+    everyArrayItem === false
       ? `${waitingMessage} one or more collection elements should include required state\n`
       : `${waitingMessage} all collection elements should include required state\n`;
 
   waitingMessage =
-    strictStrings === false
+    stringIncludes === false
       ? `${waitingMessage} string should include part of the string`
       : `${waitingMessage} string should equal to string`;
 

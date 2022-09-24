@@ -73,7 +73,7 @@ describe('PromodSystemStructure', function () {
 
     it('complex page waiters', async () => {
       const complexPage = new TestComplexPage();
-      await complexPage.waitContent({ collection: { field1: { text: 'field1 item1' } } }, { strictArrays: false });
+      await complexPage.waitContent({ collection: { field1: { text: 'field1 item1' } } }, { everyArrayItem: false });
     });
   });
 });

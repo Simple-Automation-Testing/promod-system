@@ -18,14 +18,14 @@ type IWaiterOpts = {
   timeout?: number;
   interval?: number;
   message?: string;
-  analyseEResult?: (...args: any[]) => boolean | Promise<boolean>;
+  analyzeResult?: (...args: any[]) => boolean | Promise<boolean>;
   waiterError?: new (...args: any[]) => any;
   callEveryCycle?: () => Promise<void> | any;
   dontThrow?: boolean;
   falseIfError?: boolean;
   stopIfNoError?: boolean;
-  strictArrays?: boolean;
-  strictStrings?: boolean;
+  everyArrayItem?: boolean;
+  stringIncludes?: boolean;
   isEql?: boolean;
 };
 
@@ -311,8 +311,8 @@ class PromodSystemStructure {
 
     const mergedOpts = {
       // this props from compareToPattern sat-utils lib
-      strictArrays: true,
-      strictStrings: true,
+      everyArrayItem: true,
+      stringIncludes: true,
       isEql: true,
       timeout: 5000,
       message: (timeout, initialError) => {
@@ -337,8 +337,8 @@ class PromodSystemStructure {
         const structureStateActualData = await this[method](getStateData);
 
         const { result, message } = compareToPattern(structureStateActualData, expectedData, {
-          strictArrays: mergedOpts.strictArrays,
-          strictStrings: mergedOpts.strictStrings,
+          everyArrayItem: mergedOpts.everyArrayItem,
+          stringIncludes: mergedOpts.stringIncludes,
           ignoreProperties: collectionActionProps as string[],
         });
 
