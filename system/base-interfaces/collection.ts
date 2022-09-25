@@ -1,5 +1,5 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/no-array-method-this-argument, prettier/prettier*/
-import { isArray, toArray, safeJSONstringify, isNotEmptyArray, isNumber } from 'sat-utils';
+import { isNotEmptyObject, isUndefined, toArray, safeJSONstringify, isNotEmptyArray, isNumber } from 'sat-utils';
 import { promodLogger } from '../logger';
 import { getCollectionElementInstance, getCollectionActionData } from './utils';
 import { config } from '../config';
@@ -141,10 +141,27 @@ class PromodSystemCollection {
   }
 
   async compareContent(compareActionData) {
-    // TODO
-    const { _where, ...rest } = compareActionData;
-    return this.findElementsBySearchParams({ _where: _where || rest }, await this.getElements()).then(
-      res => res,
+    const { [collectionDescription.where]: _where, [collectionDescription.whereNot]: _whereNot } = compareActionData;
+
+    const searchData = {};
+
+    if (isNotEmptyObject(_where) || isNotEmptyArray(_where)) {
+      searchData['_where'] = _where;
+    }
+
+    if (isNotEmptyObject(_whereNot) || isNotEmptyArray(_whereNot)) {
+      searchData['_whereNot'] = _whereNot;
+    }
+
+    return this.findElementsBySearchParams(searchData, await this.getElements()).then(
+      res => {
+        /**
+         * @info
+         * since for get/isDisplayed methods empty array as a call result is allowed
+         * we rely on founded result length, if length === 0 - items were not found by search params
+         */
+        return !!res.length;
+      },
       error => {
         this.logger.log('PromodSystemCollection compareContent call with error result ', error);
         return false;
@@ -153,10 +170,17 @@ class PromodSystemCollection {
   }
 
   async compareVisibility(compareActionData) {
-    // TODO
-    const { _visible, ...rest } = compareActionData;
-    return this.findElementsBySearchParams({ _visible: _visible || rest }, await this.getElements()).then(
-      res => res,
+    const { [collectionDescription.visible]: _visible } = compareActionData;
+
+    return this.findElementsBySearchParams({ _visible }, await this.getElements()).then(
+      res => {
+        /**
+         * @info
+         * since for get/isDisplayed methods empty array as a call result is allowed
+         * we rely on founded result length, if length === 0 - items were not found by search params
+         */
+        return !!res.length;
+      },
       error => {
         this.logger.log('PromodSystemCollection compareContent call with error result ', error);
         return false;
@@ -209,6 +233,20 @@ class PromodSystemCollection {
     }
 
     if (repeat) {
+      for (let collectionItem of relevantCollection) {
+        if (collectionItem.successSearchParams) {
+          collectionItem = await this.checkCollectionItemBySearchParams(
+            collectionItem,
+            collectionItem.successSearchParams,
+          );
+
+          if (isUndefined(collectionItem)) {
+            // TODO error should be informative
+          }
+        }
+
+        await collectionItem[methodSignature](_action);
+      }
     } else {
       await relevantCollection[0][methodSignature](_action);
     }
@@ -256,21 +294,6 @@ class PromodSystemCollection {
   /**
    * @private
    *
-   * @returns
-   */
-  private async getElements() {
-    await this.waitLoadedState();
-
-    const count = await this.rootElements[elementAction.count]();
-
-    return await Array.from({ length: count })
-      .map((_item, index) => index)
-      .map(requiredIndex => this.getElement(requiredIndex));
-  }
-
-  /**
-   * @private
-   *
    * @param collectionItem
    * @param searchParams
    * @returns
@@ -306,6 +329,11 @@ class PromodSystemCollection {
     }
   }
 
+  /**
+   * @private
+   *
+   * @returns
+   */
   private async getInteractionElements(action) {
     const {
       [collectionDescription.where]: _where,
@@ -323,7 +351,7 @@ class PromodSystemCollection {
       requiredElements = await Array.from({ length: action[collectionDescription.count] }).map((_item, index) =>
         this.getElement(index),
       );
-    } else if (isNumber(action[collectionDescription.index]) || isArray(action[collectionDescription.index])) {
+    } else if (toArray(action[collectionDescription.index]).length) {
       requiredElements = await toArray(action[collectionDescription.index]).map(index => this.getElement(index));
     } else {
       requiredElements = await this.getElements();
@@ -334,7 +362,12 @@ class PromodSystemCollection {
     return { relevantCollection, repeat, reverse };
   }
 
-  getElement(index) {
+  /**
+   * @private
+   *
+   * @returns
+   */
+  private getElement(index) {
     const instance = getCollectionElementInstance(this, baseLibraryDescription, index);
 
     if (this.overrideCollectionItems.length) {
@@ -347,6 +380,21 @@ class PromodSystemCollection {
     instance.setIndex = index;
 
     return instance;
+  }
+
+  /**
+   * @private
+   *
+   * @returns
+   */
+  private async getElements() {
+    await this.waitLoadedState();
+
+    const count = await this.rootElements[elementAction.count]();
+
+    return await Array.from({ length: count })
+      .map((_item, index) => index)
+      .map(requiredIndex => this.getElement(requiredIndex));
   }
 
   // DATA TRANSFORMATION
@@ -363,6 +411,11 @@ class PromodSystemCollection {
       .filter(callCompareDesciptor => isNotEmptyArray(callCompareDesciptor.searchParams));
   }
 
+  /**
+   * @private
+   *
+   * @returns
+   */
   private alignActionData(action) {
     if (action) {
       const { _outOfDescription, ...rest } = getCollectionActionData(action, collectionDescription);

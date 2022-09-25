@@ -69,6 +69,7 @@ class PromodSystemElement {
   protected parent;
   protected index: number;
   protected name: string;
+  protected successSearchParams;
 
   protected logger: { log(...args: any[]): void };
 
@@ -110,6 +111,10 @@ class PromodSystemElement {
 
   set setIndex(index) {
     this.index = index;
+  }
+
+  set setSuccessSearchParams(searchParams) {
+    this.successSearchParams = searchParams;
   }
 
   set elementLogger(logger: { log: (...args) => void }) {

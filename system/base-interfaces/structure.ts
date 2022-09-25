@@ -131,7 +131,7 @@ const baseLibraryDescription = {
  * @param {string} locator element locator
  * @param {string} elementName element name
  * @param {any} rootElement root element object
- * @returns {PromodSystemElement}
+ * @returns {PromodSystemStructure}
  */
 class PromodSystemStructure {
   protected rootLocator: any;
@@ -140,6 +140,7 @@ class PromodSystemStructure {
   protected parent: any;
   protected index: any;
   protected name: any;
+  protected successSearchParams: any;
 
   protected logger: { log(...args: any[]): void };
 
@@ -175,6 +176,10 @@ class PromodSystemStructure {
 
   set setIndex(index) {
     this.index = index;
+  }
+
+  set setSuccessSearchParams(searchParams) {
+    this.successSearchParams = searchParams;
   }
 
   /**

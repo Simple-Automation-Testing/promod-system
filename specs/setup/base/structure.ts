@@ -48,6 +48,10 @@ class StructureAsFragment extends PromodSystemStructure {
     return new Child(locator, name, this.rootElement.$(locator), ...rest);
   }
 
+  initCollection(locator: string, name: string, Collection: new (...args) => any, Child: new (...args) => any) {
+    return new Collection(locator, name, this.rootElement.$$(locator), Child);
+  }
+
   async waitLoadedState() {
     await waitForCondition(async () => {
       return this.rootElement.isDisplayed();
