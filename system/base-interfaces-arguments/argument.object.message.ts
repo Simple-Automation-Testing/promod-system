@@ -5,12 +5,16 @@ import { getIntexesMessage, getDescriptorMessage, isPropValueCollection, getWait
 import { config } from '../config';
 
 const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') => {
-  const { collectionDescription } = config.get();
+  const { collectionDescription, actionFormatter } = config.get();
 
   const getActionMessage = (dataObj, initialMessage = '') => {
     return Object.keys(dataObj).reduce((actionMessage, key, index, keys) => {
+      const isLastKey = keys.length - 1 === index;
+      const messageEnd = isLastKey ? '' : ' and than ';
+      const formattedAction = actionFormatter && isPrimitive(dataObj[key]) ? actionFormatter(action) : action;
+
       const startAction = actionMessage
-        ? `${actionMessage}${prettifyCamelCase(action).toLowerCase()}`
+        ? `${actionMessage}${prettifyCamelCase(formattedAction).toLowerCase()}`
         : `${prettifyCamelCase(action)}`;
 
       if (isPropValueCollection(key, dataObj[key])) {
@@ -24,41 +28,33 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
 
         const startMessagePart = `${startAction} '${key}' collection items `;
 
-        const actionMessagePart = collectionAction ? getActionMessage(collectionAction, startMessagePart) : '';
-
         const descriptionMessage = Object.keys(restDescription).reduce((description, key) => {
           return `${description}${getDescriptorMessage(
             restDescription[key],
-            ' where collection ',
-            prettifyCamelCase(key.replace(/[^\da-z]/gi, '')).toLowerCase(),
+            ` ${prettifyCamelCase(key.replace(/[^\da-z]/gi, '')).toLowerCase()} collection `,
           )}`;
         }, '');
-
         const indexesMessagePart = getIntexesMessage(index);
 
-        return `${actionMessagePart}${descriptionMessage}${indexesMessagePart}`;
+        const actionMessagePart = collectionAction
+          ? getActionMessage(collectionAction, `${startMessagePart} ${descriptionMessage} ${indexesMessagePart}`)
+          : '';
+
+        return `${actionMessagePart}`;
       }
 
-      if (keys.length - 1 === index && !isObject(dataObj[key]) && isNull(dataObj[key])) {
-        return `${startAction}'${key}' element`;
+      // TODO improve
+      if (isNull(dataObj[key])) {
+        return `${startAction}'${key}' element${messageEnd}`;
       }
 
-      if (keys.length - 1 === index && !isObject(dataObj[key]) && isPrimitive(dataObj[key])) {
-        return `${startAction} '${dataObj[key]}' to '${key}' element`;
+      if (isPrimitive(dataObj[key])) {
+        return `${startAction} '${dataObj[key]}' to '${key}' element${messageEnd}`;
       }
 
-      if (!isObject(dataObj[key]) && isPrimitive(dataObj[key])) {
-        return `${startAction} '${dataObj[key]}' to '${key}' element and than `;
-      }
-
-      if (isObject(dataObj[key]) && keys.length - 1 !== index) {
+      if (isObject(dataObj[key])) {
         const startMessagePart = `${startAction} '${key}' fragment elements `;
-        return `${getActionMessage(dataObj[key], startMessagePart)} and than `;
-      }
-
-      if (isObject(dataObj[key]) && keys.length - 1 === index) {
-        const startMessagePart = `${startAction} '${key}' fragment elements `;
-        return `${getActionMessage(dataObj[key], startMessagePart)}`;
+        return `${getActionMessage(dataObj[key], startMessagePart)}${messageEnd}`;
       }
 
       return actionMessage;

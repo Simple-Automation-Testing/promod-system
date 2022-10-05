@@ -28,29 +28,23 @@ const getDescriptorMessage = (descriptorObj, initialMessage = ' where collection
 
   return Object.keys(descriptorObj).reduce((contentMessage, key, index, keys) => {
     const postFix = isObject(descriptorObj[key]) && !isBase(Object.keys(descriptorObj[key])) ? ' item ' : ' ';
+    const isLastKey = keys.length - 1 === index;
+    const messageEnd = isLastKey ? '' : ' and ';
 
     const startAction = contentMessage
       ? `${contentMessage}'${key}'${postFix}has ${description} `
       : `element '${key}'${postFix}has ${description} `;
 
-    if (keys.length - 1 === index && isPrimitive(descriptorObj[key])) {
+    if (isLastKey && isPrimitive(descriptorObj[key])) {
       return `${startAction}'${descriptorObj[key]}'`;
     }
 
-    if (keys.length - 1 === index && isObject(descriptorObj[key]) && isBase(Object.keys(descriptorObj[key]))) {
-      return `${startAction}'${stringifyBase(descriptorObj[key])}'`;
-    }
-
     if (isObject(descriptorObj[key]) && isBase(Object.keys(descriptorObj[key]))) {
-      return `${startAction}'${stringifyBase(descriptorObj[key])}' and `;
+      return `${startAction}'${stringifyBase(descriptorObj[key])}'${messageEnd}`;
     }
 
-    if (isObject(descriptorObj[key]) && keys.length - 1 !== index && !isBase(Object.keys(descriptorObj[key]))) {
-      return `${startAction}${getDescriptorMessage(descriptorObj[key], '', description)} and `;
-    }
-
-    if (isObject(descriptorObj[key]) && keys.length - 1 === index && !isBase(Object.keys(descriptorObj[key]))) {
-      return `${startAction}${getDescriptorMessage(descriptorObj[key], '', description)}`;
+    if (isObject(descriptorObj[key]) && !isBase(Object.keys(descriptorObj[key]))) {
+      return `${startAction}${getDescriptorMessage(descriptorObj[key], '', description)}${messageEnd}`;
     }
 
     return contentMessage;
