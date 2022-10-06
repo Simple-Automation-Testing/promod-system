@@ -1,5 +1,5 @@
 /* eslint-disable complexity, sonarjs/cognitive-complexity */
-import { isObject, toArray, isPrimitive } from 'sat-utils';
+import { isUndefined, isNull, isObject, toArray, isPrimitive } from 'sat-utils';
 import { config } from '../config';
 
 const stringifyBase = base =>
@@ -19,9 +19,14 @@ const getIntexesMessage = indexes =>
     : '';
 
 const getDescriptorMessage = (descriptorObj, initialMessage = ' where collection ', description = 'state') => {
-  if (!descriptorObj) {
+  if (isUndefined(descriptorObj)) {
     return '';
   }
+
+  if (isPrimitive(descriptorObj) && !isNull(descriptorObj)) {
+    return `${initialMessage} ${description} '${descriptorObj}'`;
+  }
+
   if (isBase(Object.keys(descriptorObj))) {
     return ` where ${description} '${stringifyBase(descriptorObj)}' exists`;
   }

@@ -15,7 +15,7 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
 
       const startAction = actionMessage
         ? `${actionMessage}${prettifyCamelCase(formattedAction).toLowerCase()}`
-        : `${prettifyCamelCase(action)}`;
+        : `${prettifyCamelCase(formattedAction)}`;
 
       if (isPropValueCollection(key, dataObj[key])) {
         const {
@@ -38,7 +38,7 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
 
         const actionMessagePart = collectionAction
           ? getActionMessage(collectionAction, `${startMessagePart} ${descriptionMessage} ${indexesMessagePart}`)
-          : '';
+          : `${startMessagePart}${descriptionMessage}${indexesMessagePart}`;
 
         return `${actionMessagePart}`;
       }
