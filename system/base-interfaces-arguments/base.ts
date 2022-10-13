@@ -15,15 +15,15 @@ const isBase = keys => {
 
 const getIntexesMessage = indexes =>
   toArray(indexes).length
-    ? ` where ${toArray(indexes).length === 1 ? 'index is' : 'indexes are'} ${toArray(indexes).join(',')}`
+    ? ` where ${toArray(indexes).length === 1 ? 'index is' : 'indexes are'} ${toArray(indexes).join(',')} `
     : '';
 
 const getDescriptorMessage = (descriptorObj, initialMessage = ' where collection ', description = 'state') => {
-  if (isUndefined(descriptorObj)) {
+  if (isUndefined(descriptorObj) || isNull(descriptorObj)) {
     return '';
   }
 
-  if (isPrimitive(descriptorObj) && !isNull(descriptorObj)) {
+  if (isPrimitive(descriptorObj)) {
     return `${initialMessage} ${description} '${descriptorObj}'`;
   }
 
@@ -77,11 +77,11 @@ const doesArgumentHaveCollection = obj => {
   });
 };
 
-const isPropValueCollection = (propName: string, propValue: { [k: string]: any }) => {
+const isPropValueCollection = (propValue: { [k: string]: any }, propName?: string) => {
   const { collectionDescription } = config.get();
   const { collectionPropsId, ...collectionProps } = collectionDescription;
 
-  if (collectionPropsId && propName.endsWith(collectionPropsId)) {
+  if (propName && collectionPropsId && propName.endsWith(collectionPropsId)) {
     return true;
   }
 
