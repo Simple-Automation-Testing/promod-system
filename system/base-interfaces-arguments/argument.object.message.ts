@@ -1,7 +1,13 @@
-/* eslint-disable complexity, sonarjs/cognitive-complexity */
+/* eslint-disable complexity, sonarjs/cognitive-complexity, sonarjs/no-identical-functions*/
 import { isString, isObject, prettifyCamelCase, isNull, isPrimitive } from 'sat-utils';
 
-import { getIntexesMessage, getDescriptorMessage, isPropValueCollection, getWaitingOptionsPrettyMessage } from './base';
+import {
+  getIntexesMessage,
+  getDescriptorMessage,
+  isPropValueCollection,
+  isPropValuesRandomCollectionItem,
+  getWaitingOptionsPrettyMessage,
+} from './base';
 import { config } from '../config';
 
 const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') => {
@@ -48,10 +54,49 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
       return `${actionMessagePart}`;
     };
 
-    if (isPropValueCollection(dataObj)) {
+    const collectionRandomDataDescriptionMessage = (data: { [k: string]: any }, startMessage: string) => {
+      const {
+        [collectionDescription.index]: index,
+        // TODO - add possibility to add count information
+        [collectionDescription.count]: count,
+        except,
+        like,
+        field,
+        ...restDescription
+      } = data;
+
+      const exceptMessagePart =
+        except && except.length
+          ? ` initial list should not have values like ${except.length === 1 ? 'this' : 'these'} '${except.join(',')}' `
+          : '';
+      const likeMessagePart =
+        like && like.length
+          ? ` initial list should have values like ${like.length === 1 ? 'this' : 'these'} '${like.join(',')}' `
+          : '';
+
+      const fieldMessagePart = field ? ` field '${field}' value ` : ' value ';
+
+      const descriptionMessage = Object.keys(restDescription).reduce((description, key) => {
+        return `${description}${getDescriptorMessage(
+          restDescription[key],
+          ` ${prettifyCamelCase(key.replace(/[^\da-z]/gi, '')).toLowerCase()} collection `,
+        )}`;
+      }, '');
+
+      return `${startMessage}${fieldMessagePart}${exceptMessagePart}${likeMessagePart}${descriptionMessage}`;
+    };
+
+    if (isPropValuesRandomCollectionItem(dataObj, action)) {
+      return collectionRandomDataDescriptionMessage(
+        dataObj,
+        prettifyCamelCase(actionFormatter ? actionFormatter(action) : action, { firstWordUpperCase: true }),
+      );
+    }
+
+    if (isPropValueCollection(dataObj, action)) {
       return collectionDescriptionMessage(
         dataObj,
-        prettifyCamelCase(actionFormatter ? actionFormatter(action) : action),
+        prettifyCamelCase(actionFormatter ? actionFormatter(action) : action, { firstWordUpperCase: true }),
       );
     }
 
@@ -65,7 +110,7 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
         ? `${actionMessage}${prettifyCamelCase(formattedAction, { firstWordUpperCase: true }).toLowerCase()}`
         : `${prettifyCamelCase(formattedAction, { firstWordUpperCase: true })}`;
 
-      if (isPropValueCollection(dataObj[key], key)) {
+      if (isPropValueCollection(dataObj[key], action, key)) {
         return collectionDescriptionMessage(dataObj[key], startAction, key);
       }
 

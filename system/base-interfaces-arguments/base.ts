@@ -77,7 +77,7 @@ const doesArgumentHaveCollection = obj => {
   });
 };
 
-const isPropValueCollection = (propValue: { [k: string]: any }, propName?: string) => {
+const isPropValueCollection = (propValue: { [k: string]: any }, action, propName?: string) => {
   const { collectionDescription } = config.get();
   const { collectionPropsId, ...collectionProps } = collectionDescription;
 
@@ -87,6 +87,18 @@ const isPropValueCollection = (propValue: { [k: string]: any }, propName?: strin
 
   return (
     isObject(propValue) && Object.values(collectionProps).some((prop: string) => Object.keys(propValue).includes(prop))
+  );
+};
+
+const isPropValuesRandomCollectionItem = (propValue: { [k: string]: any }, action) => {
+  const { prettyMethodName } = config.get();
+  // TODO move to config in case if it will be configurable
+  const randomDataFields = ['except', 'like', 'field', '_where', '_whereNot', '_visible'];
+
+  // TODO move to config in case if it will be configurable
+  return (
+    prettyMethodName.getRandom.includes(action) ||
+    (isObject(propValue) && randomDataFields.some((prop: string) => Object.keys(propValue).includes(prop)))
   );
 };
 
@@ -117,4 +129,5 @@ export {
   doesArgumentHaveCollection,
   getWaitingOptionsPrettyMessage,
   isPropValueCollection,
+  isPropValuesRandomCollectionItem,
 };
