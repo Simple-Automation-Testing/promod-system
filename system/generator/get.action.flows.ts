@@ -71,10 +71,12 @@ function createFlowTemplateForPageElements(name, action, instance) {
   const optionsSecondArgument = actionWithWaitOpts.includes(action)
     ? `, opts?: ${baseLibraryDescription.waitOptionsId}`
     : '';
+  // TODO waiters returns boolean if error was not thrown
+  const resultTypeClarification = flowResultType === 'void' && optionsSecondArgument ? 'boolean' : flowResultType;
 
   return `
 type ${typeName} = ${flowArgumentType}
-const ${flowActionName} = async function(data: ${typeName}${optionsSecondArgument}): Promise<${flowResultType}> {
+const ${flowActionName} = async function(data: ${typeName}${optionsSecondArgument}): Promise<${resultTypeClarification}> {
   return await page.${action}(data${optionsSecondArgument ? ', opts' : ''});
 };\n`;
 }
