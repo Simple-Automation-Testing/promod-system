@@ -1,8 +1,18 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/no-array-method-this-argument, prettier/prettier*/
-import { isNotEmptyObject, isUndefined, toArray, safeJSONstringify, isNotEmptyArray, isNumber } from 'sat-utils';
+import {
+  isNotEmptyObject,
+  isUndefined,
+  toArray,
+  safeJSONstringify,
+  isNotEmptyArray,
+  isNumber,
+  isObject,
+} from 'sat-utils';
 import { promodLogger } from '../logger';
 import { getCollectionElementInstance, getCollectionActionData } from './utils';
 import { config } from '../config';
+
+import type { TbaseLibraryDescriptionMap, TcollectionActionDescriptionMap, TelementActionsMap } from './types';
 
 const collection = {
   log(...data) {
@@ -16,7 +26,6 @@ const {
     where: '_where',
     whereNot: '_whereNot',
     visible: '_visible',
-
     repeatActionForEveryFoundElement: '_repeact',
     reversFoundElementCollection: '_reverse',
     index: '_indexes',
@@ -58,15 +67,30 @@ class PromodSystemCollection {
   protected parent: any;
   private logger: { log(...args: any[]): void };
 
-  static updateElementActionsMap(elementActionMap) {
+  /**
+   * @param {!Object} elementActionMap base library element/elements actions
+   *
+   */
+  static updateElementActionsMap(elementActionMap: TelementActionsMap) {
+    if (!isObject(elementActionMap)) {
+      throw new TypeError('updateElementActionsMap(): expects that elementActionMap be an object');
+    }
     Object.assign(elementAction, elementActionMap);
   }
 
-  static updateCollectionDescription(collectionDescriptionMap) {
-    Object.assign(collectionDescription, collectionDescriptionMap);
+  static updateCollectionActionDescriptor(collectionActionDescriptionMap: TcollectionActionDescriptionMap) {
+    if (!isObject(collectionActionDescriptionMap)) {
+      throw new TypeError(
+        'updateCollectionActionDescriptor(): expects that collectionActionDescriptionMap be an object',
+      );
+    }
+    Object.assign(collectionDescription, collectionActionDescriptionMap);
   }
 
-  static updateBaseLibraryDescription(baseLibraryDescriptionMap) {
+  static updateBaseLibraryDescription(baseLibraryDescriptionMap: TbaseLibraryDescriptionMap) {
+    if (!isObject(baseLibraryDescriptionMap)) {
+      throw new TypeError('updateBaseLibraryDescription(): expects that baseLibraryDescriptionMap be an object');
+    }
     Object.assign(baseLibraryDescription, baseLibraryDescriptionMap);
   }
 
@@ -234,10 +258,10 @@ class PromodSystemCollection {
 
     if (repeat) {
       for (let collectionItem of relevantCollection) {
-        if (collectionItem.successSearchParams) {
+        if (collectionItem.getSuccessSearchParams) {
           collectionItem = await this.checkCollectionItemBySearchParams(
             collectionItem,
-            collectionItem.successSearchParams,
+            collectionItem.getSuccessSearchParams,
           );
 
           if (isUndefined(collectionItem)) {

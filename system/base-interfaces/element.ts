@@ -1,6 +1,8 @@
-import { isString, isNumber, compareToPattern, getType, isNull } from 'sat-utils';
+import { isString, isNumber, isObject, compareToPattern, getType, isNull } from 'sat-utils';
 import { promodLogger } from '../logger';
 import { config } from '../config';
+
+import type { TelementActionsMap } from './types';
 
 const {
   elementAction = {
@@ -83,7 +85,10 @@ class PromodSystemElement {
    * }} elementActionMap element action map that will be used to call required action
    *            based on library/framework
    */
-  static updateElementActionsMap(elementActionMap) {
+  static updateElementActionsMap(elementActionMap: TelementActionsMap) {
+    if (!isObject(elementActionMap)) {
+      throw new TypeError('updateElementActionsMap(): expects that elementActionMap be an object');
+    }
     Object.assign(elementAction, elementActionMap);
   }
 
@@ -117,6 +122,13 @@ class PromodSystemElement {
     this.successSearchParams = searchParams;
   }
 
+  get getSuccessSearchParams() {
+    return this.successSearchParams;
+  }
+
+  /**
+   * @set logger
+   */
   set elementLogger(logger: { log: (...args) => void }) {
     this.logger = logger;
   }
@@ -141,6 +153,9 @@ class PromodSystemElement {
    */
   protected async baseSendKeys(...args): Promise<void> {}
 
+  /**
+   * @param {...(...args: []?): ? } methods methods that need to be overridden
+   */
   overrideBaseMethods(...methods) {
     const methodsWhatCanBeOverridden = /^get|action|sendKeys|isDisplayed|compareContent|compareVisibility/;
 
@@ -157,7 +172,11 @@ class PromodSystemElement {
     }
   }
 
-  async sendKeys(action): Promise<void> {
+  /**
+   * @param {string|number|?} action action data
+   * @returns {Promise<void>}
+   */
+  async sendKeys(action: string | number | any): Promise<void> {
     this.logger.log('PromodSystemElement sendKeys action call with data ', action);
     if (!isString(action) && !isNumber(action)) {
       throw new TypeError(`${this.identifier}: sendKeys(): argument should be a string or number ${getType(action)}`);
@@ -181,6 +200,8 @@ class PromodSystemElement {
       throw new TypeError(`${this.identifier}: action(): argument should be a string or null ${getType(action)}`);
     }
 
+    await this.waitLoadedState();
+
     if (!(action in this)) {
       throw new TypeError(`
         PromodSystemElement ${action} action does not exist, seems custom action was not implemented
@@ -194,7 +215,6 @@ class PromodSystemElement {
    */
   private async click(): Promise<void> {
     this.logger.log('PromodSystemElement click action call');
-    await this.waitLoadedState();
 
     await this.rootElement[elementAction.click]();
   }
@@ -204,7 +224,6 @@ class PromodSystemElement {
    */
   private async focus(): Promise<void> {
     this.logger.log('PromodSystemElement focus action call');
-    await this.waitLoadedState();
 
     await this.rootElement[elementAction.focus]();
   }
@@ -214,7 +233,6 @@ class PromodSystemElement {
    */
   private async scroll(): Promise<void> {
     this.logger.log('PromodSystemElement scroll action call');
-    await this.waitLoadedState();
 
     return this.rootElement[elementAction.scrollIntoView]();
   }
@@ -224,14 +242,12 @@ class PromodSystemElement {
    */
   private async hover(): Promise<void> {
     this.logger.log('PromodSystemElement hover action call');
-    await this.waitLoadedState();
 
     await this.rootElement[elementAction.hover]();
   }
 
   async get(action?): Promise<any> {
     this.logger.log('PromodSystemElement get action call with data ', action);
-    await this.waitLoadedState();
 
     return this.baseGetData(action);
   }
@@ -245,6 +261,8 @@ class PromodSystemElement {
     this.logger.log('PromodSystemElement compareContent action call', action);
     const elementContent = await this.get({ ...action });
 
+    this.logger.log('PromodSystemElement compareContent element content', elementContent);
+
     const { result, message } = compareToPattern(elementContent, action);
 
     this.logger.log('PromodSystemElement compareContent action result', result);
@@ -256,6 +274,8 @@ class PromodSystemElement {
   async compareVisibility(action: boolean): Promise<boolean> {
     this.logger.log('PromodSystemElement compareVisibility action call', action);
     const elementVisibility = await this.isDisplayed();
+
+    this.logger.log('PromodSystemElement compareVisibility element visibility', elementVisibility);
 
     const { result, message } = compareToPattern(elementVisibility, action);
 

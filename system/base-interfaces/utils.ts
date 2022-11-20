@@ -5,6 +5,12 @@ type TConfig = {
   entityId: string;
 };
 
+/**
+ * @param {Object} collectionInstance collection object instance
+ * @param {Object} config config
+ * @param {number} index index in elements lust
+ * @returns {Object} collection child instance
+ */
 function getCollectionElementInstance(collectionInstance, config: TConfig, index = 0) {
   return new collectionInstance[config.collectionItemId](
     collectionInstance[config.rootLocatorId],
@@ -25,10 +31,8 @@ type TCollectionAction = {
  *   reversFoundElementCollection: '_reverse',
  *   whereNot: '_whereNot',
  *   visible: '_visible',
- *
  *   index: '_indexes',
  *   count: '_count',
- *
  *   length: 'length',
  * };
  */

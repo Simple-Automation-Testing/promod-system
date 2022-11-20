@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/prefer-switch */
 import {
   isObject,
+  isArray,
   isNull,
   compareToPattern,
   waitForCondition,
@@ -13,6 +14,10 @@ import {
 import { PromodSystemCollection } from './collection';
 import { promodLogger } from '../logger';
 import { getCollectionElementInstance, getCollectionActionData } from './utils';
+
+import type { TbaseLibraryDescriptionMap, TcollectionActionDescriptionMap, TsystemPropsList } from './types';
+
+import { config } from '../config';
 
 type IWaiterOpts = {
   timeout?: number;
@@ -35,42 +40,44 @@ const structure = {
   },
 };
 
-const systemPropsList = [
-  'index',
-  'rootLocator',
-  'rootElements',
-  'identifier',
-  'CollectionItemClass',
-  'overrideElement',
-  'parent',
-  'loaderLocator',
-  'rootElement',
-  'logger',
-];
-const collectionDescription = {
-  action: '_action',
-  where: '_where',
-  whereNot: '_whereNot',
-  visible: '_visible',
-  index: '_indexes',
-  count: '_count',
-  length: 'length',
-};
-const baseLibraryDescription = {
-  entityId: 'identifier',
-  rootLocatorId: 'rootLocator',
-  pageId: 'Page',
-  fragmentId: 'Fragment',
-  collectionId: 'Collection',
-  collectionItemId: 'CollectionItemClass',
-  collectionRootElementsId: 'rootElements',
-  waitOptionsId: 'IWaitOpts',
-  collectionActionId: 'ICollectionAction',
-  collectionCheckId: 'ICollectionCheck',
-  getDataMethod: 'get',
-  getVisibilityMethod: 'isDisplayed',
-  getBaseElementFromCollectionByIndex: 'get',
-};
+const {
+  systemPropsList = [
+    'index',
+    'rootLocator',
+    'rootElements',
+    'identifier',
+    'CollectionItemClass',
+    'overrideElement',
+    'parent',
+    'loaderLocator',
+    'rootElement',
+    'logger',
+  ],
+  collectionDescription = {
+    action: '_action',
+    where: '_where',
+    whereNot: '_whereNot',
+    visible: '_visible',
+    index: '_indexes',
+    count: '_count',
+    length: 'length',
+  },
+  baseLibraryDescription = {
+    entityId: 'identifier',
+    rootLocatorId: 'rootLocator',
+    pageId: 'Page',
+    fragmentId: 'Fragment',
+    collectionId: 'Collection',
+    collectionItemId: 'CollectionItemClass',
+    collectionRootElementsId: 'rootElements',
+    waitOptionsId: 'IWaitOpts',
+    collectionActionId: 'ICollectionAction',
+    collectionCheckId: 'ICollectionCheck',
+    getDataMethod: 'get',
+    getVisibilityMethod: 'isDisplayed',
+    getBaseElementFromCollectionByIndex: 'get',
+  },
+} = config.get();
 
 /**
  * PromodSystemStructure is used for defining framework (pages and fragments),it has
@@ -127,7 +134,7 @@ const baseLibraryDescription = {
  *      this.button2 = this.init('#butto2', 'Button 2', Button);
  *    }
  * }
- * @constructor
+ * @constructor PromodSystemStructure
  * @param {string} locator element locator
  * @param {string} elementName element name
  * @param {any} rootElement root element object
@@ -141,19 +148,31 @@ class PromodSystemStructure {
   protected index: any;
   protected name: any;
   protected successSearchParams: any;
+  protected compareCallQueuecollectionItem: Array<{ compareData: any; method: string; conditionBoolean: boolean }>;
 
   protected logger: { log(...args: any[]): void };
 
-  static updateCollectionDescription(collectionDescriptionMap) {
-    Object.assign(collectionDescription, collectionDescriptionMap);
+  static updateCollectionActionDescriptor(collectionActionDescriptionMap: TcollectionActionDescriptionMap) {
+    if (!isObject(collectionActionDescriptionMap)) {
+      throw new TypeError(
+        'updateCollectionActionDescriptor(): expects that collectionActionDescriptionMap be an object',
+      );
+    }
+    Object.assign(collectionDescription, collectionActionDescriptionMap);
   }
 
-  static updateBaseLibraryDescription(baseLibraryDescriptionMap) {
+  static updateBaseLibraryDescription(baseLibraryDescriptionMap: TbaseLibraryDescriptionMap) {
+    if (!isObject(baseLibraryDescriptionMap)) {
+      throw new TypeError('updateBaseLibraryDescription(): expects that baseLibraryDescriptionMap be an object');
+    }
     Object.assign(baseLibraryDescription, baseLibraryDescriptionMap);
   }
 
-  static updateSystemPropsList(systemPropsListArr) {
-    Object.assign(systemPropsList, systemPropsListArr);
+  static updateSystemPropsList(systemPropsList: TsystemPropsList) {
+    if (!isArray(systemPropsList)) {
+      throw new TypeError('updateBaseLibraryDescription(): expects that baseLibraryDescriptionMap be an object');
+    }
+    Object.assign(systemPropsList, systemPropsList);
   }
 
   constructor(locator, structureName, rootElement) {
@@ -180,6 +199,10 @@ class PromodSystemStructure {
 
   set setSuccessSearchParams(searchParams) {
     this.successSearchParams = searchParams;
+  }
+
+  get getSuccessSearchParams() {
+    return this.successSearchParams;
   }
 
   /**
