@@ -4,12 +4,14 @@
 
 ```ts
 import { waitForCondition } from 'sat-utils';
-import { seleniumWD, PromodSeleniumElementType } from 'promod';
+import { seleniumWD } from 'promod';
 import { PromodSystemStructure } from 'promod-system';
+
+import type { PromodElementType } from 'promod/built/interface';
 
 const { browser } = seleniumWD;
 
-class BaseFragment extends PromodSystemStructure<PromodSeleniumElementType> {
+class BaseFragment extends PromodSystemStructure<PromodElementType> {
   constructor(locator, name, rootElement) {
     super(locator, name, rootElement);
   }

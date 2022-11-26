@@ -2,10 +2,13 @@
 import { waitForCondition } from 'sat-utils';
 import { seleniumWD } from 'promod';
 import { PromodSystemStructure } from '../../../system/base-interfaces/structure';
+import { PromodSystemCollection } from '../../../system/base-interfaces/collection';
+
+import type { PromodElementType, PromodElementsType } from 'promod/built/interface';
 
 const { $ } = seleniumWD;
 
-class StructureTest extends PromodSystemStructure {
+class StructureTest extends PromodSystemStructure<PromodElementType> {
   constructor(locator, structureName, rootElement) {
     super(locator, structureName, rootElement);
   }
@@ -19,7 +22,7 @@ class StructureTest extends PromodSystemStructure {
   }
 }
 
-class StructureAsPage extends PromodSystemStructure {
+class StructureAsPage extends PromodSystemStructure<PromodElementType> {
   constructor(locator, structureName) {
     super(locator, structureName, $(locator));
   }
@@ -28,8 +31,13 @@ class StructureAsPage extends PromodSystemStructure {
     return new Child(locator, name, this.rootElement.$(locator));
   }
 
-  initCollection(locator: string, name: string, Collection: new (...args) => any, Child: new (...args) => any) {
-    return new Collection(locator, name, this.rootElement.$$(locator), Child);
+  initCollection<TcollectionItem = any, TrootElements = PromodElementsType>(
+    locator: string,
+    name: string,
+    Collection: typeof PromodSystemCollection,
+    Child: TcollectionItem,
+  ) {
+    return new Collection<TrootElements, TcollectionItem>(locator, name, this.rootElement.$$(locator), Child);
   }
 
   async waitLoadedState() {
@@ -39,7 +47,7 @@ class StructureAsPage extends PromodSystemStructure {
   }
 }
 
-class StructureAsFragment extends PromodSystemStructure {
+class StructureAsFragment extends PromodSystemStructure<PromodElementType> {
   constructor(locator, structureName, rootElement) {
     super(locator, structureName, rootElement);
   }
@@ -48,8 +56,13 @@ class StructureAsFragment extends PromodSystemStructure {
     return new Child(locator, name, this.rootElement.$(locator), ...rest);
   }
 
-  initCollection(locator: string, name: string, Collection: new (...args) => any, Child: new (...args) => any) {
-    return new Collection(locator, name, this.rootElement.$$(locator), Child);
+  initCollection<TcollectionItem = any, TrootElements = PromodElementsType>(
+    locator: string,
+    name: string,
+    Collection: typeof PromodSystemCollection,
+    Child: TcollectionItem,
+  ) {
+    return new Collection<TrootElements, TcollectionItem>(locator, name, this.rootElement.$$(locator), Child);
   }
 
   async waitLoadedState() {

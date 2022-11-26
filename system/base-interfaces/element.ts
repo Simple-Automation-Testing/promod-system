@@ -32,12 +32,12 @@ const element = {
  * Designed for promod library but works with any other library or framework.
  *
  * @example
- * import { PromodSeleniumElementType } from 'promod';
+ * import type { PromodElementType } from 'promod/built/interface';
  * import { waitForCondition } from 'sat-utils';
  * import { PromodSystemElement } from 'promod-system';
  *
- * class Button extends PromodSystemElement<PromodSeleniumElementType> {
- *   constructor(locator: string, elementName: string, root: PromodSeleniumElementType) {
+ * class Button extends PromodSystemElement<PromodElementType> {
+ *   constructor(locator: string, elementName: string, root: PromodElementType) {
  *     super(locator, elementName, root);
  *   }
  *
@@ -64,10 +64,10 @@ const element = {
  * @param {any} rootElement root element object
  * @returns {PromodSystemElement}
  */
-class PromodSystemElement {
+class PromodSystemElement<TrootElement = any> {
   protected rootLocator: string;
   protected identifier: string;
-  protected rootElement: any;
+  protected rootElement: TrootElement;
   protected parent;
   protected index: number;
   protected name: string;
@@ -190,7 +190,7 @@ class PromodSystemElement {
    * @param {string|null} action action that will be called
    * @returns {Promise<void>}
    */
-  async action(action: 'click' | 'hover' | 'focus' | 'scroll' | null) {
+  async action(action: 'click' | 'hover' | 'focus' | 'scroll' | null): Promise<void> {
     this.logger.log('PromodSystemElement action action call with data ', action);
     if (isNull(action)) {
       action = 'click';

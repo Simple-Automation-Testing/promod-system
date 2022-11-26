@@ -2,6 +2,8 @@ import { ElementTest } from '../base/element';
 import { StructureAsFragment, StructureAsPage } from '../base/structure';
 import { PromodSystemCollection } from '../../../system/base-interfaces/collection';
 
+import type { PromodElementType, PromodElementsType } from 'promod/built/interface';
+
 class TestUserFormFragment extends StructureAsFragment {
   private username: ElementTest;
   private password: ElementTest;
@@ -52,7 +54,7 @@ class TestComplexPage extends StructureAsPage {
 
     this.userform = this.init('#section1_internal3', 'User form', TestUserFormFragment);
     this.userdata = this.init('#userdata', 'User data', ElementTest);
-    this.collection = this.initCollection(
+    this.collection = this.initCollection<typeof CollectionItemFragment>(
       '.collection_item',
       'Collection item',
       PromodSystemCollection,

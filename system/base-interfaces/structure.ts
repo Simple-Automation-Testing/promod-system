@@ -16,6 +16,7 @@ import { promodLogger } from '../logger';
 import { getCollectionElementInstance, getCollectionActionData } from './utils';
 
 import type { TbaseLibraryDescriptionMap, TcollectionActionDescriptionMap, TsystemPropsList } from './types';
+import type { PromodElementType } from 'promod/built/interface';
 
 import { config } from '../config';
 
@@ -88,12 +89,13 @@ const {
  * Designed for promod library but works with any other library or framework.
  *
  * @example
- * import { PromodSeleniumElementType } from 'promod';
  * import { waitForCondition } from 'sat-utils';
  * import { PromodSystemElement, PromodSystemStructure } from 'promod-system';
  *
- * class Button extends PromodSystemElement<PromodSeleniumElementType> {
- *   constructor(locator: string, elementName: string, root: PromodSeleniumElementType) {
+ * import type { PromodElementType } from 'promod/built/interface';
+ *
+ * class Button extends PromodSystemElement<PromodElementType> {
+ *   constructor(locator: string, elementName: string, root: PromodElementType) {
  *     super(locator, elementName, root);
  *   }
  *
@@ -140,10 +142,10 @@ const {
  * @param {any} rootElement root element object
  * @returns {PromodSystemStructure}
  */
-class PromodSystemStructure {
+class PromodSystemStructure<TrootElement = any> {
   protected rootLocator: any;
   protected identifier: any;
-  protected rootElement: any;
+  protected rootElement: TrootElement;
   protected parent: any;
   protected index: any;
   protected name: any;
