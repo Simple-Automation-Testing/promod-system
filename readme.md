@@ -14,6 +14,7 @@ The purpose of this library is building of the TAF ecosystem which will not rega
 <p><a href="/.docs/browser.md">Browser</a></p>
 <p><a href="/.docs/system-element.md">PromodSystem base element</a></p>
 <p><a href="/.docs/system-structure.md">PromodSystem base structure</a></p>
+<p><a href="/.docs/system-collection.md">PromodSystem base collection</a></p>
 
 ## Usage. [promod](https://www.npmjs.com/package/promod) example.
 
@@ -21,6 +22,7 @@ The purpose of this library is building of the TAF ecosystem which will not rega
 - [Core](#core)
 
 ### Waiters
+
 ```ts
 import { seleniumWD } from 'promod';
 import { createBrowserWaiters, createElementWaiters } from 'promod-system';
@@ -41,10 +43,13 @@ const { browser, $ } = seleniumWD;
 ```
 
 ### Core
+
 ```ts
 import { waitForCondition } from 'sat-utils';
-import { seleniumWD, PromodSeleniumElementType } from 'promod';
+import { seleniumWD } from 'promod';
 import { PromodSystemStructure } from 'promod-system';
+
+import type { PromodElementType } from 'promod/built/interface';
 
 const timeouts = {
 	s: 5000,
@@ -54,8 +59,8 @@ const timeouts = {
 }
 
 
-class BaseElement extends PromodSystemElement {
-  constructor(locator, name, rootElement: PromodSeleniumElementType) {
+class BaseElement extends PromodSystemElement<PromodElementType> {
+  constructor(locator, name, rootElement) {
     super(locator, name, rootElement);
   }
 
@@ -85,21 +90,21 @@ class BaseElement extends PromodSystemElement {
 	 * this method should be overridden, it will be execute inside get method, depends on base library/framework specific
 	 */
   async baseGetData(): Promise<{ background: any; value: any }> {
-    return browser.executeScript(
-      `	const background = arguments[0].style.background;
+    return browser.executeScript(() =>  {
+      	const background = arguments[0].style.background;
 				const value = arguments[0].value;
 				const rect = arguments[0].getBoundingClientRect();
 				const text = arguments[0].innerText.trim()
 
 				return {background, value, rect, text}
-			`,
-      await this.rootElement.getWebDriverElement(),
+		},
+      await this.rootElement.getEngineElement(),
     );
   }
 }
 
 class BaseFragment extends PromodSystemStructure {
-  constructor(locator: string, structureName: string, rootElement: PromodSeleniumElementType) {
+  constructor(locator: string, structureName: string, rootElement: PromodElementType) {
     super(locator, structureName, rootElement);
   }
 
@@ -154,11 +159,13 @@ class BasePage extends PromodSystemStructure {
 ```
 
 ## Improvement/new features plan
- * [ ] Fix hardcoded values
- * [ ] Config validation
- * [ ] Logging
- * [ ] Error messages
- * [ ] Generate config `baseElementsActionsDescription` part based on base elements library
- * [ ] Generate base library
- * [ ] Generate project example
- * [ ] Вepth level flow generation
+
+- [x] Fix hardcoded values
+- [x] Generate get random flows for several fields
+- [ ] Config validation
+- [ ] Logging
+- [ ] Error messages
+- [x] Generate config `baseElementsActionsDescription` part based on base elements library
+- [ ] Generate base library
+- [ ] Generate project example
+- [ ] Вepth level flow generation

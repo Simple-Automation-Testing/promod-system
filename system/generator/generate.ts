@@ -49,7 +49,13 @@ const createPageStructure = (pagePath: string) => {
   const globalImport = `import { toArray, getRandomArrayItem } from 'sat-utils';
 import {
     ${getBaseImport(getAllBaseElements(pageInstance))}
-  } from '${pathToLibFolder}${pathToBase}';`;
+  } from '${pathToLibFolder}${pathToBase}';
+
+type TresultBasedOnArgument<TflowcallArgument, TflowResult extends Record<string | number | symbol, unknown>> = {
+  [K in keyof TflowcallArgument]: TflowResult[K];
+};
+
+`;
 
   const pageName = pageInstance.identifier;
 

@@ -5,6 +5,8 @@ import { getElementsTypes, getFragmentTypes } from './get.instance.elements.type
 import { checkThatFragmentHasItemsToAction } from './check.that.action.exists';
 import { checkThatElementHasAction } from './get.base';
 
+const noTransormTypes = new Set(['void', 'boolean']);
+
 function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field }) {
   const { repeatingActions = [] } = config.get();
 
@@ -12,7 +14,7 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
   const additionalArguments = optionsSecondArgument ? ', opts' : '';
 
-  let entryDataType = `${typeName}${optionsSecondArgument}`;
+  let entryDataType = `Tentry${optionsSecondArgument}`;
 
   let flowBody = `${
     isActionVoid ? 'return' : `const { ${field} } =`
@@ -29,15 +31,22 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
       `${action} result type is not void, but action exists in 'repeatingActions' list. Repeat is not allowed here`,
     );
   } else if (isRepeatingAllowed) {
-    entryDataType = `${typeName} | ${typeName}[]${optionsSecondArgument}`;
+    entryDataType = `Tentry | Tentry[]${optionsSecondArgument}`;
 
     flowBody = `for (const actionData of toArray(data)) {
       await page.${action}({ ${field}: actionData }${additionalArguments})
     }`;
   }
 
-  return `type ${typeName} = ${flowArgumentType}
-  const ${name} = async function(data: ${entryDataType}): Promise<${flowResultType}> {
+  const resultTypeClarification = flowResultType === 'void' && optionsSecondArgument ? 'boolean' : flowResultType;
+  const callResultType = noTransormTypes.has(resultTypeClarification.trim())
+    ? `${typeName}Result`
+    : `TresultBasedOnArgument<Tentry, ${typeName}Result>`;
+
+  return `
+type ${typeName} = ${flowArgumentType}
+type ${typeName}Result = ${resultTypeClarification}
+const ${name} = async function<Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}> {
     ${flowBody}
   };`;
 }
@@ -73,10 +82,14 @@ function createFlowTemplateForPageElements(name, action, instance) {
     : '';
   // TODO waiters returns boolean if error was not thrown
   const resultTypeClarification = flowResultType === 'void' && optionsSecondArgument ? 'boolean' : flowResultType;
+  const callResultType = noTransormTypes.has(resultTypeClarification.trim())
+    ? `${typeName}Result`
+    : `TresultBasedOnArgument<Tentry, ${typeName}Result>`;
 
   return `
 type ${typeName} = ${flowArgumentType}
-const ${flowActionName} = async function(data: ${typeName}${optionsSecondArgument}): Promise<${resultTypeClarification}> {
+type ${typeName}Result = ${resultTypeClarification}
+const ${flowActionName} = async function<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {
   return await page.${action}(data${optionsSecondArgument ? ', opts' : ''});
 };\n`;
 }

@@ -58,11 +58,11 @@ const {
   },
 } = config.get();
 
-class PromodSystemCollection {
+class PromodSystemCollection<TrootElements = any, TitemClass = any> {
   protected rootLocator: string;
-  protected rootElements: any;
-  protected identifier: any;
-  protected CollectionItemClass: any;
+  protected rootElements: TrootElements;
+  protected identifier: string;
+  protected CollectionItemClass: TitemClass;
   protected overrideCollectionItems: any[];
   protected parent: any;
   private logger: { log(...args: any[]): void };
@@ -391,7 +391,7 @@ class PromodSystemCollection {
    *
    * @returns
    */
-  private getElement(index) {
+  private getElement(index): TitemClass {
     const instance = getCollectionElementInstance(this, baseLibraryDescription, index);
 
     if (this.overrideCollectionItems.length) {
@@ -416,7 +416,7 @@ class PromodSystemCollection {
 
     const count = await this.rootElements[elementAction.count]();
 
-    return await Array.from({ length: count })
+    return Array.from({ length: count })
       .map((_item, index) => index)
       .map(requiredIndex => this.getElement(requiredIndex));
   }

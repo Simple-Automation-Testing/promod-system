@@ -37,7 +37,7 @@
     "eslint-plugin-sonarjs": "^0.13.0",
     "eslint-plugin-unicorn": "^42.0.0",
     "mocha": "^10.0.0",
-    "promod": "0.0.43",
+    "promod": "1.1.0-rc-18",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.4"
   },
