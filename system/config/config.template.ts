@@ -256,6 +256,7 @@ const baseLibraryDescription = {
   collectionRootElementsId: 'rootElements',
   waitOptionsId: 'IWaitOpts',
   getDataMethod: 'get',
+  waitVisibilityState: 'waitForVisibilityState',
   getVisibilityMethod: 'isDisplayed',
   getBaseElementFromCollectionByIndex: 'get',
 };

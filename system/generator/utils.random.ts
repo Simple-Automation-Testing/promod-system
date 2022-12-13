@@ -62,4 +62,10 @@ function toRandomTemplateFormat(dataItem) {
   return items.filter(item => isNotEmptyObject(item));
 }
 
-export { isCollectionDescription, toRandomTemplateFormat };
+function finTypedObject(dataObj) {
+  for (const value of Object.values(dataObj)) {
+    return isCollectionDescription(value) ? value : finTypedObject(value);
+  }
+}
+
+export { isCollectionDescription, toRandomTemplateFormat, finTypedObject };

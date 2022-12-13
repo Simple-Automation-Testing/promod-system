@@ -2,7 +2,15 @@
 import { isObject, camelize } from 'sat-utils';
 import { config } from '../config/config';
 import { getPathesToCollections } from './get.fragments.for.random.getting';
-import { isCollectionDescription, toRandomTemplateFormat } from './utils.random';
+import { isCollectionDescription, toRandomTemplateFormat, finTypedObject } from './utils.random';
+
+function getWaitForCollectionArgumentTemplate(dataObj) {
+  return Object.keys(dataObj).reduce((template, key) => {
+    return isObject(dataObj[key]) && !isCollectionDescription(dataObj[key])
+      ? `${template} ${key}: ${getWaitForCollectionArgumentTemplate(dataObj[key])} }`
+      : `${template} ${key}: { length: '>0' } }`;
+  }, '{');
+}
 
 function getFieldsEnumList(fieldsArr: string[]) {
   return fieldsArr.reduce((enumList, item, index, arr) => {
@@ -17,13 +25,6 @@ function getPropPath(dataObj) {
   }
 
   return '';
-}
-
-function finTypedObject(dataObj) {
-  // TODO check this function
-  for (const value of Object.values(dataObj)) {
-    return isCollectionDescription(value) ? value : finTypedObject(value);
-  }
 }
 
 function getFlowEntryType(dataObj) {
@@ -111,6 +112,7 @@ function createFlowTemplates(asActorAndPage, dataObj) {
   const { type, typeName } = getFlowEntryType(dataObj);
   const { lastKey, returnTemplate } = getReturnTemplateAndLastKey(dataObj);
   const argumentTemplate = getReturnArgumentTemplate(dataObj);
+  const waitElementListArgumentTemplate = getWaitForCollectionArgumentTemplate(dataObj);
 
   const name = camelize(`${asActorAndPage} get random data from ${getPropPath(dataObj)}`);
   return `\n
@@ -118,6 +120,7 @@ ${type}
 const ${name} = async function(data: ${typeName} = {${
     type.includes('field:') ? `field: '${finTypedObject(dataObj)._fields[0]}'` : ''
   }}): Promise<string> {
+  await page.${baseLibraryDescription.waitForVisibilityMethod}(${waitElementListArgumentTemplate})
   const ${returnTemplate} = await page.${baseLibraryDescription.getDataMethod}(${argumentTemplate});
 
   const excludeValues = toArray(data.except);

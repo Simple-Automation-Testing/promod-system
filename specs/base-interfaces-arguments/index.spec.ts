@@ -31,6 +31,7 @@ config.updateConfigField('baseLibraryDescription', {
   collectionActionId: 'ICollectionAction',
   collectionCheckId: 'ICollectionCheck',
   getDataMethod: 'get',
+  waitVisibilityState: 'waitForVisibilityState',
   getVisibilityMethod: 'isDisplayed',
   getBaseElementFromCollectionByIndex: 'get',
 });
