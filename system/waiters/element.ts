@@ -5,6 +5,13 @@ import { config } from '../config';
 
 const { elementAction } = config.get();
 
+/**
+ * @param {object} element element interaction interface
+ * @param {string} attribute attribute that needs to be checked
+ * @param {string} attributeValue attribute part
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForAttributeIncludes(
   element,
   attribute: string,
@@ -26,6 +33,13 @@ async function waitForAttributeIncludes(
   );
 }
 
+/**
+ * @param {object} element element interaction interface
+ * @param {string} attribute attribute that needs to be checked
+ * @param {string} attributeValue attribute
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForAttributeEquals(
   element,
   attribute: string,
@@ -47,6 +61,12 @@ async function waitForAttributeEquals(
   );
 }
 
+/**
+ * @param {object} element element interaction interface
+ * @param {string} text text part
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForTextIncludes(element, text: string, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -62,6 +82,11 @@ async function waitForTextIncludes(element, text: string, opts: IWaitConditionOp
   );
 }
 
+/**
+ * @param {object} element element interaction interface
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForText(element, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -77,6 +102,12 @@ async function waitForText(element, opts: IWaitConditionOpts = {}) {
   );
 }
 
+/**
+ * @param {object} element element interaction interface
+ * @param {string} text text part
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForTextEquals(element, text: string, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -92,6 +123,12 @@ async function waitForTextEquals(element, text: string, opts: IWaitConditionOpts
   );
 }
 
+/**
+ * @param {object} element element interaction interface
+ * @param {boolean} isDisplayed is element displayed
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForDisplayed(element, isDisplayed: boolean, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -108,6 +145,12 @@ async function waitForDisplayed(element, isDisplayed: boolean, opts: IWaitCondit
   );
 }
 
+/**
+ * @param {object} element element interaction interface
+ * @param {boolean} isPresented is element presented
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForPresented(element, isPresented: boolean, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -124,6 +167,12 @@ async function waitForPresented(element, isPresented: boolean, opts: IWaitCondit
   );
 }
 
+/**
+ * @param {object} element element interaction interface
+ * @param {boolean} isEnabled is element inabled
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForEnabled(element, isEnabled: boolean, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -140,6 +189,12 @@ async function waitForEnabled(element, isEnabled: boolean, opts: IWaitConditionO
   );
 }
 
+/**
+ * @param {object} element element interaction interface
+ * @param {number} count elements count
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForElementsCountEquals(elements, count: number, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -155,6 +210,12 @@ async function waitForElementsCountEquals(elements, count: number, opts: IWaitCo
   );
 }
 
+/**
+ * @param {object} elements elements interaction interface
+ * @param {number} count elements count
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForElementsCountNotEquals(elements, count: number, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -171,6 +232,12 @@ async function waitForElementsCountNotEquals(elements, count: number, opts: IWai
   );
 }
 
+/**
+ * @param {object} elements elements interaction interface
+ * @param {string} range elements count range
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForElementsCountIsInRange(elements, range: string, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -187,6 +254,12 @@ async function waitForElementsCountIsInRange(elements, range: string, opts: IWai
   );
 }
 
+/**
+ * @param {object} elements element interaction interface
+ * @param {string} text text part
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForEveryElementTextIncludes(elements, text: string, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -208,6 +281,12 @@ async function waitForEveryElementTextIncludes(elements, text: string, opts: IWa
   );
 }
 
+/**
+ * @param {object} elements element interaction interface
+ * @param {string} text text
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForEveryElementTextEquals(elements, text: string, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 

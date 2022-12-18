@@ -1,9 +1,16 @@
 import { waitForCondition } from 'sat-utils';
-import { IWaitConditionOpts } from './interfaces';
 import { config } from '../config';
+
+import type { IWaitConditionOpts } from './interfaces';
 
 const { browserAction } = config.get();
 
+/**
+ * @param {object} browser browser interaction interface
+ * @param {string} title expected page title
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForTabTitleEqual(browser, title: string, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -19,6 +26,12 @@ async function waitForTabTitleEqual(browser, title: string, opts: IWaitCondition
   );
 }
 
+/**
+ * @param {object} browser browser interaction interface
+ * @param {string} title expected page title part
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForTabTitleIncludes(browser, title: string, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -34,6 +47,12 @@ async function waitForTabTitleIncludes(browser, title: string, opts: IWaitCondit
   );
 }
 
+/**
+ * @param {object} browser browser interaction interface
+ * @param {string} url expected page url part
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForUrlIncludes(browser, url: string, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -49,6 +68,12 @@ async function waitForUrlIncludes(browser, url: string, opts: IWaitConditionOpts
   );
 }
 
+/**
+ * @param {object} browser browser interaction interface
+ * @param {string} url page url part
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForUrlNotIncludes(browser, url: string, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -64,6 +89,12 @@ async function waitForUrlNotIncludes(browser, url: string, opts: IWaitConditionO
   );
 }
 
+/**
+ * @param {object} browser browser interaction interface
+ * @param {string} url page url
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForUrlEquals(browser, url: string, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -79,6 +110,12 @@ async function waitForUrlEquals(browser, url: string, opts: IWaitConditionOpts =
   );
 }
 
+/**
+ * @param {object} browser browser interaction interface
+ * @param {string} url page url
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForUrlNotEquals(browser, url: string, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
@@ -94,6 +131,12 @@ async function waitForUrlNotEquals(browser, url: string, opts: IWaitConditionOpt
   );
 }
 
+/**
+ * @param {object} browser browser interaction interface
+ * @param {string} quantity browser pages quantity
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
 async function waitForTabsQuantity(browser, quantity: number, opts: IWaitConditionOpts = {}) {
   let createErrorMessage;
 
