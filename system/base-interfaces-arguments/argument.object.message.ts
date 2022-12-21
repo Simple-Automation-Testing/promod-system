@@ -2,6 +2,8 @@
 import { isString, isObject, prettifyCamelCase, isNull, isPrimitive } from 'sat-utils';
 
 import {
+  isBase,
+  stringifyBase,
   getIntexesMessage,
   getDescriptorMessage,
   isPropValueCollection,
@@ -67,14 +69,16 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
 
       const exceptMessagePart =
         except && except.length
-          ? ` initial list should not have values like ${except.length === 1 ? 'this' : 'these'} '${except.join(',')}' `
+          ? `, initial list should not have values like ${except.length === 1 ? 'this' : 'these'} '${except.join(
+              ',',
+            )}' `
           : '';
       const likeMessagePart =
         like && like.length
-          ? ` initial list should have values like ${like.length === 1 ? 'this' : 'these'} '${like.join(',')}' `
+          ? `, initial list should have values like ${like.length === 1 ? 'this' : 'these'} '${like.join(',')}' `
           : '';
 
-      const fieldMessagePart = field ? ` field '${field}' value ` : ' value ';
+      const fieldMessagePart = field ? ` field '${field}' ` : ' ';
 
       const descriptionMessage = Object.keys(restDescription).reduce((description, key) => {
         return `${description}${getDescriptorMessage(
@@ -121,6 +125,10 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
 
       if (isPrimitive(dataObj[key])) {
         return `${startAction} '${dataObj[key]}' to '${key}' element${messageEnd}`;
+      }
+
+      if (isBase(dataObj[key])) {
+        return `${startAction} '${key}' element '${stringifyBase(dataObj[key])}'${messageEnd}`;
       }
 
       if (isObject(dataObj[key])) {

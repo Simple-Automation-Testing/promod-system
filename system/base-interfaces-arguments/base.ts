@@ -1,5 +1,5 @@
 /* eslint-disable complexity, sonarjs/cognitive-complexity */
-import { isUndefined, isNull, isObject, toArray, isPrimitive } from 'sat-utils';
+import { isArray, isUndefined, isNull, isObject, toArray, isPrimitive } from 'sat-utils';
 import { config } from '../config';
 
 const stringifyBase = base =>
@@ -10,10 +10,16 @@ const stringifyBase = base =>
 
 const isBase = keys => {
   const { baseResultData } = config.get();
-  return keys.some(key => baseResultData.includes(key));
+  if (isArray(keys)) {
+    return keys.some(key => baseResultData.includes(key));
+  } else if (isObject(keys)) {
+    return isBase(Object.keys(keys));
+  }
+
+  return false;
 };
 
-const getIntexesMessage = indexes =>
+const getIntexesMessage = (indexes: number | number[]) =>
   toArray(indexes).length
     ? ` where ${toArray(indexes).length === 1 ? 'index is' : 'indexes are'} ${toArray(indexes).join(',')} `
     : '';
@@ -56,8 +62,8 @@ const getDescriptorMessage = (descriptorObj, initialMessage = ' where collection
   }, initialMessage);
 };
 
-const doesArgumentHaveCollection = obj => {
-  const { collectionDescription } = config.get();
+const doesArgumentHaveCollection = (obj: { [k: string]: any }) => {
+  const { collectionDescription = {} } = config.get();
   const { collectionPropsId, ...collectionProps } = collectionDescription;
 
   return Object.keys(obj).some(key => {
@@ -78,7 +84,7 @@ const doesArgumentHaveCollection = obj => {
 };
 
 const isPropValueCollection = (propValue: { [k: string]: any }, action, propName?: string) => {
-  const { collectionDescription } = config.get();
+  const { collectionDescription = {} } = config.get();
   const { collectionPropsId, ...collectionProps } = collectionDescription;
 
   if (propName && collectionPropsId && propName.endsWith(collectionPropsId)) {
@@ -91,15 +97,24 @@ const isPropValueCollection = (propValue: { [k: string]: any }, action, propName
 };
 
 const isPropValuesRandomCollectionItem = (propValue: { [k: string]: any }, action) => {
-  const { prettyMethodName } = config.get();
+  const { prettyMethodName = {} } = config.get();
   // TODO move to config in case if it will be configurable
   const randomDataFields = ['except', 'like', 'field', '_where', '_whereNot', '_visible'];
 
   // TODO move to config in case if it will be configurable
   return (
-    prettyMethodName.getRandom.includes(action) ||
+    prettyMethodName?.getRandom?.includes(action) ||
     (isObject(propValue) && randomDataFields.some((prop: string) => Object.keys(propValue).includes(prop)))
   );
+};
+
+const isActionableAction = (actionFlow: string) => {
+  const { prettyMethodName = {} } = config.get();
+  const { action, click, sendKeys } = prettyMethodName;
+
+  const actionableActions = [action, click, sendKeys].filter(Boolean);
+
+  return actionableActions.some(prettyAction => actionFlow.includes(prettyAction));
 };
 
 const getWaitingOptionsPrettyMessage = (waitingOptions?: { [key: string]: any }) => {
@@ -130,4 +145,5 @@ export {
   getWaitingOptionsPrettyMessage,
   isPropValueCollection,
   isPropValuesRandomCollectionItem,
+  isActionableAction,
 };
