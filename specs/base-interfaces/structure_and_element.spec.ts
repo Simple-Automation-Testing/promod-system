@@ -5,12 +5,12 @@ import { ElementTest } from '../setup/base/element';
 import { StructureTest } from '../setup/base/structure';
 import { actionFile } from '../.misc/setup';
 
-const { $, browser, getSeleniumDriver } = seleniumWD;
+const { $, browser, getDriver } = seleniumWD;
 
 describe('PromodSystemStructure', function () {
   describe('[P] Actions with element', function () {
     before(async () => {
-      await getSeleniumDriver(browser);
+      await getDriver(browser);
     });
 
     beforeEach(async () => {

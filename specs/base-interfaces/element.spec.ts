@@ -4,12 +4,12 @@ import { seleniumWD } from 'promod';
 import { ElementTest } from '../setup/base/element';
 import { actionFile } from '../.misc/setup';
 
-const { $, browser, getSeleniumDriver } = seleniumWD;
+const { $, browser, getDriver } = seleniumWD;
 
 describe('PromodSystemElement', function () {
   describe('[P] Actions', function () {
     before(async () => {
-      await getSeleniumDriver(browser);
+      await getDriver(browser);
     });
 
     beforeEach(async () => {
@@ -94,6 +94,18 @@ describe('PromodSystemElement', function () {
   });
 
   describe('[N] Fails', function () {
+    before(async () => {
+      await getDriver(browser);
+    });
+
+    beforeEach(async () => {
+      await browser.get(actionFile);
+    });
+
+    after(async () => {
+      await browser.quitAll();
+    });
+
     it('[N] waitLoadedState', async () => {
       const notExist = $('#not_exist_item');
       const notExistElement = new ElementTest('#not_exist_item', 'Not exist', notExist);

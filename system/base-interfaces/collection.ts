@@ -7,10 +7,16 @@ import {
   isNotEmptyArray,
   isNumber,
   isObject,
+  lengthToIndexesArray,
+  getRandomArrayItem,
 } from 'sat-utils';
-import { promodLogger } from '../logger';
 import { getCollectionElementInstance, getCollectionActionData } from './utils';
+import { PromodeSystemCollectionStateError } from './error';
+
+import { promodLogger } from '../logger';
 import { config } from '../config';
+
+const collectionItemIndexRg = /(?<=index \[)(\d+)(?=])/gm;
 
 import type { TbaseLibraryDescriptionMap, TcollectionActionDescriptionMap, TelementActionsMap } from './types';
 
@@ -124,7 +130,7 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
   /**
    * @override
    */
-  async waitLoadedState() {}
+  async waitLoadedState(methodSignature?: string) {}
 
   overrideChildrenBaseMethods(...methods) {
     this.overrideCollectionItems.push(...methods);
@@ -220,7 +226,7 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
   private async gatherDataActionCall(action, methodSignature: 'get' | 'isDisplayed') {
     this.logger.log(`PromodSystemCollection ${methodSignature} action call with data `, action);
 
-    await this.waitLoadedState();
+    await this.waitLoadedState(methodSignature);
 
     const { [collectionDescription.action]: _action, ...descriptionInteractionElements } = this.alignActionData(action);
 
@@ -247,7 +253,8 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
   private async interactionActionCall(action, methodSignature: 'action' | 'sendKeys') {
     this.logger.log(`PromodSystemCollection ${methodSignature} action call with data `, action);
 
-    await this.waitLoadedState();
+    await this.waitLoadedState(methodSignature);
+
     const { [collectionDescription.action]: _action, ...descriptionInteractionElements } = this.alignActionData(action);
 
     const { relevantCollection, repeat, reverse } = await this.getInteractionElements(descriptionInteractionElements);
@@ -265,7 +272,9 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
           );
 
           if (isUndefined(collectionItem)) {
-            // TODO error should be informative
+            throw new PromodeSystemCollectionStateError(
+              `interactionActionCall(): call ${methodSignature} seems to have stale collection, search params do not work ${collectionItem.getSuccessSearchParams}`,
+            );
           }
         }
 
@@ -329,9 +338,19 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
       if (!(await result)) return false;
 
       for (const searchParamsItem of compareCallAction.searchParams) {
+        const currentItemsCount = await this.rootElements[elementAction.count]();
+
         const partialResult = await collectionItem[compareCallAction.method](searchParamsItem)
           .then(reslt => reslt === compareCallAction.condition)
-          .catch(() => false === compareCallAction.condition);
+          .catch((error: Error) => {
+            const [matchedIndex] = error.toString().match(collectionItemIndexRg) || [];
+            if (matchedIndex && Number(matchedIndex) >= currentItemsCount) {
+              throw new PromodeSystemCollectionStateError(
+                `checkCollectionItemBySearchParams(): collection seems to be stale, collection length is ${currentItemsCount}, collection item index is ${matchedIndex}`,
+              );
+            }
+            return false === compareCallAction.condition;
+          });
 
         if (partialResult) {
           successSearchParamsCombination.push({
@@ -365,20 +384,33 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
       [collectionDescription.visible]: _visible,
       [collectionDescription.repeat]: repeat,
       [collectionDescription.reverse]: reverse,
+      [collectionDescription.count]: count,
     } = action;
 
     const findDescription = { _visible, _where, _whereNot };
 
-    let requiredElements;
+    const availableElementsCount = isNumber(count) ? count : await this.rootElements[elementAction.count]();
+    const availableElementsIndexes = lengthToIndexesArray(availableElementsCount);
 
-    if (isNumber(action[collectionDescription.count])) {
-      requiredElements = await Array.from({ length: action[collectionDescription.count] }).map((_item, index) =>
-        this.getElement(index),
-      );
-    } else if (toArray(action[collectionDescription.index]).length) {
-      requiredElements = await toArray(action[collectionDescription.index]).map(index => this.getElement(index));
+    const requiredElements = [];
+
+    if (toArray(action[collectionDescription.index]).length) {
+      const indexes = toArray(action[collectionDescription.index]);
+      const ignoreIndexes = new Set([]);
+
+      for (const index of indexes) {
+        if (isNumber(index) && !ignoreIndexes.has(index)) {
+          requiredElements.push(this.getElement(index));
+          ignoreIndexes.add(index);
+        } else if (index === 'random') {
+          const availableIndexes = availableElementsIndexes.filter(index => !ignoreIndexes.has(index));
+          const randomIndex = getRandomArrayItem(availableIndexes);
+          requiredElements.push(this.getElement(randomIndex));
+          ignoreIndexes.add(randomIndex);
+        }
+      }
     } else {
-      requiredElements = await this.getElements();
+      requiredElements.push(...lengthToIndexesArray(availableElementsCount).map(index => this.getElement(index)));
     }
 
     const relevantCollection = await this.findElementsBySearchParams(findDescription, requiredElements);
@@ -422,7 +454,7 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
   }
 
   // DATA TRANSFORMATION
-  private prepareFind({ _visible, _where, _whereNot }) {
+  private prepareFind({ _visible, _where, _whereNot }: any = {}) {
     return [
       { searchParams: _visible, method: 'compareVisibility', condition: true },
       { searchParams: _where, method: 'compareContent', condition: true },
@@ -438,7 +470,8 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
   /**
    * @private
    *
-   * @returns
+   * @param {any} action action data
+   * @returns {{[k: string]: any}}
    */
   private alignActionData(action) {
     if (action) {

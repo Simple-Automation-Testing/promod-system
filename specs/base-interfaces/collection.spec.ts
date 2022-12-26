@@ -4,7 +4,7 @@ import { seleniumWD } from 'promod';
 import { ElementTest } from '../setup/base/element';
 import { actionFile } from '../.misc/setup';
 
-const { $$, $, getSeleniumDriver, browser } = seleniumWD;
+const { $$, $, getDriver, browser } = seleniumWD;
 
 function getSimpleCollection() {
   const collectionItems = $$('#simple_collection > button');
@@ -34,7 +34,7 @@ function getCollectionWithElementsThatAreNotExist() {
 describe('PromodSystemCollection', function () {
   describe('[P] Actions', function () {
     before(async () => {
-      await getSeleniumDriver(browser);
+      await getDriver(browser);
     });
 
     beforeEach(async () => {
@@ -112,7 +112,7 @@ describe('PromodSystemCollection', function () {
 
   describe('[P] collection properties', function () {
     before(async () => {
-      await getSeleniumDriver(browser);
+      await getDriver(browser);
     });
 
     beforeEach(async () => {

@@ -27,7 +27,7 @@ class ElementTest extends PromodSystemElement<PromodElementType> {
       const rect = element.getBoundingClientRect();
       const text = element.innerText.trim();
       return { background, value, rect, text };
-    }, await this.rootElement.getEngineElement());
+    }, this.rootElement.getEngineElement());
   }
 }
 

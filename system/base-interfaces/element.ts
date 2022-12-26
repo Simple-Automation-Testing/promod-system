@@ -141,7 +141,7 @@ class PromodSystemElement<TrootElement = any> {
   /**
    * @override
    */
-  async waitLoadedState() {}
+  async waitLoadedState(methodSignature?: string, ...rest) {}
 
   /**
    * @override
@@ -200,13 +200,14 @@ class PromodSystemElement<TrootElement = any> {
       throw new TypeError(`${this.identifier}: action(): argument should be a string or null ${getType(action)}`);
     }
 
+    if (!(action in this)) {
+      throw new TypeError(
+        `PromodSystemElement ${action} action does not exist, seems custom action was not implemented`,
+      );
+    }
+
     await this.waitLoadedState();
 
-    if (!(action in this)) {
-      throw new TypeError(`
-        PromodSystemElement ${action} action does not exist, seems custom action was not implemented
-      `);
-    }
     await this[action]();
   }
 
@@ -246,8 +247,10 @@ class PromodSystemElement<TrootElement = any> {
     await this.rootElement[elementAction.hover]();
   }
 
-  async get(action?): Promise<any> {
+  async get(action?, ...rest): Promise<any> {
     this.logger.log('PromodSystemElement get action call with data ', action);
+
+    await this.waitLoadedState(action, ...rest);
 
     return this.baseGetData(action);
   }

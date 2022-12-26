@@ -3,12 +3,12 @@ import { seleniumWD } from 'promod';
 import { TestPage, TestComplexPage } from '../setup/complex';
 import { actionFile } from '../.misc/setup';
 
-const { browser, getSeleniumDriver } = seleniumWD;
+const { browser, getDriver } = seleniumWD;
 
 describe('PromodSystemStructure', function () {
   describe('[P] actions', function () {
     before(async () => {
-      await getSeleniumDriver(browser);
+      await getDriver(browser);
     });
 
     beforeEach(async () => {

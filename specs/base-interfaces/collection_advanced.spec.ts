@@ -5,7 +5,7 @@ import { ElementTest } from '../setup/base/element';
 import { StructureAsFragment } from '../setup/base/structure';
 import { collection } from '../.misc/setup';
 
-const { $, getSeleniumDriver, browser } = seleniumWD;
+const { $, getDriver, browser } = seleniumWD;
 
 class LastLayerItem extends StructureAsFragment {
   title;
@@ -48,7 +48,7 @@ describe('PromodSystemCollection Advanced', function () {
   const appItem = new AppItem();
 
   before(async () => {
-    await getSeleniumDriver(browser);
+    await getDriver(browser);
   });
 
   beforeEach(async () => {
