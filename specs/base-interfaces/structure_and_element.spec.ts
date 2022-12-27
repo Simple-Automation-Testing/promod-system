@@ -105,7 +105,7 @@ describe('PromodSystemStructure', function () {
         await structure.waitContent({ scrollButton: { text: 'scrollsss' } }, { timeout: 2500 });
       } catch (error) {
         expect(error.toString()).stringIncludesSubstring(
-          'scrollButton->text->Message: expected: scrollsss, actual: scroll.',
+          'scrollButton->text->Message: expected: data scroll string should include pattern scrollsss.',
         );
       }
     });
