@@ -7,6 +7,7 @@ class FsReporter {
   private isEnabled: boolean;
   private data: any[];
   private caseTitle;
+  private suiteTitle;
 
   constructor(outputPath?: string, isEnabled?: boolean) {
     this.outputPath = outputPath;
@@ -14,11 +15,17 @@ class FsReporter {
     this.data = [];
   }
 
+  inSuite(suiteTitle: string) {
+    if (this.isEnabled) {
+      this.suiteTitle = suiteTitle;
+    }
+  }
+
   startCase(testCaseTitle: string) {
     if (this.isEnabled) {
       this.caseTitle = testCaseTitle;
 
-      this.data.push(testCaseTitle);
+      this.data.push(this.caseTitle);
     }
   }
 

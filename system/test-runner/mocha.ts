@@ -41,7 +41,19 @@ function getPreparedRunner<T>(fixtures?: T) {
   let _updateSuiteName: (suiteTitle: string) => string;
   let _updateCaseName: (caseName: string) => string;
 
-  function testBodyWrapper(itName, fn) {
+  const runner = {
+    suite,
+    test,
+    beforeEach,
+    afterEach,
+    beforeAll,
+    afterAll,
+    updateSuiteName,
+    updateCaseName,
+    addReporters,
+  };
+
+  function testBodyWrapper(testName, fn) {
     return async function () {
       try {
         if (isFunction(_customTestPreExecution) || isAsyncFunction(_customTestPreExecution)) {
@@ -52,7 +64,7 @@ function getPreparedRunner<T>(fixtures?: T) {
         }
 
         reportersCreators.forEach(r => reportersManager.addReporter(r()));
-        reportersManager.startCase(itName);
+        reportersManager.startCase(testName);
 
         if (_beforeEachCase) {
           await _beforeEachCase.call(this, fixtures);
@@ -71,10 +83,10 @@ function getPreparedRunner<T>(fixtures?: T) {
           }
         }
 
-        reportersManager.finishSuccessCase(itName);
+        reportersManager.finishSuccessCase(testName);
         reportersManager.reset();
       } catch (error) {
-        reportersManager.finishFailedCase(itName, error);
+        reportersManager.finishFailedCase(testName, error);
         reportersManager.reset();
 
         if (shouldRecallAfterEach() && _afterEachCase) {
@@ -86,7 +98,7 @@ function getPreparedRunner<T>(fixtures?: T) {
     };
   }
 
-  function test(itName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
+  function test(testName: string, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
     if (!checkExecutionTags((opts as TtestOpts).tags)) {
       return;
     }
@@ -94,32 +106,38 @@ function getPreparedRunner<T>(fixtures?: T) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
     }
+    if (isFunction(_updateCaseName)) {
+      const result = _updateCaseName(testName);
+      if (isString(result)) {
+        testName = result;
+      }
+    }
 
-    global.it(itName, testBodyWrapper(itName, fn));
+    global.it(testName, testBodyWrapper(testName, fn));
   }
 
-  test.only = function (itName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
+  test.only = function testOnly(testName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
     }
-    global.it.only(itName, testBodyWrapper(itName, fn));
+    global.it.only(testName, testBodyWrapper(testName, fn));
   };
 
-  test.skip = function (itName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
+  test.skip = function testSkip(testName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
     }
-    global.it.skip(itName, testBodyWrapper(itName, fn));
+    global.it.skip(testName, testBodyWrapper(testName, fn));
   };
 
-  test.if = function (condition, itName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
+  test.if = function testIf(condition, testName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
     }
     if (condition()) {
-      global.it(itName, testBodyWrapper(itName, fn));
+      global.it(testName, testBodyWrapper(testName, fn));
     } else {
-      global.it.skip(itName, testBodyWrapper(itName, fn));
+      global.it.skip(testName, testBodyWrapper(testName, fn));
     }
   };
 
@@ -134,27 +152,17 @@ function getPreparedRunner<T>(fixtures?: T) {
     global.describe(suiteName, function () {
       if (isFunction(_afterAllCases)) {
         global.after(_afterAllCases);
-      }
-
-      if (isAsyncFunction(_afterAllCases)) {
+      } else if (isAsyncFunction(_afterAllCases)) {
         global.after(async function () {
           await _afterAllCases.call(this);
         });
       }
 
       if (isFunction(_beforeAllCases)) {
-        global.before(_afterAllCases);
-      }
-
-      if (isAsyncFunction(_afterAllCases)) {
-        global.after(async function () {
-          await _afterAllCases.call(this);
-        });
-      }
-
-      if (isAsyncFunction(_beforeAllCases)) {
-        global.after(async function () {
-          await _afterAllCases.call(this);
+        global.before(_beforeAllCases);
+      } else if (isAsyncFunction(_beforeAllCases)) {
+        global.before(async function () {
+          await _beforeAllCases.call(this);
         });
       }
 
@@ -188,24 +196,32 @@ function getPreparedRunner<T>(fixtures?: T) {
     _beforeEachCase = async function () {
       await fn.call(this, fixtures);
     };
+
+    return runner;
   }
 
   function afterEach(fn: TtestBody<T>) {
     _afterEachCase = async function () {
       await fn.call(this, fixtures);
     };
+
+    return runner;
   }
 
   function beforeAll(fn: TtestBody<T>) {
-    _afterAllCases = async function () {
-      await fn.call(this, fixtures);
-    };
-  }
-
-  function afterAll(fn: TtestBody<T>) {
     _beforeAllCases = async function () {
       await fn.call(this, fixtures);
     };
+
+    return runner;
+  }
+
+  function afterAll(fn: TtestBody<T>) {
+    _afterAllCases = async function () {
+      await fn.call(this, fixtures);
+    };
+
+    return runner;
   }
 
   function updateSuiteName(fn: (suiteTitle: string) => string) {
@@ -216,21 +232,14 @@ function getPreparedRunner<T>(fixtures?: T) {
     _updateCaseName = fn;
   }
 
-  return {
-    suite,
-    test,
-    beforeEach,
-    afterEach,
-    beforeAll,
-    afterAll,
-    updateSuiteName,
-    updateCaseName,
-  };
-}
+  function addReporters(createReporter: () => TreporterInstance | (() => TreporterInstance)[]) {
+    // @ts-ignore
+    reportersCreators.push(...toArray(createReporter));
 
-getPreparedRunner.addReporters = function (createReporter: () => TreporterInstance | (() => TreporterInstance)[]) {
-  // @ts-ignore
-  reportersCreators.push(...toArray(createReporter));
-};
+    return runner;
+  }
+
+  return runner;
+}
 
 export { getPreparedRunner };

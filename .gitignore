@@ -2,3 +2,4 @@ node_modules
 built
 playground.*
 playground
+allure-results
