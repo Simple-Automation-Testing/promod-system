@@ -1,4 +1,5 @@
 // @ts-check
+
 export type TreporterInstance = {
   startCase: (testCaseTitle: string) => void;
 
@@ -48,3 +49,6 @@ const reportersManager = (() => {
 })();
 
 export { reportersManager };
+
+export { FsReporter } from './fs';
+export { ConsoleReporter } from './console';
