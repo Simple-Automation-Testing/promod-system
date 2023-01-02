@@ -36,8 +36,12 @@ function getPreparedRunner<T>(fixtures?: T) {
   let _afterEachCase;
   let _afterAllCases;
   let _beforeAllCases;
+
   let _customTestPreExecution: () => Promise<boolean>;
   let _customTestPostExecution: () => Promise<boolean>;
+
+  let _customSuiteHook: () => void;
+
   let _updateSuiteName: (suiteTitle: string) => string;
   let _updateCaseName: (caseName: string) => string;
 
@@ -48,6 +52,7 @@ function getPreparedRunner<T>(fixtures?: T) {
     afterEach,
     beforeAll,
     afterAll,
+    customSuiteHook,
     updateSuiteName,
     updateCaseName,
     addReporters,
@@ -62,9 +67,8 @@ function getPreparedRunner<T>(fixtures?: T) {
             return;
           }
         }
-
         reportersCreators.forEach(r => reportersManager.addReporter(r()));
-        reportersManager.startCase(testName);
+        await reportersManager.startCase(testName);
 
         if (_beforeEachCase) {
           await _beforeEachCase.call(this, fixtures);
@@ -83,10 +87,10 @@ function getPreparedRunner<T>(fixtures?: T) {
           }
         }
 
-        reportersManager.finishSuccessCase(testName);
+        await reportersManager.finishSuccessCase(testName);
         reportersManager.reset();
       } catch (error) {
-        reportersManager.finishFailedCase(testName, error);
+        await reportersManager.finishFailedCase(testName, error);
         reportersManager.reset();
 
         if (shouldRecallAfterEach() && _afterEachCase) {
@@ -141,6 +145,30 @@ function getPreparedRunner<T>(fixtures?: T) {
     }
   };
 
+  function suiteBodyWrapper(suiteName, cb: TdescribeBody<T>) {
+    if (isFunction(_customSuiteHook)) {
+      _customSuiteHook.call(this, this);
+    }
+
+    if (isFunction(_afterAllCases)) {
+      global.after(_afterAllCases);
+    } else if (isAsyncFunction(_afterAllCases)) {
+      global.after(async function () {
+        await _afterAllCases.call(this);
+      });
+    }
+
+    if (isFunction(_beforeAllCases)) {
+      global.before(_beforeAllCases);
+    } else if (isAsyncFunction(_beforeAllCases)) {
+      global.before(async function () {
+        await _beforeAllCases.call(this);
+      });
+    }
+
+    cb.call(this, fixtures);
+  }
+
   function suite(suiteName, cb: TdescribeBody<T>) {
     if (isFunction(_updateSuiteName)) {
       const updated = _updateSuiteName(suiteName);
@@ -150,23 +178,7 @@ function getPreparedRunner<T>(fixtures?: T) {
     }
 
     global.describe(suiteName, function () {
-      if (isFunction(_afterAllCases)) {
-        global.after(_afterAllCases);
-      } else if (isAsyncFunction(_afterAllCases)) {
-        global.after(async function () {
-          await _afterAllCases.call(this);
-        });
-      }
-
-      if (isFunction(_beforeAllCases)) {
-        global.before(_beforeAllCases);
-      } else if (isAsyncFunction(_beforeAllCases)) {
-        global.before(async function () {
-          await _beforeAllCases.call(this);
-        });
-      }
-
-      cb.call(this, fixtures);
+      suiteBodyWrapper.call(this, suiteName, cb);
     });
   }
 
@@ -181,14 +193,26 @@ function getPreparedRunner<T>(fixtures?: T) {
   };
 
   suite.skip = function suiteSkip(suiteName, cb: TdescribeBody<T>) {
+    if (isFunction(_updateSuiteName)) {
+      const updated = _updateSuiteName(suiteName);
+      if (isString(updated)) {
+        suiteName = updated;
+      }
+    }
     global.describe.skip(suiteName, function () {
-      cb.call(this, fixtures);
+      suiteBodyWrapper.call(this, suiteName, cb);
     });
   };
 
   suite.only = function suiteOnly(suiteName, cb: TdescribeBody<T>) {
+    if (isFunction(_updateSuiteName)) {
+      const updated = _updateSuiteName(suiteName);
+      if (isString(updated)) {
+        suiteName = updated;
+      }
+    }
     global.describe.only(suiteName, function () {
-      cb.call(this, fixtures);
+      suiteBodyWrapper.call(this, suiteName, cb);
     });
   };
 
@@ -237,6 +261,10 @@ function getPreparedRunner<T>(fixtures?: T) {
     reportersCreators.push(...toArray(createReporter));
 
     return runner;
+  }
+
+  function customSuiteHook(fn: (...args) => any) {
+    _customSuiteHook = fn;
   }
 
   return runner;

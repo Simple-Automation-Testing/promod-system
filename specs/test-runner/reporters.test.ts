@@ -1,7 +1,7 @@
 import { equal } from 'node:assert';
 import { getPreparedRunner } from '../../system/test-runner/mocha';
 
-const { afterAll, test, suite, addReporters } = getPreparedRunner();
+const { afterAll, test, suite, addReporters, customSuiteHook } = getPreparedRunner();
 
 let titleByClass;
 let titleByObj;
@@ -42,11 +42,13 @@ const reporterObj = {
 addReporters(() => new ReporterExample());
 addReporters(() => reporterObj);
 
+customSuiteHook(a => a);
+
 afterAll(() => {
   equal('1', titleByClass);
   equal('1', titleByObj);
 });
 
-suite.only('1', function () {
+suite('1', function () {
   test('1', function () {});
 });

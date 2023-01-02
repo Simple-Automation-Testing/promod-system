@@ -1,6 +1,4 @@
 // @ts-check
-import { safeHasOwnPropery } from 'sat-utils';
-
 export type TreporterInstance = {
   startCase: (testCaseTitle: string) => void;
 
@@ -21,41 +19,30 @@ const reportersManager = (() => {
     reset: () => {
       activeReporters.splice(0, activeReporters.length);
     },
-    startCase: (testCaseTitle: string) => {
-      activeReporters.forEach(reporter => {
-        if (safeHasOwnPropery(reporter, 'startCase')) {
-          reporter.startCase(testCaseTitle);
-        }
-      });
+    startCase: async (testCaseTitle: string) => {
+      for (const reporter of activeReporters) {
+        await reporter.startCase(testCaseTitle);
+      }
     },
-    addStep: (stepData: string, stepArguments?: any, stepResult?: any) => {
-      activeReporters.forEach(reporter => {
-        if (safeHasOwnPropery(reporter, 'addStep')) {
-          reporter.addStep(stepData, stepArguments, stepResult);
-        }
-      });
+    addStep: async (stepData: string, stepArguments?: any, stepResult?: any) => {
+      for (const reporter of activeReporters) {
+        await reporter.addStep(stepData, stepArguments, stepResult);
+      }
     },
-    addCustomData: (...args: any[]) => {
-      activeReporters.forEach(reporter => {
-        if (safeHasOwnPropery(reporter, 'addCustomData')) {
-          // @ts-ignore
-          reporter.addCustomData(...args);
-        }
-      });
+    addCustomData: async (...args: any[]) => {
+      for (const reporter of activeReporters) {
+        await reporter.addCustomData(...args);
+      }
     },
-    finishSuccessCase: (testCaseTitle: string) => {
-      activeReporters.forEach(reporter => {
-        if (safeHasOwnPropery(reporter, 'finishSuccessCase')) {
-          reporter.finishSuccessCase(testCaseTitle);
-        }
-      });
+    finishSuccessCase: async (testCaseTitle: string) => {
+      for (const reporter of activeReporters) {
+        await reporter.finishSuccessCase(testCaseTitle);
+      }
     },
-    finishFailedCase: (testCaseTitle: string, error: Error) => {
-      activeReporters.forEach(reporter => {
-        if (safeHasOwnPropery(reporter, 'finishFailedCase')) {
-          reporter.finishFailedCase(testCaseTitle, error);
-        }
-      });
+    finishFailedCase: async (testCaseTitle: string, error: Error) => {
+      for (const reporter of activeReporters) {
+        await reporter.finishFailedCase(testCaseTitle, error);
+      }
     },
   };
 })();
