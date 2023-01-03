@@ -3,7 +3,17 @@ import { waitForCondition, execNumberExpression } from 'sat-utils';
 import { IWaitConditionOpts } from './interfaces';
 import { config } from '../config';
 
-const { elementAction } = config.get();
+const {
+  elementAction = {
+    isEnabled: 'isEnabled',
+    isDisplayed: 'isDisplayed',
+    isPresent: 'isPresent',
+    getText: 'getText',
+    getAttribute: 'getAttribute',
+    count: 'count',
+    get: 'get',
+  },
+} = config.get();
 
 /**
  * @param {object} element element interaction interface

@@ -2,7 +2,7 @@
  * @returns {string[]}
  */
 function getArgumentTags(): string[] {
-  const tagsArgId = process.env.PROMOD_S_TAGS_ID;
+  const tagsArgId = process.env.PROMOD_S_TAGS_ID || 'tags';
 
   return (
     process.argv
@@ -16,9 +16,9 @@ function getArgumentTags(): string[] {
 /**
  * @returns {boolean}
  */
-function shouldRecallAfterEach() {
+function shouldRecallAfterEachOnFail() {
   // @ts-ignore
   return process.env.PROMOD_S_RECALL_AFTER_EACH === '1' || process.env.PROMOD_S_RECALL_AFTER_EACH === 1;
 }
 
-export { getArgumentTags, shouldRecallAfterEach };
+export { getArgumentTags, shouldRecallAfterEachOnFail };

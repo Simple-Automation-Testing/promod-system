@@ -1,4 +1,5 @@
 // @ts-check
+const { warn } = console;
 
 export type TreporterInstance = {
   startCase: (testCaseTitle: string) => void;
@@ -22,22 +23,38 @@ const reportersManager = (() => {
     },
     startCase: async (testCaseTitle: string) => {
       for (const reporter of activeReporters) {
-        await reporter.startCase(testCaseTitle);
+        try {
+          await reporter.startCase(testCaseTitle);
+        } catch (error) {
+          warn(error);
+        }
       }
     },
     addStep: async (stepData: string, stepArguments?: any, stepResult?: any) => {
       for (const reporter of activeReporters) {
-        await reporter.addStep(stepData, stepArguments, stepResult);
+        try {
+          await reporter.addStep(stepData, stepArguments, stepResult);
+        } catch (error) {
+          warn(error);
+        }
       }
     },
     addCustomData: async (...args: any[]) => {
       for (const reporter of activeReporters) {
-        await reporter.addCustomData(...args);
+        try {
+          await reporter.addCustomData(...args);
+        } catch (error) {
+          warn(error);
+        }
       }
     },
     finishSuccessCase: async (testCaseTitle: string) => {
       for (const reporter of activeReporters) {
-        await reporter.finishSuccessCase(testCaseTitle);
+        try {
+          await reporter.finishSuccessCase(testCaseTitle);
+        } catch (error) {
+          warn(error);
+        }
       }
     },
     finishFailedCase: async (testCaseTitle: string, error: Error) => {

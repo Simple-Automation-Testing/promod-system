@@ -1,12 +1,12 @@
 /* eslint-disable no-only-tests/no-only-tests, sonarjs/cognitive-complexity */
 import { isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
 import { reportersManager } from '../reporter';
-import { getArgumentTags, shouldRecallAfterEach } from './setup';
+import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 
 import type { TreporterInstance } from '../reporter';
 
 type TtestOpts = {
-  tags?: string | string[];
+  [k: string]: string | string[];
 };
 
 type TtestBody<T> = (fixtures?: T) => Promise<void> | any;
@@ -93,7 +93,7 @@ function getPreparedRunner<T>(fixtures?: T) {
         await reportersManager.finishFailedCase(testName, error);
         reportersManager.reset();
 
-        if (shouldRecallAfterEach() && _afterEachCase) {
+        if (shouldRecallAfterEachOnFail() && _afterEachCase) {
           await _afterEachCase.call(this);
         }
 
@@ -103,7 +103,7 @@ function getPreparedRunner<T>(fixtures?: T) {
   }
 
   function test(testName: string, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
-    if (!checkExecutionTags((opts as TtestOpts).tags)) {
+    if (!checkExecutionTags((opts as TtestOpts)[process.env.PROMOD_S_TAGS_ID || 'tags'])) {
       return;
     }
 
@@ -120,6 +120,12 @@ function getPreparedRunner<T>(fixtures?: T) {
     global.it(testName, testBodyWrapper(testName, fn));
   }
 
+  /**
+   * @param {string} testName test case title
+   * @param {object|(fixtures?: any) => Promise<void> | any} opts test cases configuration options, or test case body
+   * @param {(fixtures?: any) => Promise<void> | any} [fn] test case body
+   * @returns {void}
+   */
   test.only = function testOnly(testName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
@@ -127,19 +133,38 @@ function getPreparedRunner<T>(fixtures?: T) {
     global.it.only(testName, testBodyWrapper(testName, fn));
   };
 
-  test.skip = function testSkip(testName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
+  /**
+   * @param {string} skipReason test case skip reason
+   * @param {string} testName test case title
+   * @param {object|(fixtures?: any) => Promise<void> | any} opts test cases configuration options, or test case body
+   * @param {(fixtures?: any) => Promise<void> | any} [fn] test case body
+   * @returns {void}
+   */
+  test.skip = function testSkip(
+    skipReason: string,
+    testName: string,
+    opts: TtestOpts | TtestBody<T>,
+    fn?: TtestBody<T>,
+  ) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
     }
-    global.it.skip(testName, testBodyWrapper(testName, fn));
+    global.it.skip(`${skipReason} ${testName}`, testBodyWrapper(testName, fn));
   };
 
+  /**
+   * @param {() => boolean} condition condition check
+   * @param {string} testName test case title
+   * @param {object|(fixtures?: any) => Promise<void> | any} opts test cases configuration options, or test case body
+   * @param {(fixtures?: any) => Promise<void> | any} [fn] test case body
+   * @returns {void}
+   */
   test.if = function testIf(condition, testName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
     }
     if (condition()) {
-      global.it(testName, testBodyWrapper(testName, fn));
+      test(testName, opts, fn);
     } else {
       global.it.skip(testName, testBodyWrapper(testName, fn));
     }

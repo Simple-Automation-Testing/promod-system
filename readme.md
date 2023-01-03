@@ -2,16 +2,21 @@
 	<h1 align="center"> PROMOD-SYSTEM </h1>
 	<p align="center"><img style="width:350px;height:300px;" src="./.docs/promod-system.png"/></p>
 
-  <h3 align="center">Designed for <a href="https://www.npmjs.com/package/promod">promod</a> - works with anyone</h3>
+  <h3 align="center">Designed for
+	<a href="https://www.npmjs.com/package/promod">promod</a> - works with anyone
+	</h3>
 </p>
 
 <h2> API </h2>
 <p>
-The purpose of this library is building of the TAF ecosystem which will not regardless of library or framework which you use for your automation testing
+The purpose of this library is building of the TAF ecosystem which will not
+regardless of library or framework which you use for your automation testing
 </p>
 
 <p><a href="/.docs/elements.md">Element(s)</a></p>
 <p><a href="/.docs/browser.md">Browser</a></p>
+
+<p><a href="/.docs/env.vars.md">PromodSystem env var usage</a></p>
 <p><a href="/.docs/system-element.md">PromodSystem base element</a></p>
 <p><a href="/.docs/system-structure.md">PromodSystem base structure</a></p>
 <p><a href="/.docs/system-collection.md">PromodSystem base collection</a></p>
@@ -60,26 +65,30 @@ const timeouts = {
 
 
 class BaseElement extends PromodSystemElement<PromodElementType> {
-  constructor(locator, name, rootElement) {
+  constructor(locator: string, name: string, rootElement) {
     super(locator, name, rootElement);
   }
 
 	/**
 	 * @info
-	 * this method should be overridden, it will be execute to wait visibility before next base methods
+	 * this method should be overridden,
+	 * method will be execute to wait visibility before next base methods
 	 * sendKeys, get, action
 	 * ! for isDisplayed method waitLoadedState will not be executed.
 	 */
   async waitLoadedState() {
     await waitForCondition(async () => this.rootElement.isDisplayed(), {
-			message: `Element ${this.identifier} with root selector ${this.rootLocator} should become visible during ${timeouts.l} ms.`
+			message: `Element ${this.identifier} with root selector ${this.rootLocator}
+should become visible during ${timeouts.l} ms.`
 			timeout: timeouts.l
 		});
   }
 
 	/**
 	 * @info
-	 * this method should be overridden, it will be execute inside sendKeys method, depends on base library/framework specific
+	 * this method should be overridden,
+	 * method will be execute inside sendKeys method
+	 * depends on base library/framework specific
 	 */
   async baseSendKeys(value): Promise<void> {
     await this.rootElement.sendKeys(value);
@@ -87,7 +96,9 @@ class BaseElement extends PromodSystemElement<PromodElementType> {
 
 	/**
 	 * @info
-	 * this method should be overridden, it will be execute inside get method, depends on base library/framework specific
+	 * this method should be overridden,
+	 * method will be execute inside get method
+	 * depends on base library/framework specific
 	 */
   async baseGetData(): Promise<{ background: any; value: any }> {
     return browser.executeScript(() =>  {
@@ -97,15 +108,13 @@ class BaseElement extends PromodSystemElement<PromodElementType> {
 				const text = arguments[0].innerText.trim()
 
 				return {background, value, rect, text}
-		},
-      await this.rootElement.getEngineElement(),
-    );
+		}, this.rootElement.getEngineElement());
   }
 }
 
 class BaseFragment extends PromodSystemStructure {
-  constructor(locator: string, structureName: string, rootElement: PromodElementType) {
-    super(locator, structureName, rootElement);
+  constructor(locator: string, name: string, rootElement: PromodElementType) {
+    super(locator, name, rootElement);
   }
 
   init(locator: string, name: string, Child: new (...args) => any, ...rest) {
@@ -124,7 +133,8 @@ class BaseFragment extends PromodSystemStructure {
 	 */
   async waitLoadedState() {
     await waitForCondition(async () => this.rootElement.isDisplayed(), {
-			message: `Fragment ${this.identifier} with root selector ${this.rootLocator} should become visible during ${timeouts.l} ms.`
+			message: `Fragment ${this.identifier} with root selector ${this.rootLocator}
+should become visible during ${timeouts.l} ms.`
 			timeout: timeouts.l
 		});
   }
@@ -145,13 +155,15 @@ class BasePage extends PromodSystemStructure {
 
 	/**
 	 * @info
-	 * this method should be overridden, it will be execute to wait visibility before next base methods
+	 * this method should be overridden,
+	 * method will be execute to wait visibility before next base methods
 	 * sendKeys, get, action
 	 * ! for isDisplayed method waitLoadedState will not be executed.
 	 */
   async waitLoadedState() {
     await waitForCondition(async () => this.rootElement.isDisplayed(), {
-			message: `Page ${this.identifier} with root selector ${this.rootLocator} should become visible during ${timeouts.l} ms.`
+			message: `Page ${this.identifier} with root selector ${this.rootLocator}
+			should become visible during ${timeouts.l} ms.`
 			timeout: timeouts.l
 		});
   }

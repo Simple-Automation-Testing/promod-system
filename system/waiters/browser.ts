@@ -3,7 +3,13 @@ import { config } from '../config';
 
 import type { IWaitConditionOpts } from './interfaces';
 
-const { browserAction } = config.get();
+const {
+  browserAction = {
+    getCurrentUrl: 'getCurrentUrl',
+    getTabs: 'getTabs',
+    getTitle: 'getTitle',
+  },
+} = config.get();
 
 /**
  * @param {object} browser browser interaction interface
