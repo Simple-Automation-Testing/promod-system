@@ -2,7 +2,7 @@ import { sleep } from 'sat-utils';
 import { equal } from 'node:assert';
 import { getPreparedRunner } from '../../system/test-runner/mocha';
 
-const { afterAll, test, beforeAll, afterEach, suite } = getPreparedRunner();
+const { afterAll, test, beforeAll, afterEach, suite, beforeEach } = getPreparedRunner();
 
 let suiteCall = 0;
 let testCall = 0;
@@ -23,6 +23,7 @@ afterEach(async () => {
   await sleep(50);
   afterEachCall++;
 });
+
 beforeEach(async () => {
   await sleep(50);
   beforeEachCall++;

@@ -1,9 +1,18 @@
 /* eslint-disable no-only-tests/no-only-tests, sonarjs/cognitive-complexity */
 import { isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
-import { reportersManager } from '../reporter';
 import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 
-import type { TreporterInstance } from '../reporter';
+const { warn } = console;
+
+export type TreporterInstance = {
+  startCase: (testCaseTitle: string) => void;
+
+  addStep: (stepData: string, stepArguments?: any, stepResult?: any) => void;
+  addCustomData?: (...args) => void;
+
+  finishSuccessCase: (testCaseTitle: string) => void;
+  finishFailedCase: (testCaseTitle: string, error: Error) => void;
+};
 
 type TtestOpts = {
   [k: string]: string | string[];
@@ -11,8 +20,6 @@ type TtestOpts = {
 
 type TtestBody<T> = (fixtures?: T) => Promise<void> | any;
 type TdescribeBody<T> = (fixtures?: T) => void;
-
-const reportersCreators: (() => TreporterInstance)[] = [];
 
 /**
  * @param {string|string[]} tags test cases tags
@@ -31,7 +38,76 @@ function checkExecutionTags(testTags?: string | string[]): boolean {
   return true;
 }
 
+const reportersManager = {
+  addReporter: (...args) => ({}),
+  startCase: (...args) => ({}),
+  addStep: (...args) => ({}),
+  addCustomData: (...args) => ({}),
+  finishSuccessCase: (...args) => ({}),
+  finishFailedCase: (...args) => ({}),
+  reset: (...args) => ({}),
+};
+
 function getPreparedRunner<T>(fixtures?: T) {
+  const reportersCreators: (() => TreporterInstance)[] = [];
+  const _reportersManager = (() => {
+    const activeReporters: TreporterInstance[] = [];
+
+    return {
+      addReporter: (reporter: TreporterInstance) => {
+        activeReporters.push(reporter);
+      },
+      reset: () => {
+        activeReporters.splice(0, activeReporters.length);
+      },
+      startCase: async (testCaseTitle: string) => {
+        for (const reporter of activeReporters) {
+          try {
+            await reporter.startCase(testCaseTitle);
+          } catch (error) {
+            warn(error);
+          }
+        }
+      },
+      addStep: async (stepData: string, stepArguments?: any, stepResult?: any) => {
+        for (const reporter of activeReporters) {
+          try {
+            await reporter.addStep(stepData, stepArguments, stepResult);
+          } catch (error) {
+            warn(error);
+          }
+        }
+      },
+      addCustomData: async (...args: any[]) => {
+        for (const reporter of activeReporters) {
+          try {
+            await reporter.addCustomData(...args);
+          } catch (error) {
+            warn(error);
+          }
+        }
+      },
+      finishSuccessCase: async (testCaseTitle: string) => {
+        for (const reporter of activeReporters) {
+          try {
+            await reporter.finishSuccessCase(testCaseTitle);
+          } catch (error) {
+            warn(error);
+          }
+        }
+      },
+      finishFailedCase: async (testCaseTitle: string, error: Error) => {
+        for (const reporter of activeReporters) {
+          try {
+            await reporter.finishFailedCase(testCaseTitle, error);
+          } catch (error) {
+            warn(error);
+          }
+        }
+      },
+    };
+  })();
+
   let _beforeEachCase;
   let _afterEachCase;
   let _afterAllCases;
@@ -56,11 +132,15 @@ function getPreparedRunner<T>(fixtures?: T) {
     updateSuiteName,
     updateCaseName,
     addReporters,
+    checkTest,
   };
 
   function testBodyWrapper(testName, fn) {
     return async function () {
       try {
+        // TODO improve this approach
+        Object.assign(reportersManager, _reportersManager);
+
         if (isFunction(_customTestPreExecution) || isAsyncFunction(_customTestPreExecution)) {
           const result = await _customTestPreExecution();
           if (!result) {
@@ -292,7 +372,11 @@ function getPreparedRunner<T>(fixtures?: T) {
     _customSuiteHook = fn;
   }
 
+  function checkTest(fn: (...args) => any) {
+    _customTestPreExecution = fn;
+  }
+
   return runner;
 }
 
-export { getPreparedRunner };
+export { getPreparedRunner, reportersManager };
