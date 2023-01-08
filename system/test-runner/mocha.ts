@@ -113,7 +113,7 @@ function getPreparedRunner<T>(fixtures?: T) {
   let _afterAllCases;
   let _beforeAllCases;
 
-  let _customTestPreExecution: () => Promise<boolean>;
+  let _customTestPreExecution: (testTitle: string, testBodyStringified: string) => boolean | Promise<boolean>;
   let _customTestPostExecution: () => Promise<boolean>;
 
   let _customSuiteHook: () => void;
@@ -142,7 +142,7 @@ function getPreparedRunner<T>(fixtures?: T) {
         Object.assign(reportersManager, _reportersManager);
 
         if (isFunction(_customTestPreExecution) || isAsyncFunction(_customTestPreExecution)) {
-          const result = await _customTestPreExecution();
+          const result = await _customTestPreExecution(testName, fn.toString());
           if (!result) {
             return;
           }
@@ -372,7 +372,7 @@ function getPreparedRunner<T>(fixtures?: T) {
     _customSuiteHook = fn;
   }
 
-  function checkTest(fn: (...args) => any) {
+  function checkTest(fn: (testTitle: string, testBodyStringified: string) => boolean | Promise<boolean>) {
     _customTestPreExecution = fn;
   }
 

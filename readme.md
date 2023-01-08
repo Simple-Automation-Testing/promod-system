@@ -17,6 +17,7 @@ regardless of library or framework which you use for your automation testing
 <p><a href="/.docs/browser.md">Browser</a></p>
 
 <p><a href="/.docs/env.vars.md">PromodSystem env var usage</a></p>
+<p><a href="/.docs/test-runner.md">PromodSystem test runner (powered by mocha)</a></p>
 <p><a href="/.docs/system-element.md">PromodSystem base element</a></p>
 <p><a href="/.docs/system-structure.md">PromodSystem base structure</a></p>
 <p><a href="/.docs/system-collection.md">PromodSystem base collection</a></p>

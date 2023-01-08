@@ -2,7 +2,7 @@
  * @returns {string[]}
  */
 function getArgumentTags(): string[] {
-  const tagsArgId = process.env.PROMOD_S_TAGS_ID || 'tags';
+  const tagsArgId = process.env.PROMOD_S_TAGS_ID || '--tags';
 
   return (
     process.argv
