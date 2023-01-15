@@ -53,6 +53,8 @@
     "wait for conditions"
   ],
   "dependencies": {
+    "dayjs": "^1.11.7",
+    "node-fetch": "2.6.8",
     "sat-utils": "1.5.3",
     "yargs": "17.5.0"
   }
