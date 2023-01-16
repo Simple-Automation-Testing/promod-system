@@ -8,18 +8,18 @@ async function fillTestCaseHistory() {
   if (!fs.existsSync(allTestCasesPath)) {
     throw new EvalError(`${allTestCasesPath} file does not exist, please run 'promod-system --fetch-testrail'`);
   }
+
   const testCases = require(allTestCasesPath);
+
   const withHistory = [];
   for (const testCase of testCases) {
     const history = await getTestCaseHistory(testCase.id);
-    await sleep(150);
+    await sleep(100);
     testCase.history = history;
     withHistory.push(testCase);
   }
 
-  require('fs').writeFileSync(allTestCasesWithHistoryPath, JSON.stringify(withHistory));
+  fs.writeFileSync(allTestCasesWithHistoryPath, JSON.stringify(withHistory));
 }
 
-module.exports = {
-  fillTestCaseHistory,
-};
+export { fillTestCaseHistory };

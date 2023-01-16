@@ -22,13 +22,15 @@ function getUpdatedTestCaseGroupedByMonthPerQA() {
   );
 
   function getUserById(id) {
-    return Object.keys(testrailReport.users).find(key => testrailReport.users[key] === id);
+    return (
+      Object.keys(testrailReport.users).find(key => testrailReport.users[key] === id) || 'Not part of the team anymore'
+    );
   }
 
   for (const month of Object.keys(testChanges)) {
     const monthChanges = testChanges[month];
     for (const testChange of monthChanges) {
-      const user = getUserById(testChange.created_by) || 'Not part of the team anymore';
+      const user = getUserById(testChange.created_by);
       if (perUser[user][month]) {
         perUser[user][month]++;
       } else {

@@ -1,20 +1,14 @@
 import * as fs from 'fs';
-import {
-  allTestCasesGroupedUpdationAutomationByMonthPath,
-  allTestCasesGroupedUpdationAutomationPerQAByMonthPath,
-} from './constants';
-import { config } from '../config/config';
+import { config } from '../../config/config';
 
 const { testrailReport } = config.get();
 
-function getUpdatedAutomationTestCaseGroupedByMonthPerQA() {
-  if (!fs.existsSync(allTestCasesGroupedUpdationAutomationByMonthPath)) {
-    throw new EvalError(
-      `${allTestCasesGroupedUpdationAutomationByMonthPath} file does not exist, please run 'promod-system --fetch-testrail-by-month-updates'`,
-    );
+function getBaseAutomationTestCaseGroupedByMonthPerQA(source, resultPath) {
+  if (!fs.existsSync(source)) {
+    throw new EvalError(`${source} file does not exist, please run 'promod-system --fetch-testrail-by-month-updates'`);
   }
 
-  const testChanges = require(allTestCasesGroupedUpdationAutomationByMonthPath);
+  const testChanges = require(source);
 
   const perUser = Object.keys(testrailReport.users).reduce(
     (acc, userName) => {
@@ -43,7 +37,7 @@ function getUpdatedAutomationTestCaseGroupedByMonthPerQA() {
     }
   }
 
-  fs.writeFileSync(allTestCasesGroupedUpdationAutomationPerQAByMonthPath, JSON.stringify(perUser));
+  fs.writeFileSync(resultPath, JSON.stringify(perUser));
 }
 
-export { getUpdatedAutomationTestCaseGroupedByMonthPerQA };
+export { getBaseAutomationTestCaseGroupedByMonthPerQA };

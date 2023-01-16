@@ -1,12 +1,9 @@
 import * as fs from 'fs';
-import { allTestCasesWithHistoryPath, allTestCasesGroupedUpdationAutomationByMonthPath } from './constants';
-import { getDateInterface } from './date';
-import { config } from '../config/config';
-
-const { testrailReport } = config.get();
+import { getDateInterface } from '../date';
+import { allTestCasesWithHistoryPath } from '../constants';
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
-function createReportByMonthAutomationUpdates(starDate: string, periodInMonthes: number) {
+function createReportByMonthAutomation(starDate: string, periodInMonthes: number, config, resultPath) {
   if (!fs.existsSync(allTestCasesWithHistoryPath)) {
     throw new EvalError(
       `${allTestCasesWithHistoryPath} file does not exist, please run 'promod-system --fetch-testrail-history'`,
@@ -18,7 +15,7 @@ function createReportByMonthAutomationUpdates(starDate: string, periodInMonthes:
   let iteration = 1;
   const { getMonthRangeInUnixBy } = getDateInterface(starDate);
   while (iteration <= periodInMonthes) {
-    const { startUnix, endUnix, id } = getMonthRangeInUnixBy(starDate);
+    const { startUnix, endUnix, id } = getMonthRangeInUnixBy(iteration);
 
     const filteredByMonth = testCases.reduce((acc, { history: { history } }) => {
       // @ts-ignore
@@ -27,9 +24,9 @@ function createReportByMonthAutomationUpdates(starDate: string, periodInMonthes:
           if (changes) {
             return changes.some(change => {
               return (
-                change.field === testrailReport.automationId &&
-                change?.old_text?.trim() === testrailReport.from &&
-                change?.new_text?.trim() === testrailReport.to
+                change.field === config.id &&
+                change?.old_text?.trim() === config.from &&
+                change?.new_text?.trim() === config.to
               );
             });
           }
@@ -51,9 +48,11 @@ function createReportByMonthAutomationUpdates(starDate: string, periodInMonthes:
     }, []);
 
     data[id] = filteredByMonth;
+
+    iteration++;
   }
 
-  fs.writeFileSync(allTestCasesGroupedUpdationAutomationByMonthPath, JSON.stringify(data));
+  fs.writeFileSync(resultPath, JSON.stringify(data));
 }
 
-export { createReportByMonthAutomationUpdates };
+export { createReportByMonthAutomation };

@@ -3,12 +3,12 @@ import * as advancedFormat from 'dayjs/plugin/advancedFormat';
 
 dayjs.extend(advancedFormat);
 
-function getDateInterface(startData: string = '01/01/2021') {
+function getDateInterface(startData: string = dayjs().format('MM/DD/YYYY')) {
   const startDate = dayjs(startData, 'MM/DD/YYYY');
 
-  function getMonthRangeInUnixBy(addMonth) {
-    const end = startDate.add(addMonth, 'M');
-    const start = end.subtract(1, 'M');
+  function getMonthRangeInUnixBy(monthFromDate) {
+    const end = startDate.subtract(monthFromDate, 'M');
+    const start = end.subtract(monthFromDate + 1, 'M');
 
     const startUnix = +start.format('X');
     const endUnix = +end.format('X');
