@@ -23,7 +23,7 @@ function createReportByMonthUpdates(starDate: string, periodInMonthes: number) {
 
     const filteredByMonth = testCases.reduce((acc, { history: { history } }) => {
       const properChangesInCurrentMonth = history.filter(({ changes, created_on }) => {
-        if (created_on >= startUnix && created_on <= endUnix) {
+        if (created_on > startUnix && created_on < endUnix) {
           if (changes) {
             return changes.some(change => testrailReport.countAsChanges.includes(change.field));
           }

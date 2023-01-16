@@ -1,7 +1,7 @@
 import { config } from '../../config/config';
 
 import { allTestCasesGroupedUpdationAutomationByMonthPath } from '../constants';
-import { createReportByMonthAutomation } from './tr.cases.by.monthes.base.automation';
+import { createReportByMonthAutomation } from './base.cases.by.monthes.automation';
 
 const { testrailReport } = config.get();
 

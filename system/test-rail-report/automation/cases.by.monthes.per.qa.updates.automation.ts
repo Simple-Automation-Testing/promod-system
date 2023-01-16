@@ -2,7 +2,7 @@ import {
   allTestCasesGroupedUpdationAutomationByMonthPath,
   allTestCasesGroupedUpdationAutomationPerQAByMonthPath,
 } from '../constants';
-import { getBaseAutomationTestCaseGroupedByMonthPerQA } from './tr.cases.by.monthes.per.qa.base.automation';
+import { getBaseAutomationTestCaseGroupedByMonthPerQA } from './base.cases.by.monthes.per.qa.automation';
 
 function getUpdatedAutomationTestCaseGroupedByMonthPerQA() {
   getBaseAutomationTestCaseGroupedByMonthPerQA(

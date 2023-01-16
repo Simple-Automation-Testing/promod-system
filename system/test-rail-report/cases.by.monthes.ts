@@ -17,7 +17,7 @@ function getTestCaseGroupedByMonth(starDate: string, periodInMonthes: number) {
     const { startUnix, endUnix, id } = getMonthRangeInUnixBy(iteration++);
 
     const filteredByMonth = testCases
-      .filter(({ created_on }) => created_on >= startUnix && endUnix >= created_on)
+      .filter(({ created_on }) => created_on > startUnix && endUnix > created_on)
       .map(({ created_by, title }) => ({ created_by, title }));
 
     data[id] = filteredByMonth;

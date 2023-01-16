@@ -8,7 +8,7 @@ function getDateInterface(startData: string = dayjs().format('MM/DD/YYYY')) {
 
   function getMonthRangeInUnixBy(monthFromDate) {
     const end = startDate.subtract(monthFromDate, 'M');
-    const start = end.subtract(monthFromDate + 1, 'M');
+    const start = end.subtract(1, 'M');
 
     const startUnix = +start.format('X');
     const endUnix = +end.format('X');

@@ -1,7 +1,7 @@
 import { config } from '../../config/config';
 
-import { allTestCasesGroupedNewAutomationByMonthPath } from '../constants';
-import { createReportByMonthAutomation } from './tr.cases.by.monthes.base.automation';
+import { allTestCasesGroupedCreationAutomationByMonthPath } from '../constants';
+import { createReportByMonthAutomation } from './base.cases.by.monthes.automation';
 
 const { testrailReport } = config.get();
 
@@ -10,7 +10,7 @@ function createReportByMonthAutomationNew(starDate: string, periodInMonthes: num
     starDate,
     periodInMonthes,
     testrailReport.automationNew,
-    allTestCasesGroupedNewAutomationByMonthPath,
+    allTestCasesGroupedCreationAutomationByMonthPath,
   );
 }
 
