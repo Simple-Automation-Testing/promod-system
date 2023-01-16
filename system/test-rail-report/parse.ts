@@ -33,7 +33,7 @@ function parseReportToConsoleOutput() {
 
       return monthCreationReportPeach;
     }, '');
-    report += `\n${creationByMonthes}\n${getSeparator()}`;
+    report += `\nGrouped by month creation.\n${creationByMonthes}\n${getSeparator()}`;
   }
   if (fs.existsSync(allTestCasesGroupedCreationPerQAByMonthPathQAPath)) {
     const creationMonthPerQA = require(allTestCasesGroupedCreationPerQAByMonthPathQAPath);
@@ -52,7 +52,7 @@ function parseReportToConsoleOutput() {
       return monthCreationPerQAReportPeach;
     }, '');
 
-    report += `\n${creationByMonthesPerQA}\n${getSeparator()}`;
+    report += `\nGrouped by month creation per QA.\n${creationByMonthesPerQA}\n${getSeparator()}`;
   }
   if (fs.existsSync(allTestCasesGroupedUpdationByMonthPath)) {
     const monthesBasedData = require(allTestCasesGroupedUpdationByMonthPath);
@@ -62,7 +62,7 @@ function parseReportToConsoleOutput() {
 
       return monthCreationReportPeach;
     }, '');
-    report += `\n${creationByMonthes}\n${getSeparator()}`;
+    report += `\nGrouped by month updation.\n${creationByMonthes}\n${getSeparator()}`;
   }
   if (fs.existsSync(allTestCasesGroupedUpdationPerQAByMonthPath)) {
     const creationMonthPerQA = require(allTestCasesGroupedUpdationPerQAByMonthPath);
@@ -81,7 +81,7 @@ function parseReportToConsoleOutput() {
       return monthCreationPerQAReportPeach;
     }, '');
 
-    report += `\n Updation ${creationByMonthesPerQA}\n${getSeparator()}`;
+    report += `\nGrouped by month updation per QA.\n${creationByMonthesPerQA}\n${getSeparator()}`;
   }
   if (fs.existsSync(allTestCasesGroupedCreationAutomationByMonthPath)) {
     const monthesBasedData = require(allTestCasesGroupedCreationAutomationByMonthPath);
@@ -91,7 +91,7 @@ function parseReportToConsoleOutput() {
 
       return monthCreationReportPeach;
     }, '');
-    report += `\n${creationByMonthes}\n${getSeparator()}`;
+    report += `\nGrouped by month automation.\n${creationByMonthes}\n${getSeparator()}`;
   }
   if (fs.existsSync(allTestCasesGroupedCreationAutomationPerQAByMonthPath)) {
     const creationMonthPerQA = require(allTestCasesGroupedCreationAutomationPerQAByMonthPath);
@@ -110,7 +110,7 @@ function parseReportToConsoleOutput() {
       return monthCreationPerQAReportPeach;
     }, '');
 
-    report += `\n Creation ${creationByMonthesPerQA}\n${getSeparator()}`;
+    report += `\nGrouped by month automation per QA.\n${creationByMonthesPerQA}\n${getSeparator()}`;
   }
   if (fs.existsSync(allTestCasesGroupedUpdationAutomationByMonthPath)) {
     const monthesBasedData = require(allTestCasesGroupedUpdationAutomationByMonthPath);
@@ -120,7 +120,7 @@ function parseReportToConsoleOutput() {
 
       return monthCreationReportPeach;
     }, '');
-    report += `\n${creationByMonthes}\n${getSeparator()}`;
+    report += `\nGrouped by month automation update.\n${creationByMonthes}\n${getSeparator()}`;
   }
   if (fs.existsSync(allTestCasesGroupedUpdationAutomationPerQAByMonthPath)) {
     const creationMonthPerQA = require(allTestCasesGroupedUpdationAutomationPerQAByMonthPath);
@@ -139,7 +139,7 @@ function parseReportToConsoleOutput() {
       return monthCreationPerQAReportPeach;
     }, '');
 
-    report += `\n Updation ${creationByMonthesPerQA}\n${getSeparator()}`;
+    report += `Grouped by month automation update per QA.\n${creationByMonthesPerQA}\n${getSeparator()}`;
   }
 
   console.log(report);
