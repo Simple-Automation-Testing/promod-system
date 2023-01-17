@@ -139,7 +139,7 @@ function parseReportToConsoleOutput() {
       return monthCreationPerQAReportPeach;
     }, '');
 
-    report += `Grouped by month automation update per QA.\n${creationByMonthesPerQA}\n${getSeparator()}`;
+    report += `\nGrouped by month automation update per QA.\n${creationByMonthesPerQA}\n${getSeparator()}`;
   }
 
   console.log(report);

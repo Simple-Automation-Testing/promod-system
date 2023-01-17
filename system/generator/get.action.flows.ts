@@ -1,11 +1,24 @@
 /* eslint-disable sonarjs/no-nested-template-literals, no-console */
-import { camelize, isArray, isNotEmptyArray } from 'sat-utils';
+import { isObject, camelize, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../config/config';
 import { getElementsTypes, getFragmentTypes } from './get.instance.elements.type';
 import { checkThatFragmentHasItemsToAction } from './check.that.action.exists';
 import { checkThatElementHasAction } from './get.base';
 
 const noTransormTypes = new Set(['void', 'boolean']);
+
+function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType) {
+  const { collectionActionTypes } = config.get();
+
+  if (noTransormTypes.has(resultTypeClarification.trim())) {
+    return false;
+  }
+
+  return !(
+    isObject(collectionActionTypes) &&
+    Object.values(collectionActionTypes).some(collectionAction => argumentType.startsWith(collectionAction))
+  );
+}
 
 function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field }) {
   const { repeatingActions = [] } = config.get();
@@ -39,9 +52,9 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
   }
 
   const resultTypeClarification = flowResultType === 'void' && optionsSecondArgument ? 'boolean' : flowResultType;
-  const callResultType = noTransormTypes.has(resultTypeClarification.trim())
-    ? `${typeName}Result`
-    : `TresultBasedOnArgument<Tentry, ${typeName}Result>`;
+  const callResultType = shouldResultTypeBeBasedOnArgument(resultTypeClarification, flowArgumentType)
+    ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
+    : `${typeName}Result`;
 
   return `
 type ${typeName} = ${flowArgumentType}
@@ -82,9 +95,9 @@ function createFlowTemplateForPageElements(name, action, instance) {
     : '';
   // TODO waiters returns boolean if error was not thrown
   const resultTypeClarification = flowResultType === 'void' && optionsSecondArgument ? 'boolean' : flowResultType;
-  const callResultType = noTransormTypes.has(resultTypeClarification.trim())
-    ? `${typeName}Result`
-    : `TresultBasedOnArgument<Tentry, ${typeName}Result>`;
+  const callResultType = shouldResultTypeBeBasedOnArgument(resultTypeClarification, flowArgumentType)
+    ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
+    : `${typeName}Result`;
 
   return `
 type ${typeName} = ${flowArgumentType}
