@@ -46,6 +46,11 @@ const allTestCasesGroupedCreationAutomationPerQAByMonthPath = resolve(
   './all.testcases.new.automation.perqa.month.json',
 );
 
+const allTestRunsPath = resolve(testrailReport.outputDir, './all.testruns.json');
+const allTestRunsWithDetailsPath = resolve(testrailReport.outputDir, './all.testruns.details.json');
+const allTestRunsGroupedByMonthesPath = resolve(testrailReport.outputDir, './all.testruns.month.json');
+const allTestRunsGroupedByMonthesPerQAPath = resolve(testrailReport.outputDir, './all.testruns.perqa.month.json');
+
 export {
   allTestCasesPath,
   allTestCasesGroupedCreationByMonthPath,
@@ -57,4 +62,8 @@ export {
   allTestCasesGroupedUpdationAutomationPerQAByMonthPath,
   allTestCasesGroupedCreationAutomationByMonthPath,
   allTestCasesGroupedCreationAutomationPerQAByMonthPath,
+  allTestRunsPath,
+  allTestRunsWithDetailsPath,
+  allTestRunsGroupedByMonthesPath,
+  allTestRunsGroupedByMonthesPerQAPath,
 };
