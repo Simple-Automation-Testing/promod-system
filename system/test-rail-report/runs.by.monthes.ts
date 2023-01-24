@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { isNumber } from 'sat-utils';
 import { allTestRunsGroupedByMonthesPath, allTestRunsWithDetailsPath } from './constants';
 import { getDateInterface } from './date';
 
@@ -23,7 +24,7 @@ function getTestRunsGroupedByMonth(starDate: string, periodInMonthes: number) {
     // https://support.gurock.com/hc/en-us/articles/7077935129364-Statuses#getstatuses
     const cases = filteredByMonth
       .flatMap(testRun => testRun.details)
-      .filter(({ status_id }) => status_id !== 3)
+      .filter(item => isNumber(item.status_id) && item.status_id !== 3)
       .map(({ created_by }) => ({ created_by }));
 
     data[id] = cases;

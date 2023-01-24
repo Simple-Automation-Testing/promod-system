@@ -18,7 +18,7 @@ const allTestCasesPath = resolve(testrailReport.outputDir, './all.testcases.json
 const allTestCasesWithHistoryPath = resolve(testrailReport.outputDir, './all.testcases.with.history.json');
 
 const allTestCasesGroupedCreationByMonthPath = resolve(testrailReport.outputDir, './all.testcases.creation.month.json');
-const allTestCasesGroupedCreationPerQAByMonthPathQAPath = resolve(
+const allTestCasesGroupedCreationByMonthPerQAPath = resolve(
   testrailReport.outputDir,
   './all.testcases.creation.perqa.month.json',
 );
@@ -48,13 +48,18 @@ const allTestCasesGroupedCreationAutomationPerQAByMonthPath = resolve(
 
 const allTestRunsPath = resolve(testrailReport.outputDir, './all.testruns.json');
 const allTestRunsWithDetailsPath = resolve(testrailReport.outputDir, './all.testruns.details.json');
+const testRunsWithDetailsPath = id => resolve(testrailReport.outputDir, `./${id}.testruns.details.json`);
 const allTestRunsGroupedByMonthesPath = resolve(testrailReport.outputDir, './all.testruns.month.json');
 const allTestRunsGroupedByMonthesPerQAPath = resolve(testrailReport.outputDir, './all.testruns.perqa.month.json');
+
+const testRunsWithExecutionReportHTML = id => resolve(testrailReport.outputDir, `./${id}.testruns.details.html`);
+
+const generalReportPath = resolve(testrailReport.outputDir, './general.qa.report.html');
 
 export {
   allTestCasesPath,
   allTestCasesGroupedCreationByMonthPath,
-  allTestCasesGroupedCreationPerQAByMonthPathQAPath,
+  allTestCasesGroupedCreationByMonthPerQAPath,
   allTestCasesWithHistoryPath,
   allTestCasesGroupedUpdationByMonthPath,
   allTestCasesGroupedUpdationPerQAByMonthPath,
@@ -66,4 +71,7 @@ export {
   allTestRunsWithDetailsPath,
   allTestRunsGroupedByMonthesPath,
   allTestRunsGroupedByMonthesPerQAPath,
+  testRunsWithDetailsPath,
+  testRunsWithExecutionReportHTML,
+  generalReportPath,
 };

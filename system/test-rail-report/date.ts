@@ -3,6 +3,20 @@ import * as advancedFormat from 'dayjs/plugin/advancedFormat';
 
 dayjs.extend(advancedFormat);
 
+function sortMonthes(monthes: string[]) {
+  return monthes.sort((firstMonth, secondMonth) => {
+    const first = +dayjs(firstMonth, 'YYYY MMMM').format('X');
+    const second = +dayjs(secondMonth, 'YYYY MMMM').format('X');
+    if (first > second) {
+      return 1;
+    }
+    if (first < second) {
+      return -1;
+    }
+    return 0;
+  });
+}
+
 function getDateInterface(startData: string = dayjs().format('MM/DD/YYYY')) {
   const startDate = dayjs(startData, 'MM/DD/YYYY');
 
@@ -26,4 +40,4 @@ function getDateInterface(startData: string = dayjs().format('MM/DD/YYYY')) {
   };
 }
 
-export { getDateInterface };
+export { getDateInterface, sortMonthes };

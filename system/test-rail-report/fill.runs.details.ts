@@ -1,8 +1,54 @@
+/* eslint-disable no-console */
 import * as fs from 'fs';
-import { sleep } from 'sat-utils';
-import { allTestRunsPath, allTestRunsWithDetailsPath, allTestCasesPath } from './constants';
+import { resolve, basename } from 'path';
+import { getDirFilesList, shuffleArr, isUndefined } from 'sat-utils';
+import { testRunsWithDetailsPath, allTestRunsPath, allTestCasesPath, allTestRunsWithDetailsPath } from './constants';
+
+import { config } from '../config/config';
+
+const {
+  testrailReport = {
+    outputDir: resolve(process.cwd(), './.testraildata'),
+  },
+} = config.get();
 
 import { getAllTestCaseExecutionResult } from './api.calls';
+
+function getTestRunsFiles() {
+  if (fs.existsSync(testrailReport.outputDir)) {
+    return getDirFilesList(testrailReport.outputDir).filter(
+      item => basename(item).includes('testruns.details') && !basename(item).includes('all.testruns.details'),
+    );
+  }
+
+  return [];
+}
+
+function findWithoutDetails() {
+  const files = getTestRunsFiles();
+
+  for (const file of files) {
+    const data = require(file);
+    if (isUndefined(data.details)) {
+      console.error(file);
+    }
+  }
+}
+
+function mergeTestRuns() {
+  const files = getTestRunsFiles();
+
+  const allTestRunsDetails = [];
+  for (const file of files) {
+    allTestRunsDetails.push(require(file));
+  }
+
+  fs.writeFileSync(allTestRunsWithDetailsPath, JSON.stringify(allTestRunsDetails));
+}
+
+function getAlreadyStoredRunsIds() {
+  return getTestRunsFiles().map(item => +basename(item).match(/\d+/gim)[0]);
+}
 
 async function fillTestrunDetails() {
   if (!fs.existsSync(allTestRunsPath)) {
@@ -12,12 +58,21 @@ async function fillTestrunDetails() {
   const testCases = require(allTestCasesPath);
   const testRuns = require(allTestRunsPath);
 
-  const withDetails = [];
+  let testRunsToPerform: any[] = shuffleArr(
+    testRuns.filter(testRun => !getAlreadyStoredRunsIds().includes(testRun.id)),
+  );
 
-  for (const testRun of testRuns) {
+  while (testRunsToPerform.length) {
+    const [testRun] = testRunsToPerform.splice(0, 1);
+
     const runId = testRun.id;
     const suiteId = testRun.suite_id;
-    const casesFromSuite = testCases.filter(testCase => testCase.suite_id === suiteId);
+    // create placeholder for parallel workers
+    fs.writeFileSync(testRunsWithDetailsPath(runId), JSON.stringify(testRun));
+
+    const casesFromSuite = testCases.filter(
+      testCase => testCase.created_on <= testRun.created_on && testCase.suite_id === suiteId,
+    );
     const testRunDetails = [];
 
     for (const testCase of casesFromSuite) {
@@ -26,12 +81,11 @@ async function fillTestrunDetails() {
     }
 
     testRun.details = testRunDetails;
-    withDetails.push(testRun);
 
-    await sleep(100);
+    fs.writeFileSync(testRunsWithDetailsPath(runId), JSON.stringify(testRun));
+
+    testRunsToPerform = shuffleArr(testRuns.filter(testRun => !getAlreadyStoredRunsIds().includes(testRun.id)));
   }
-
-  fs.writeFileSync(allTestRunsWithDetailsPath, JSON.stringify(withDetails));
 }
 
-export { fillTestrunDetails };
+export { fillTestrunDetails, mergeTestRuns, findWithoutDetails };

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { config } from '../config/config';
-import { allTestCasesGroupedCreationByMonthPath, allTestCasesGroupedCreationPerQAByMonthPathQAPath } from './constants';
+import { allTestCasesGroupedCreationByMonthPath, allTestCasesGroupedCreationByMonthPerQAPath } from './constants';
 
 const { testrailReport } = config.get();
 
@@ -39,7 +39,7 @@ function createProductivityByQAPerMonth() {
     }
   }
 
-  fs.writeFileSync(allTestCasesGroupedCreationPerQAByMonthPathQAPath, JSON.stringify(perUser));
+  fs.writeFileSync(allTestCasesGroupedCreationByMonthPerQAPath, JSON.stringify(perUser));
 }
 
 export { createProductivityByQAPerMonth };

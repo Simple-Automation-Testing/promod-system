@@ -46,7 +46,7 @@ async function getAllTestRunResults(runId: number | string) {
   while (body._links && body._links.next && new URLSearchParams(body._links.next).get('offset')) {
     body = await getTestRunResults(runId, `&offset=${new URLSearchParams(body._links.next).get('offset')}`);
     testRunsResults.push(...body.results);
-    await sleep(100);
+    await sleep(30);
   }
 
   return testRunsResults;
@@ -59,13 +59,22 @@ async function getTestCaseExecutionResult(runId: number | string, caseId: string
       'Content-Type': 'application/json',
       Authorization: `Basic ${testrailReport.basicToken}`,
     },
-  }).then(res => res.json());
+  })
+    .then(res => res.json())
+    .catch(e => {
+      promodLogger.error(e);
+
+      return getTestCaseExecutionResult(runId, caseId, filters);
+    });
 }
 
 async function getAllTestCaseExecutionResult(runId: number | string, caseId: string | number) {
   const testRunResults = [];
   let body = await getTestCaseExecutionResult(runId, caseId);
-  testRunResults.push(...body.results);
+
+  if (body.results) {
+    testRunResults.push(...body.results);
+  }
 
   while (body._links && body._links.next && new URLSearchParams(body._links.next).get('offset')) {
     body = await getTestCaseExecutionResult(
@@ -74,7 +83,7 @@ async function getAllTestCaseExecutionResult(runId: number | string, caseId: str
       `&offset=${new URLSearchParams(body._links.next).get('offset')}`,
     );
     testRunResults.push(...body.results);
-    await sleep(100);
+    await sleep(30);
   }
 
   return testRunResults;
