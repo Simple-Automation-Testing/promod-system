@@ -1,6 +1,8 @@
 /* eslint-disable no-console, sonarjs/no-identical-functions */
 import * as fs from 'fs';
-import { lengthToIndexesArray } from 'sat-utils';
+import * as path from 'path';
+import { lengthToIndexesArray, getDirFilesList } from 'sat-utils';
+import { config } from '../config/config';
 import {
   allTestCasesPath,
   allTestCasesGroupedCreationByMonthPath,
@@ -14,8 +16,13 @@ import {
   allTestRunsWithDetailsPath,
   allTestRunsGroupedByMonthesPath,
   allTestRunsGroupedByMonthesPerQAPath,
+  allBugsGroupedCreationByMonthPerQAPath,
+  allStoriesGroupedByTestingMonthPath,
+  allStoriesGroupedByTestingMonthPerQAPath,
 } from './constants';
 import { sortMonthes } from './date';
+
+const { testrailReport } = config.get();
 
 import { createExecutionReport, extendGeneralReport } from './report.templates';
 
@@ -23,6 +30,21 @@ function getSeparator() {
   return lengthToIndexesArray(40)
     .map(() => '-')
     .join('');
+}
+
+function getAllAvailableCreatedBugs() {
+  const bugsFiles = getDirFilesList(testrailReport.outputDir).filter(filePath => filePath.endsWith('bugs.json'));
+  const bugs = [];
+  for (const bugFile of bugsFiles) {
+    const availableBugs = require(bugFile);
+    bugs.push(...availableBugs);
+  }
+
+  return bugs;
+}
+
+function transformBugsToMonthPerQAFormat() {
+  const allBugs = getAllAvailableCreatedBugs();
 }
 
 function parseByMonth(pathToFile: string, title: string, description: string) {
@@ -78,12 +100,15 @@ function parseReportToConsoleOutput() {
     report += parseByMonthPerQA(allTestRunsGroupedByMonthesPerQAPath, 'Grouped by testrun execution per QA');
   }
 
+  return console.log(report);
+
   if (fs.existsSync(allTestCasesGroupedCreationByMonthPath)) {
     report += parseByMonth(allTestCasesGroupedCreationByMonthPath, 'Grouped by month creation', 'new cases');
   }
   if (fs.existsSync(allTestCasesGroupedCreationByMonthPerQAPath)) {
     report += parseByMonthPerQA(allTestCasesGroupedCreationByMonthPerQAPath, 'Grouped by month creation per QA');
   }
+
   if (fs.existsSync(allTestCasesGroupedUpdationByMonthPath)) {
     report += parseByMonth(allTestCasesGroupedCreationByMonthPath, 'Grouped by month updation', 'updated cases');
   }
@@ -192,25 +217,6 @@ type TreportType = {
 function parseGeneralReport() {
   const reportExtensions: TreportType[] = [];
 
-  if (fs.existsSync(allTestRunsGroupedByMonthesPerQAPath) && fs.existsSync(allTestRunsGroupedByMonthesPath)) {
-    const dataSet = require(allTestRunsGroupedByMonthesPerQAPath);
-    const monthData = require(allTestRunsGroupedByMonthesPath);
-
-    const monthDataAligned = Object.keys(monthData).reduce((data, key) => {
-      data[key] = monthData[key].length;
-
-      return data;
-    }, {});
-
-    dataSet['Total executed'] = monthDataAligned;
-
-    const dataDescriptors = Object.keys(monthData);
-
-    const testRunExecutions: TreportType = { reportId: 'execution', dataDescriptors, dataSet };
-
-    reportExtensions.push(testRunExecutions);
-  }
-
   if (
     fs.existsSync(allTestCasesGroupedCreationByMonthPath) &&
     fs.existsSync(allTestCasesGroupedCreationAutomationByMonthPath)
@@ -252,6 +258,55 @@ function parseGeneralReport() {
     reportExtensions.push(testsBurndown);
   }
 
+  if (fs.existsSync(allTestRunsGroupedByMonthesPerQAPath) && fs.existsSync(allTestRunsGroupedByMonthesPath)) {
+    const dataSet = require(allTestRunsGroupedByMonthesPerQAPath);
+    const monthData = require(allTestRunsGroupedByMonthesPath);
+
+    if (fs.existsSync(allBugsGroupedCreationByMonthPerQAPath)) {
+      const createdBugs = require(allBugsGroupedCreationByMonthPerQAPath);
+      Object.assign(
+        dataSet,
+        Object.keys(createdBugs).reduce((bugsPerQA, key) => {
+          bugsPerQA[`${key} new bugs`] = createdBugs[key];
+
+          return bugsPerQA;
+        }, {}),
+      );
+    }
+
+    const monthDataAligned = Object.keys(monthData).reduce((data, key) => {
+      data[key] = monthData[key].length;
+
+      return data;
+    }, {});
+
+    dataSet['Total executed'] = monthDataAligned;
+
+    const dataDescriptors = sortMonthes(Object.keys(monthData));
+
+    const testRunExecutions: TreportType = { reportId: 'execution', dataDescriptors, dataSet };
+
+    reportExtensions.push(testRunExecutions);
+  }
+
+  if (fs.existsSync(allStoriesGroupedByTestingMonthPath) && fs.existsSync(allStoriesGroupedByTestingMonthPerQAPath)) {
+    const dataSet = require(allStoriesGroupedByTestingMonthPerQAPath);
+    const monthData = require(allStoriesGroupedByTestingMonthPath);
+
+    const monthDataAligned = Object.keys(monthData).reduce((data, key) => {
+      data[key] = monthData[key].length;
+
+      return data;
+    }, {});
+
+    dataSet['Total stories'] = monthDataAligned;
+
+    const dataDescriptors = sortMonthes(Object.keys(monthData));
+
+    const testRunExecutions: TreportType = { reportId: 'story_testing', dataDescriptors, dataSet };
+
+    reportExtensions.push(testRunExecutions);
+  }
   reportExtensions.forEach(data => extendGeneralReport(data));
 }
 

@@ -56,6 +56,27 @@ const testRunsWithExecutionReportHTML = id => resolve(testrailReport.outputDir, 
 
 const generalReportPath = resolve(testrailReport.outputDir, './general.qa.report.html');
 
+const allBugsGroupedCreationByMonthPath = resolve(testrailReport.outputDir, './all.bugs.creation.month.json');
+const allBugsGroupedCreationByMonthPerQAPath = resolve(
+  testrailReport.outputDir,
+  './all.bugs.creation.perqa.month.json',
+);
+
+const allStoriesGroupedByTestingMonthPath = resolve(testrailReport.outputDir, './all.stories.testing.month.json');
+const allStoriesGroupedByTestingMonthPerQAPath = resolve(
+  testrailReport.outputDir,
+  './all.stories.testing.perqa.month.json',
+);
+
+const allStoriesGroupedByTestingMonthStoryPointsPath = resolve(
+  testrailReport.outputDir,
+  './all.stories.testing.month.story.points.json',
+);
+const allStoriesGroupedByTestingMonthStoryPointsPerQAPath = resolve(
+  testrailReport.outputDir,
+  './all.stories.testing.perqa.month.story.points.json',
+);
+
 export {
   allTestCasesPath,
   allTestCasesGroupedCreationByMonthPath,
@@ -73,5 +94,11 @@ export {
   allTestRunsGroupedByMonthesPerQAPath,
   testRunsWithDetailsPath,
   testRunsWithExecutionReportHTML,
+  allBugsGroupedCreationByMonthPath,
+  allBugsGroupedCreationByMonthPerQAPath,
+  allStoriesGroupedByTestingMonthPath,
+  allStoriesGroupedByTestingMonthPerQAPath,
+  allStoriesGroupedByTestingMonthStoryPointsPath,
+  allStoriesGroupedByTestingMonthStoryPointsPerQAPath,
   generalReportPath,
 };

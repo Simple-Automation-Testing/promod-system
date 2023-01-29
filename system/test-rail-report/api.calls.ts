@@ -61,8 +61,8 @@ async function getTestCaseExecutionResult(runId: number | string, caseId: string
     },
   })
     .then(res => res.json())
-    .catch(e => {
-      promodLogger.error(e);
+    .catch(error => {
+      promodLogger.error(error);
 
       return getTestCaseExecutionResult(runId, caseId, filters);
     });
