@@ -1,16 +1,15 @@
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+
+const argv = yargs(hideBin(process.argv)).argv;
+
 /**
  * @returns {string[]}
  */
 function getArgumentTags(): string[] {
-  const tagsArgId = process.env.PROMOD_S_TAGS_ID || '--tags';
+  const tagsArgId = process.env.PROMOD_S_TAGS_ID || 'tags';
 
-  return (
-    process.argv
-      .slice(2)
-      .find(arg => arg.includes(tagsArgId))
-      ?.replace(tagsArgId, '')
-      ?.split(',') || []
-  );
+  return argv[tagsArgId]?.split(',') || [];
 }
 
 /**
