@@ -1,8 +1,8 @@
-/* eslint-disable no-only-tests/no-only-tests, sonarjs/cognitive-complexity */
+/* eslint-disable no-console, no-only-tests/no-only-tests, sonarjs/cognitive-complexity */
 import { isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
 import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 
-const { warn } = console;
+const { warn, error } = console;
 
 export type TreporterInstance = {
   startCase: (testCaseTitle: string) => void;
@@ -47,6 +47,8 @@ const reportersManager = {
   finishFailedCase: (...args) => ({}),
   reset: (...args) => ({}),
 };
+
+let _suiteAdditionalCall;
 
 function getPreparedRunner<T>(fixtures?: T) {
   const reportersCreators: (() => TreporterInstance)[] = [];
@@ -147,7 +149,15 @@ function getPreparedRunner<T>(fixtures?: T) {
             return;
           }
         }
-        reportersCreators.forEach(r => reportersManager.addReporter(r()));
+        reportersCreators.forEach(reporter => {
+          if (isFunction(reporter)) {
+            reportersManager.addReporter(reporter());
+          } else if (isObject(reporter)) {
+            reportersManager.addReporter(reporter);
+          } else {
+            error(`${reporter} should be an object of function that returns reporter object`);
+          }
+        });
         await reportersManager.startCase(testName);
 
         if (_beforeEachCase) {
@@ -182,6 +192,12 @@ function getPreparedRunner<T>(fixtures?: T) {
     };
   }
 
+  /**
+   * @param {string} testName test case title
+   * @param {object|(fixtures?: any) => Promise<void> | any} opts test cases configuration options, or test case body
+   * @param {(fixtures?: any) => Promise<void> | any} [fn] test case body
+   * @returns {void}
+   */
   function test(testName: string, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
     if (!checkExecutionTags((opts as TtestOpts)[process.env.PROMOD_S_TAGS_ID || 'tags'])) {
       return;
@@ -274,7 +290,7 @@ function getPreparedRunner<T>(fixtures?: T) {
     cb.call(this, fixtures);
   }
 
-  function suite(suiteName, cb: TdescribeBody<T>) {
+  function suite(suiteName: string, cb: TdescribeBody<T>) {
     if (isFunction(_updateSuiteName)) {
       const updated = _updateSuiteName(suiteName);
       if (isString(updated)) {
@@ -283,6 +299,9 @@ function getPreparedRunner<T>(fixtures?: T) {
     }
 
     global.describe(suiteName, function () {
+      if (isFunction(_suiteAdditionalCall)) {
+        _suiteAdditionalCall(this);
+      }
       suiteBodyWrapper.call(this, suiteName, cb);
     });
   }
@@ -316,7 +335,11 @@ function getPreparedRunner<T>(fixtures?: T) {
         suiteName = updated;
       }
     }
+    // eslint-disable-next-line sonarjs/no-identical-functions
     global.describe.only(suiteName, function () {
+      if (isFunction(_suiteAdditionalCall)) {
+        _suiteAdditionalCall(this);
+      }
       suiteBodyWrapper.call(this, suiteName, cb);
     });
   };
@@ -379,4 +402,11 @@ function getPreparedRunner<T>(fixtures?: T) {
   return runner;
 }
 
-export { getPreparedRunner, reportersManager };
+function additionalSuiteCall(cb) {
+  if (!isFunction(cb)) {
+    throw new TypeError('additionalSuiteCall(): first argument should be a function');
+  }
+  _suiteAdditionalCall = cb;
+}
+
+export { getPreparedRunner, reportersManager, additionalSuiteCall };
