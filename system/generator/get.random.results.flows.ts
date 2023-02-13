@@ -4,11 +4,11 @@ import { config } from '../config/config';
 import { getPathesToCollections } from './get.fragments.for.random.getting';
 import { isCollectionDescription, toRandomTemplateFormat, finTypedObject } from './utils.random';
 
-function getWaitForCollectionArgumentTemplate(dataObj) {
+function getWaitForCollectionArgumentTemplate(dataObj, expression = '>0') {
   return Object.keys(dataObj).reduce((template, key) => {
     return isObject(dataObj[key]) && !isCollectionDescription(dataObj[key])
-      ? `${template} ${key}: ${getWaitForCollectionArgumentTemplate(dataObj[key])} }`
-      : `${template} ${key}: { length: '>0' } }`;
+      ? `${template} ${key}: ${getWaitForCollectionArgumentTemplate(dataObj[key], expression)} }`
+      : `${template} ${key}: { length: \`${expression}\` } }`;
   }, '{');
 }
 
@@ -27,8 +27,8 @@ function getPropPath(dataObj) {
   return '';
 }
 
-function getFlowEntryType(dataObj) {
-  const typeName = `T${camelize(getPropPath(dataObj))}`;
+function getFlowEntryType(dataObj, { namePart = '', additional = '' } = {}) {
+  const typeName = `T${camelize(getPropPath(dataObj))}${namePart}`;
 
   const { _fields, ...restCollectionDescription } = finTypedObject(dataObj);
 
@@ -41,7 +41,8 @@ function getFlowEntryType(dataObj) {
     ``,
   );
 
-  const exectLikePart = `  except?: string | string[];
+  const exectLikePart = `${additional}
+  except?: string | string[];
   like?: string | string[];
   ${descriptionType}`;
 
@@ -109,18 +110,21 @@ function getReturnTemplateAndLastKey(dataObj) {
 function createFlowTemplates(asActorAndPage, dataObj) {
   const { baseLibraryDescription } = config.get();
 
-  const { type, typeName } = getFlowEntryType(dataObj);
+  const oneValue = getFlowEntryType(dataObj);
+  const severalValues = getFlowEntryType(dataObj, { namePart: 'SeveralValues', additional: 'quantity: number;' });
+
   const { lastKey, returnTemplate } = getReturnTemplateAndLastKey(dataObj);
   const argumentTemplate = getReturnArgumentTemplate(dataObj);
-  const waitElementListArgumentTemplate = getWaitForCollectionArgumentTemplate(dataObj);
 
-  const name = camelize(`${asActorAndPage} get random data from ${getPropPath(dataObj)}`);
+  const oneValueName = camelize(`${asActorAndPage} get random data from ${getPropPath(dataObj)}`);
+  const severalValuesName = camelize(`${asActorAndPage} get several random values from ${getPropPath(dataObj)}`);
+
   return `\n
-${type}
-const ${name} = async function(data: ${typeName} = {${
-    type.includes('field:') ? `field: '${finTypedObject(dataObj)._fields[0]}'` : ''
+${oneValue.type}
+const ${oneValueName} = async function(data: ${oneValue.typeName} = {${
+    oneValue.type.includes('field:') ? `field: '${finTypedObject(dataObj)._fields[0]}'` : ''
   }}): Promise<string> {
-  await page.${baseLibraryDescription.waitForVisibilityMethod}(${waitElementListArgumentTemplate})
+  await page.${baseLibraryDescription.waitForVisibilityMethod}(${getWaitForCollectionArgumentTemplate(dataObj)})
   const ${returnTemplate} = await page.${baseLibraryDescription.getDataMethod}(${argumentTemplate});
 
   const excludeValues = toArray(data.except);
@@ -128,11 +132,33 @@ const ${name} = async function(data: ${typeName} = {${
 
   return getRandomArrayItem(
     ${lastKey}
-      .map(item => item${type.includes('field:') ? '[data.field]' : ''}.text)
+      .map(item => item${oneValue.type.includes('field:') ? '[data.field]' : ''}.text)
       .filter(fieldText => !excludeValues.includes(fieldText))
       .filter(fieldText => (includeValues.length ? includeValues.some(item => fieldText.includes(item)) : true)),
   );
-};\n`;
+};\n
+
+${severalValues.type}
+const ${severalValuesName} = async function(data: ${severalValues.typeName} = {quantity: 2, ${
+    severalValues.type.includes('field:') ? `field: '${finTypedObject(dataObj)._fields[0]}'` : ''
+  }}): Promise<string[]> {
+  await page.${baseLibraryDescription.waitForVisibilityMethod}(${getWaitForCollectionArgumentTemplate(
+    dataObj,
+    '>=${data.quantity}',
+  )})
+  const ${returnTemplate} = await page.${baseLibraryDescription.getDataMethod}(${argumentTemplate});
+
+  const excludeValues = toArray(data.except);
+  const includeValues = toArray(data.like);
+
+  return getRandomArrayItem(
+    ${lastKey}
+      .map(item => item${severalValues.type.includes('field:') ? '[data.field]' : ''}.text)
+      .filter(fieldText => !excludeValues.includes(fieldText))
+      .filter(fieldText => (includeValues.length ? includeValues.some(item => fieldText.includes(item)) : true)),
+    data.quantity);
+};\n
+`;
 }
 
 function getRandomResultsFlows(asActorAndPage, pageInstance) {

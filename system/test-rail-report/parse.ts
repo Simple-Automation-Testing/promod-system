@@ -19,12 +19,14 @@ import {
   allBugsGroupedCreationByMonthPerQAPath,
   allStoriesGroupedByTestingMonthPath,
   allStoriesGroupedByTestingMonthPerQAPath,
+  allStoriesGroupedByTestingMonthStoryPointsPath,
+  allStoriesGroupedByTestingMonthStoryPointsPerQAPath,
 } from './constants';
 import { sortMonthes } from './date';
 
 const { testrailReport } = config.get();
 
-import { createExecutionReport, extendGeneralReport } from './report.templates';
+import { createExecutionReport, extendGeneralReport, createGeneralReportTemplate } from './report.templates';
 
 function getSeparator() {
   return lengthToIndexesArray(40)
@@ -99,8 +101,6 @@ function parseReportToConsoleOutput() {
   if (fs.existsSync(allTestRunsGroupedByMonthesPerQAPath)) {
     report += parseByMonthPerQA(allTestRunsGroupedByMonthesPerQAPath, 'Grouped by testrun execution per QA');
   }
-
-  return console.log(report);
 
   if (fs.existsSync(allTestCasesGroupedCreationByMonthPath)) {
     report += parseByMonth(allTestCasesGroupedCreationByMonthPath, 'Grouped by month creation', 'new cases');
@@ -226,6 +226,37 @@ function parseGeneralReport() {
 
     const dataDescriptors = sortMonthes(Object.keys(createdCasesData));
 
+    const manualProgress = dataDescriptors.reduce((data, key) => {
+      data[key] = createdCasesData[key].length;
+
+      return data;
+    }, {});
+
+    const automationProgress = dataDescriptors.reduce((data, key) => {
+      data[key] = createdAutomationCasesData[key].length;
+
+      return data;
+    }, {});
+
+    const dataSet = {
+      'New manual test cases count': manualProgress,
+      'New automation test cases count': automationProgress,
+    };
+
+    const testsBurndown: TreportType = { reportId: 'automation_manual_progress', dataDescriptors, dataSet };
+
+    reportExtensions.push(testsBurndown);
+  }
+
+  if (
+    fs.existsSync(allTestCasesGroupedCreationByMonthPath) &&
+    fs.existsSync(allTestCasesGroupedCreationAutomationByMonthPath)
+  ) {
+    const createdCasesData = require(allTestCasesGroupedCreationByMonthPath);
+    const createdAutomationCasesData = require(allTestCasesGroupedCreationAutomationByMonthPath);
+
+    const dataDescriptors = sortMonthes(Object.keys(createdCasesData));
+
     const manualProgress = dataDescriptors.reduce((data, key, index, context) => {
       if (index === 0) {
         data[key] = createdCasesData[key].length;
@@ -249,8 +280,8 @@ function parseGeneralReport() {
     }, {});
 
     const dataSet = {
-      'New manual test cases': manualProgress,
-      'New automation test cases': automationProgress,
+      'New manual test cases progress': manualProgress,
+      'New automation test cases progress': automationProgress,
     };
 
     const testsBurndown: TreportType = { reportId: 'burndown', dataDescriptors, dataSet };
@@ -307,7 +338,34 @@ function parseGeneralReport() {
 
     reportExtensions.push(testRunExecutions);
   }
-  reportExtensions.forEach(data => extendGeneralReport(data));
+
+  if (
+    fs.existsSync(allStoriesGroupedByTestingMonthStoryPointsPath) &&
+    fs.existsSync(allStoriesGroupedByTestingMonthStoryPointsPerQAPath)
+  ) {
+    const dataSet = require(allStoriesGroupedByTestingMonthStoryPointsPerQAPath);
+    const monthData = require(allStoriesGroupedByTestingMonthStoryPointsPath);
+
+    const monthDataAligned = Object.keys(monthData).reduce((data, key) => {
+      data[key] = monthData[key].length;
+
+      return data;
+    }, {});
+
+    dataSet['Total story points'] = monthDataAligned;
+
+    const dataDescriptors = sortMonthes(Object.keys(monthData));
+
+    const testRunExecutions: TreportType = { reportId: 'story_testing_storypoints', dataDescriptors, dataSet };
+
+    reportExtensions.push(testRunExecutions);
+  }
+
+  if (process.env.RESET_REPORT) {
+    createGeneralReportTemplate();
+  }
+
+  reportExtensions.forEach(extendGeneralReport);
 }
 
 export { parseReportToConsoleOutput, parseTestRunExecutionToHTML, parseBurndownToHTML, parseGeneralReport };

@@ -71,7 +71,6 @@ async function getTestCaseExecutionResult(runId: number | string, caseId: string
 async function getAllTestCaseExecutionResult(runId: number | string, caseId: string | number) {
   const testRunResults = [];
   let body = await getTestCaseExecutionResult(runId, caseId);
-
   if (body.results) {
     testRunResults.push(...body.results);
   }

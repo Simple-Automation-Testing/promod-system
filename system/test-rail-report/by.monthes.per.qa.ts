@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-identical-functions */
 import * as fs from 'fs';
 import { config } from '../config/config';
 import {
@@ -7,9 +8,17 @@ import {
   allBugsGroupedCreationByMonthPerQAPath,
   allStoriesGroupedByTestingMonthPath,
   allStoriesGroupedByTestingMonthPerQAPath,
+  allStoriesGroupedByTestingMonthStoryPointsPath,
+  allStoriesGroupedByTestingMonthStoryPointsPerQAPath,
 } from './constants';
 
 const { testrailReport } = config.get();
+
+function getUserById(id) {
+  return (
+    Object.keys(testrailReport.users).find(key => testrailReport.users[key] === id) || 'Not part of the team anymore'
+  );
+}
 
 function createBugsProductivityByQAPerMonth() {
   if (!fs.existsSync(allBugsGroupedCreationByMonthPath)) {
@@ -25,12 +34,6 @@ function createBugsProductivityByQAPerMonth() {
     },
     { 'Not part of the team anymore': {} },
   );
-
-  function getUserById(id) {
-    return (
-      Object.keys(testrailReport.users).find(key => testrailReport.users[key] === id) || 'Not part of the team anymore'
-    );
-  }
 
   for (const month of Object.keys(bugs)) {
     const monthCases = bugs[month];
@@ -62,12 +65,6 @@ function createStoryTestingProductivityByQAPerMonth() {
     { 'Not part of the team anymore': {} },
   );
 
-  function getUserById(id) {
-    return (
-      Object.keys(testrailReport.users).find(key => testrailReport.users[key] === id) || 'Not part of the team anymore'
-    );
-  }
-
   for (const month of Object.keys(stories)) {
     const monthCases = stories[month];
     for (const testCase of monthCases) {
@@ -81,6 +78,38 @@ function createStoryTestingProductivityByQAPerMonth() {
   }
 
   fs.writeFileSync(allStoriesGroupedByTestingMonthPerQAPath, JSON.stringify(perUser));
+}
+
+function createStoryTestingProductivityByQAPerMonthInStoryPoints() {
+  if (!fs.existsSync(allStoriesGroupedByTestingMonthStoryPointsPath)) {
+    throw new EvalError(
+      `${allStoriesGroupedByTestingMonthStoryPointsPath} file does not exist, please run 'promod-system --*'`,
+    );
+  }
+  const stories = require(allStoriesGroupedByTestingMonthStoryPointsPath);
+
+  const perUser = Object.keys(testrailReport.users).reduce(
+    (acc, userName) => {
+      acc[userName] = {};
+
+      return acc;
+    },
+    { 'Not part of the team anymore': {} },
+  );
+
+  for (const month of Object.keys(stories)) {
+    const monthCases = stories[month];
+    for (const testCase of monthCases) {
+      const user = getUserById(testCase.created_by);
+      if (perUser[user][month]) {
+        perUser[user][month]++;
+      } else {
+        perUser[user][month] = 1;
+      }
+    }
+  }
+
+  fs.writeFileSync(allStoriesGroupedByTestingMonthStoryPointsPerQAPath, JSON.stringify(perUser));
 }
 
 function createProductivityByQAPerMonth() {
@@ -99,12 +128,6 @@ function createProductivityByQAPerMonth() {
     },
     { 'Not part of the team anymore': {} },
   );
-
-  function getUserById(id) {
-    return (
-      Object.keys(testrailReport.users).find(key => testrailReport.users[key] === id) || 'Not part of the team anymore'
-    );
-  }
 
   for (const month of Object.keys(testCases)) {
     const monthCases = testCases[month];
@@ -125,4 +148,5 @@ export {
   createProductivityByQAPerMonth,
   createBugsProductivityByQAPerMonth,
   createStoryTestingProductivityByQAPerMonth,
+  createStoryTestingProductivityByQAPerMonthInStoryPoints,
 };

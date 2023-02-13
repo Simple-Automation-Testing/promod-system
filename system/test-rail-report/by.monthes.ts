@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { getDirFilesList } from 'sat-utils';
+import { getDirFilesList, lengthToIndexesArray } from 'sat-utils';
 import { config } from '../config/config';
 
 import {
@@ -7,6 +7,8 @@ import {
   allTestCasesPath,
   allBugsGroupedCreationByMonthPath,
   allStoriesGroupedByTestingMonthPath,
+  allStoriesGroupedByTestingMonthStoryPointsPath,
+  allStoriesGroupedByTestingMonthStoryPointsPerQAPath,
 } from './constants';
 import { getDateInterface } from './date';
 
@@ -84,6 +86,29 @@ function getTestedStoriesGroupedByMonth(starDate: string, periodInMonthes: numbe
   fs.writeFileSync(allStoriesGroupedByTestingMonthPath, JSON.stringify(data));
 }
 
+function getTestedStoriesGroupedByMonthInStoryPoints(starDate: string, periodInMonthes: number) {
+  const stories = getAllAvailableTestedStories();
+
+  const data = {};
+
+  let iteration = 1;
+
+  const { getMonthRangeInUnixBy } = getDateInterface(starDate);
+  while (iteration <= periodInMonthes) {
+    const { startUnix, endUnix, id } = getMonthRangeInUnixBy(iteration++);
+
+    const filteredByMonth = stories
+      .filter(({ created_on }) => created_on > startUnix && endUnix > created_on)
+      .flatMap(({ created_by, title, story_points }) => {
+        return story_points ? lengthToIndexesArray(story_points).map(() => ({ created_by, title })) : [];
+      });
+
+    data[id] = filteredByMonth;
+  }
+
+  fs.writeFileSync(allStoriesGroupedByTestingMonthStoryPointsPath, JSON.stringify(data));
+}
+
 function getTestCaseGroupedByMonth(starDate: string, periodInMonthes: number) {
   if (!fs.existsSync(allTestCasesPath)) {
     throw new EvalError(`${allTestCasesPath} file does not exist, please run 'promod-system --fetch-testrail'`);
@@ -108,4 +133,9 @@ function getTestCaseGroupedByMonth(starDate: string, periodInMonthes: number) {
   fs.writeFileSync(allTestCasesGroupedCreationByMonthPath, JSON.stringify(data));
 }
 
-export { getTestCaseGroupedByMonth, getBugsGroupedByMonth, getTestedStoriesGroupedByMonth };
+export {
+  getTestCaseGroupedByMonth,
+  getBugsGroupedByMonth,
+  getTestedStoriesGroupedByMonth,
+  getTestedStoriesGroupedByMonthInStoryPoints,
+};

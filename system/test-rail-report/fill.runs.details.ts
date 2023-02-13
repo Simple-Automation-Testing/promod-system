@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import * as fs from 'fs';
 import { resolve, basename } from 'path';
 import { getDirFilesList, shuffleArr, isUndefined } from 'sat-utils';
@@ -58,6 +57,8 @@ async function fillTestrunDetails() {
   const testCases = require(allTestCasesPath);
   const testRuns = require(allTestRunsPath);
 
+  const withDetails = [];
+
   let testRunsToPerform: any[] = shuffleArr(
     testRuns.filter(testRun => !getAlreadyStoredRunsIds().includes(testRun.id)),
   );
@@ -81,6 +82,7 @@ async function fillTestrunDetails() {
     }
 
     testRun.details = testRunDetails;
+    withDetails.push(testRun);
 
     fs.writeFileSync(testRunsWithDetailsPath(runId), JSON.stringify(testRun));
 
