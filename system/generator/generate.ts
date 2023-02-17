@@ -7,6 +7,7 @@ import { config } from '../config/config';
 import { getActionFlows } from './get.action.flows';
 import { getAllBaseActions } from './utils';
 import { getRandomResultsFlows } from './get.random.results.flows';
+import { getCountFlows } from './get.entities.count';
 
 const flowExpressionMatcher = /(?<=const ).*(?= = async)/gim;
 const flowDeclarationMatcher = /(?<=function ).*(?=\()/gim;
@@ -63,16 +64,22 @@ type TresultBasedOnArgument<TflowcallArgument, TflowResult extends Record<string
 
   const actions = getAllBaseActions().filter(action => !Object.values(collectionDescription).includes(action));
 
-  const randomResultsFlowsTemplate = getRandomResultsFlows(asActorAndPage, pageInstance);
   const interactionFlowsTemplate = actions.map(pageAction => getActionFlows(asActorAndPage, pageInstance, pageAction));
+  const randomResultsFlowsTemplate = getRandomResultsFlows(asActorAndPage, pageInstance);
+
+  const collectionEntities = getCountFlows(pageInstance, asActorAndPage);
 
   const body = `${globalImport}
 
-import { ${PageClass.prototype.constructor.name} } from './${pageRelativeTsPath}';
+  import { ${PageClass.prototype.constructor.name} } from './${pageRelativeTsPath}';
 
-const page = new ${PageClass.prototype.constructor.name}();
+
+  const page = new ${PageClass.prototype.constructor.name}();
+${randomResultsFlowsTemplate}
 ${interactionFlowsTemplate.join('\n')}
-${randomResultsFlowsTemplate}`;
+${collectionEntities}
+
+`;
 
   const flows = body.match(flowMatcher) || [];
 

@@ -83,7 +83,7 @@ function extendGeneralReport({
 
   const ctxVarName = getRandomString(15, { letters: true });
   const reportData = `
-       <h2 class="col-5" onclick="showHide${reportId}Block()">${reportId.replace(/\_/gi, ' ')}</h2>
+       <h2 class="col-5" onclick="showHide${reportId}Block()">${reportId.replace(/_/gi, ' ')}</h2>
        <div id="${reportId}_block">
         <div class="container">
 
@@ -136,7 +136,6 @@ function extendGeneralReport({
       renderChart${reportId}();
 
       function filterFrom${reportId}(event, point) {
-        console.log(point);
         if (point === 'from') {
           const fromDropPoint = document.querySelector('.dropdown.col-4.align-self-start.from.${reportId} button',);
 

@@ -41,8 +41,7 @@ function getFlowEntryType(dataObj, { namePart = '', additional = '' } = {}) {
     ``,
   );
 
-  const exectLikePart = `${additional}
-  except?: string | string[];
+  const exectLikePart = `${additional ? additional + '\n' : ''}except?: string | string[];
   like?: string | string[];
   ${descriptionType}`;
 
