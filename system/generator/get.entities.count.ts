@@ -9,38 +9,33 @@ import {
   safeJSONstringify,
   isObject,
   camelize,
+  safeHasOwnPropery,
 } from 'sat-utils';
 import { config } from '../config/config';
 import { getCollectionsPathes } from './check.that.action.exists';
 
 function removeKeys(data, keysPath) {
+  if (isObject(data)) {
+    delete data.__countResult;
+    delete data.__visible;
+    delete data.__where;
+  }
+
   const [first, ...rest] = keysPath.split('.');
-  let typeItem;
 
   if (isEmptyArray(rest)) {
     delete data[first];
   } else {
-    const { withoutProps: part, temp } = removeKeys(data[first], rest.join('.'));
+    const { withoutProps: part } = removeKeys(data[first], rest.join('.'));
 
-    typeItem = temp;
-
-    if (
-      isEmptyObject(part) ||
-      isEmptyArray(part) ||
-      isNull(part) ||
-      isUndefined(part) ||
-      (Object.keys(part).length === 1 && Object.keys(part)[0] === '__temp')
-    ) {
-      if (part.__temp) {
-        typeItem = part.__temp;
-      }
+    if (isEmptyObject(part) || isEmptyArray(part) || isNull(part) || isUndefined(part)) {
       delete data[first];
     } else {
       data[first] = part;
     }
   }
 
-  return { withoutProps: data, temp: typeItem };
+  return { withoutProps: data };
 }
 
 function getActionsList(data) {
@@ -49,14 +44,26 @@ function getActionsList(data) {
   const actions = [];
 
   function getKeyFormat(dataItem) {
-    for (const key of Object.keys(dataItem).filter(k => k !== '__temp')) {
-      if (
-        key === collectionDescription.action &&
-        (isNull(dataItem[key]) || !safeJSONstringify(dataItem[key]).includes(collectionDescription.action))
-      ) {
-        return { [collectionDescription.action]: null };
+    for (const key of Object.keys(dataItem).filter(
+      k => k !== '__countResult' && k !== '__visible' && k !== '__where',
+    )) {
+      const isActionInside = safeJSONstringify(dataItem[key]).includes(collectionDescription.action);
+      const isDescription =
+        safeHasOwnPropery(dataItem[key], '__visible') &&
+        safeHasOwnPropery(dataItem[key], '__where') &&
+        safeHasOwnPropery(dataItem[key], '__countResult');
+
+      if (key === collectionDescription.action && (isNull(dataItem[key]) || !isActionInside)) {
+        const { __countResult, __visible, __where } = dataItem;
+
+        return { [collectionDescription.action]: null, __countResult, __visible, __where };
+      } else if (isObject(dataItem[key]) && !isActionInside && isDescription) {
+        const { __countResult, __visible, __where } = dataItem[key];
+
+        return { [key]: { [collectionDescription.action]: null }, __countResult, __visible, __where };
       } else if (isObject(dataItem[key])) {
-        return { [key]: getKeyFormat(dataItem[key]) };
+        const { __countResult, __visible, __where, ...rest } = getKeyFormat(dataItem[key]);
+        return { [key]: rest, __countResult, __visible, __where };
       }
     }
   }
@@ -64,7 +71,9 @@ function getActionsList(data) {
   function getSanitizeDataKeys(sanitizePattern) {
     let pathKeys = '';
 
-    const firstKey = Object.keys(sanitizePattern).find(k => k !== '__temp');
+    const firstKey = Object.keys(sanitizePattern).find(
+      k => k !== '__countResult' && k !== '__visible' && k !== '__where',
+    );
 
     if (isNull(sanitizePattern[firstKey])) {
       pathKeys = firstKey;
@@ -79,14 +88,14 @@ function getActionsList(data) {
 
   while (isNotEmptyObject(data) && safeJSONstringify(data).includes(collectionDescription.action)) {
     for (const key of Object.keys(data)) {
-      const result = getKeyFormat(data[key]);
+      const { __countResult, __visible, __where, ...result } = getKeyFormat(data[key]);
 
       const action = { [key]: result };
-      const { withoutProps, temp } = removeKeys(data, getSanitizeDataKeys(action));
+      const { withoutProps } = removeKeys(data, getSanitizeDataKeys(action));
 
       data = withoutProps;
 
-      actions.push({ action, typeResult: temp });
+      actions.push({ action, __countResult, __visible, __where });
     }
   }
 
@@ -139,15 +148,30 @@ function getName(data) {
 }
 
 function createTemplate(asActorAndPage, actionDescriptor) {
-  const { baseLibraryDescription } = config.get();
-  const { typeResult, action } = actionDescriptor;
+  const { baseLibraryDescription, collectionDescription } = config.get();
+  const { action, __countResult, __visible, __where } = actionDescriptor;
+
   const result = getResult(action);
   const name = camelize(`${asActorAndPage} Get Collection From ${getName(action)}`);
 
+  const actionSignature = safeJSONstringify(action).replace(
+    `"${collectionDescription.action}": null`,
+    // TODO this approach should be improved
+    `${collectionDescription.action}: null,
+    ${collectionDescription.whereNot}: data._whereNot,
+    ${collectionDescription.where}: data._where,
+    ${collectionDescription.visible}: data._visible, `,
+  );
+
   return `
-  type T${name} = ${typeResult}
-  const ${name} = async function(): Promise<T${name}[]> {
-    const result = await page.${baseLibraryDescription.getDataMethod}(${safeJSONstringify(action)});
+  type T${name}Entry = {
+    _whereNot?: ${__where || 'any'}
+    _where?: ${__where || 'any'}
+    _visible?: ${__visible || 'any'}
+  }
+  type T${name} = ${__countResult}
+  const ${name} = async function(data: T${name}Entry = {}): Promise<T${name}[]> {
+    const result = await page.${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     return result.${result}
   }`;
@@ -159,7 +183,7 @@ function getCountFlows(pageInstance, asActorAndPage) {
   const actions = getActionsList(data);
 
   return actions.reduce((flows, dataObject) => {
-    return `${flows}${createTemplate(asActorAndPage, dataObject)}`;
+    return `${flows}\n${createTemplate(asActorAndPage, dataObject)}`;
   }, '');
 }
 

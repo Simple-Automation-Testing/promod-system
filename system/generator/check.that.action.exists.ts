@@ -17,7 +17,9 @@ function getCollectionsPathes(instance) {
   if (isCollectionWithItemBaseElement(instance)) {
     return {
       [collectionDescription.action]: null,
-      __temp: getElementType(getCollectionItemInstance(instance), 'get', 'resultType'),
+      __countResult: getElementType(getCollectionItemInstance(instance), 'get', 'resultType'),
+      __visible: getElementType(getCollectionItemInstance(instance), '_visible', 'resultType'),
+      __where: getElementType(getCollectionItemInstance(instance), '_where', 'resultType'),
     };
   }
 
@@ -38,16 +40,24 @@ function getCollectionsPathes(instance) {
         result[fragmentChildFieldName] = nestedItem;
       }
     } else if (isCollectionWithItemFragment(instance[fragmentChildFieldName])) {
+      const collectionInstance = getCollectionItemInstance(instance[fragmentChildFieldName]);
+
       result[fragmentChildFieldName] = {
-        [collectionDescription.action]: getCollectionsPathes(
-          getCollectionItemInstance(instance[fragmentChildFieldName]),
-        ),
-        __temp: getFragmentTypes(getCollectionItemInstance(instance[fragmentChildFieldName]), 'get', 'resultType'),
+        [collectionDescription.action]: getCollectionsPathes(collectionInstance),
+
+        __countResult: getFragmentTypes(collectionInstance, 'get', 'resultType'),
+        __visible: getFragmentTypes(collectionInstance, '_visible', 'resultType'),
+        __where: getFragmentTypes(collectionInstance, '_where', 'resultType'),
       };
     } else if (isCollectionWithItemBaseElement(instance[fragmentChildFieldName])) {
+      const collectionInstance = getCollectionItemInstance(instance[fragmentChildFieldName]);
+
       result[fragmentChildFieldName] = {
         [collectionDescription.action]: null,
-        __temp: getElementType(getCollectionItemInstance(instance[fragmentChildFieldName]), 'get', 'resultType'),
+
+        __countResult: getElementType(collectionInstance, 'get', 'resultType'),
+        __visible: getElementType(collectionInstance, '_visible', 'resultType'),
+        __where: getElementType(collectionInstance, '_where', 'resultType'),
       };
     } else if (baseElementsActionsDescription[childConstructorName]) {
       // noop
