@@ -10,32 +10,69 @@ import {
   isObject,
   camelize,
   safeHasOwnPropery,
+  compareToPattern,
 } from 'sat-utils';
 import { config } from '../config/config';
 import { getCollectionsPathes } from './check.that.action.exists';
 
-function removeKeys(data, keysPath) {
-  if (isObject(data)) {
-    delete data.__countResult;
-    delete data.__visible;
-    delete data.__where;
-  }
+const descriptionKeys = ['__countResult', '__visible', '__where'];
 
+function removeKeys(data, keysPath) {
   const [first, ...rest] = keysPath.split('.');
 
   if (isEmptyArray(rest)) {
     delete data[first];
   } else {
-    const { withoutProps: part } = removeKeys(data[first], rest.join('.'));
+    const part = removeKeys(data[first], rest.join('.'));
 
     if (isEmptyObject(part) || isEmptyArray(part) || isNull(part) || isUndefined(part)) {
+      delete data[first];
+    }
+    if (isNotEmptyObject(part) && compareToPattern(Object.keys(part).sort(), descriptionKeys.sort()).result) {
       delete data[first];
     } else {
       data[first] = part;
     }
   }
 
-  return { withoutProps: data };
+  return data;
+}
+
+function getKeyFormat(dataItem) {
+  const { collectionDescription } = config.get();
+  for (const key of Object.keys(dataItem).filter(k => !descriptionKeys.includes(k))) {
+    const isActionInside = safeJSONstringify(dataItem[key]).includes(collectionDescription.action);
+    const isDescription = descriptionKeys.every(k => safeHasOwnPropery(dataItem[key], k));
+
+    if (key === collectionDescription.action && (isNull(dataItem[key]) || !isActionInside)) {
+      const { __countResult, __visible, __where } = dataItem;
+
+      return { [collectionDescription.action]: null, __countResult, __visible, __where };
+    } else if (isObject(dataItem[key]) && !isActionInside && isDescription) {
+      const { __countResult, __visible, __where } = dataItem[key];
+
+      return { [key]: { [collectionDescription.action]: null }, __countResult, __visible, __where };
+    } else if (isObject(dataItem[key])) {
+      const { __countResult, __visible, __where, ...rest } = getKeyFormat(dataItem[key]);
+      return { [key]: rest, __countResult, __visible, __where };
+    }
+  }
+}
+
+function getSanitizeDataKeys(sanitizePattern) {
+  let pathKeys = '';
+
+  const firstKey = Object.keys(sanitizePattern).find(k => !descriptionKeys.includes(k));
+
+  if (isNull(sanitizePattern[firstKey])) {
+    pathKeys = firstKey;
+  } else if (isObject(sanitizePattern[firstKey])) {
+    pathKeys = `${firstKey}.${getSanitizeDataKeys(sanitizePattern[firstKey])}`;
+  } else {
+    throw new Error(`Something is wrong`);
+  }
+
+  return pathKeys;
 }
 
 function getActionsList(data) {
@@ -43,57 +80,13 @@ function getActionsList(data) {
 
   const actions = [];
 
-  function getKeyFormat(dataItem) {
-    for (const key of Object.keys(dataItem).filter(
-      k => k !== '__countResult' && k !== '__visible' && k !== '__where',
-    )) {
-      const isActionInside = safeJSONstringify(dataItem[key]).includes(collectionDescription.action);
-      const isDescription =
-        safeHasOwnPropery(dataItem[key], '__visible') &&
-        safeHasOwnPropery(dataItem[key], '__where') &&
-        safeHasOwnPropery(dataItem[key], '__countResult');
-
-      if (key === collectionDescription.action && (isNull(dataItem[key]) || !isActionInside)) {
-        const { __countResult, __visible, __where } = dataItem;
-
-        return { [collectionDescription.action]: null, __countResult, __visible, __where };
-      } else if (isObject(dataItem[key]) && !isActionInside && isDescription) {
-        const { __countResult, __visible, __where } = dataItem[key];
-
-        return { [key]: { [collectionDescription.action]: null }, __countResult, __visible, __where };
-      } else if (isObject(dataItem[key])) {
-        const { __countResult, __visible, __where, ...rest } = getKeyFormat(dataItem[key]);
-        return { [key]: rest, __countResult, __visible, __where };
-      }
-    }
-  }
-
-  function getSanitizeDataKeys(sanitizePattern) {
-    let pathKeys = '';
-
-    const firstKey = Object.keys(sanitizePattern).find(
-      k => k !== '__countResult' && k !== '__visible' && k !== '__where',
-    );
-
-    if (isNull(sanitizePattern[firstKey])) {
-      pathKeys = firstKey;
-    } else if (isObject(sanitizePattern[firstKey])) {
-      pathKeys = `${firstKey}.${getSanitizeDataKeys(sanitizePattern[firstKey])}`;
-    } else {
-      throw new Error(`Something is wrong`);
-    }
-
-    return pathKeys;
-  }
-
   while (isNotEmptyObject(data) && safeJSONstringify(data).includes(collectionDescription.action)) {
     for (const key of Object.keys(data)) {
       const { __countResult, __visible, __where, ...result } = getKeyFormat(data[key]);
 
       const action = { [key]: result };
-      const { withoutProps } = removeKeys(data, getSanitizeDataKeys(action));
 
-      data = withoutProps;
+      data = removeKeys(data, getSanitizeDataKeys(action));
 
       actions.push({ action, __countResult, __visible, __where });
     }
