@@ -25,10 +25,13 @@ function removeKeys(data, keysPath) {
   } else {
     const part = removeKeys(data[first], rest.join('.'));
 
-    if (isEmptyObject(part) || isEmptyArray(part) || isNull(part) || isUndefined(part)) {
-      delete data[first];
-    }
-    if (isNotEmptyObject(part) && compareToPattern(Object.keys(part).sort(), descriptionKeys.sort()).result) {
+    if (
+      (isNotEmptyObject(part) && compareToPattern(Object.keys(part).sort(), descriptionKeys.sort()).result) ||
+      isEmptyObject(part) ||
+      isEmptyArray(part) ||
+      isNull(part) ||
+      isUndefined(part)
+    ) {
       delete data[first];
     } else {
       data[first] = part;
