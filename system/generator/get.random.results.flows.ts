@@ -41,15 +41,13 @@ function getFlowEntryType(dataObj, { namePart = '', additional = '' } = {}) {
     ``,
   );
 
-  const exectLikePart = `${additional ? additional + '\n' : ''}except?: string | string[];
-  like?: string | string[];
-  ${descriptionType}`;
+  const exectLikePart = `${additional ? additional + '\n' : ''}${descriptionType}`;
 
   return _fields
     ? {
         typeName,
         type: `type ${typeName} = {
-  field: ${getFieldsEnumList(_fields)};
+  field: ${getFieldsEnumList(_fields)}
 ${exectLikePart}
 };`,
       }
@@ -63,25 +61,30 @@ ${exectLikePart}
 
 function getReturnArgumentTemplate(dataObj) {
   const { collectionDescription } = config.get();
-  const { _fields, ...restCollectionDescription } = finTypedObject(dataObj);
-
-  const descriptionType = Object.keys(restCollectionDescription).reduce(
-    (descriptionType, key, index, allDescriptionKeys) => {
-      const endString = index !== allDescriptionKeys.length - 1 && allDescriptionKeys.length > 1 ? ', ' : ' ';
-
-      return (descriptionType += `${key}: data.${key}${endString}`);
-    },
-    ``,
-  );
+  const { _fields } = finTypedObject(dataObj);
 
   return Object.keys(dataObj).reduce((template, key) => {
     if (isObject(dataObj[key]) && !isCollectionDescription(dataObj[key])) {
       return `${template} ${key}: ${getReturnArgumentTemplate(dataObj[key])} }`;
     } else if (_fields) {
-      return `${template} ${key}: { ${collectionDescription.action}: { [data.field]: null }, ${descriptionType} } }`;
+      return `${template} ${key}: { ...descriptors, ${collectionDescription.action}: { [field]: null } } }`;
     } else {
-      return `${template} ${key}: { ${collectionDescription.action}: null, ${descriptionType} } }`;
+      return `${template} ${key}: { ...descriptors, ${collectionDescription.action}: null } }`;
     }
+  }, '{');
+}
+
+function getReturnArgumentTemplateForSeveralFields(dataObj) {
+  const { collectionDescription } = config.get();
+
+  return Object.keys(dataObj).reduce((template, key) => {
+    return isObject(dataObj[key]) && !isCollectionDescription(dataObj[key])
+      ? `${template} ${key}: ${getReturnArgumentTemplateForSeveralFields(dataObj[key])} }`
+      : `${template} ${key}: { ...descriptors, ${collectionDescription.action}: fields.reduce((act, k) => {
+        act[k] = null;
+
+        return act
+      }, {}) } }`;
   }, '{');
 }
 
@@ -114,49 +117,72 @@ function createFlowTemplates(asActorAndPage, dataObj) {
 
   const { lastKey, returnTemplate } = getReturnTemplateAndLastKey(dataObj);
   const argumentTemplate = getReturnArgumentTemplate(dataObj);
+  const severalFieldsArgumentTemplate = getReturnArgumentTemplateForSeveralFields(dataObj);
 
-  const oneValueName = camelize(`${asActorAndPage} get random data from ${getPropPath(dataObj)}`);
-  const severalValuesName = camelize(`${asActorAndPage} get several random values from ${getPropPath(dataObj)}`);
+  const oneValueName = camelize(`${asActorAndPage} get random field value from ${getPropPath(dataObj)}`);
+  const severalValuesName = camelize(`${asActorAndPage} get several random field values from ${getPropPath(dataObj)}`);
+  const severalFieldsName = camelize(`${asActorAndPage} get random data from ${getPropPath(dataObj)}`);
 
-  return `\n
-${oneValue.type}
-const ${oneValueName} = async function(data: ${oneValue.typeName} = {${
-    oneValue.type.includes('field:') ? `field: '${finTypedObject(dataObj)._fields[0]}'` : ''
-  }}): Promise<string> {
+  const severalFields = oneValue.type.includes('field:')
+    ? `
+type ${oneValue.typeName}Fields = ${finTypedObject(dataObj)
+        ._fields.map(field => "'" + field + "'")
+        .join('|')}
+type ${oneValue.typeName}Values<T extends ReadonlyArray<${oneValue.typeName}Fields>> = {
+  [K in T extends ReadonlyArray<infer U> ? U : never]: string;
+};
+    const ${severalFieldsName} = async function<T extends ReadonlyArray<${
+        oneValue.typeName
+      }Fields>>(fields: T, descriptors: Omit<${oneValue.typeName}, 'field'> = {}): Promise<${
+        oneValue.typeName
+      }Values<T>> {
   await page.${baseLibraryDescription.waitForVisibilityMethod}(${getWaitForCollectionArgumentTemplate(dataObj)})
-  const ${returnTemplate} = await page.${baseLibraryDescription.getDataMethod}(${argumentTemplate});
-
-  const excludeValues = toArray(data.except);
-  const includeValues = toArray(data.like);
+  const ${returnTemplate} = await page.${baseLibraryDescription.getDataMethod}(${severalFieldsArgumentTemplate});
 
   return getRandomArrayItem(
     ${lastKey}
-      .map(item => item${oneValue.type.includes('field:') ? '[data.field]' : ''}.text)
-      .filter(fieldText => !excludeValues.includes(fieldText))
-      .filter(fieldText => (includeValues.length ? includeValues.some(item => fieldText.includes(item)) : true)),
+      .map(item => fields.reduce((requredData, k ) => {
+        requredData[k] = item[k].text
+
+        return requredData
+      }, {} as ${oneValue.typeName}Values<T>))
+  );
+};\n`
+    : '';
+
+  return `\n
+${oneValue.type}
+const ${oneValueName} = async function({${oneValue.type.includes('field:') ? 'field,' : ''} ...descriptors}: ${
+    oneValue.typeName
+  } = {${oneValue.type.includes('field:') ? `field: '${finTypedObject(dataObj)._fields[0]}'` : ''}}): Promise<string> {
+  await page.${baseLibraryDescription.waitForVisibilityMethod}(${getWaitForCollectionArgumentTemplate(dataObj)})
+  const ${returnTemplate} = await page.${baseLibraryDescription.getDataMethod}(${argumentTemplate});
+
+  return getRandomArrayItem(
+    ${lastKey}
+      .map(item => item${oneValue.type.includes('field:') ? '[field]' : ''}.text),
   );
 };\n
 
 ${severalValues.type}
-const ${severalValuesName} = async function(data: ${severalValues.typeName} = {quantity: 2, ${
+const ${severalValuesName} = async function({${
+    oneValue.type.includes('field:') ? 'field, quantity,' : 'quantity,'
+  } ...descriptors}: ${severalValues.typeName} = {quantity: 2, ${
     severalValues.type.includes('field:') ? `field: '${finTypedObject(dataObj)._fields[0]}'` : ''
   }}): Promise<string[]> {
   await page.${baseLibraryDescription.waitForVisibilityMethod}(${getWaitForCollectionArgumentTemplate(
     dataObj,
-    '>=${data.quantity}',
+    '>=${quantity}',
   )})
   const ${returnTemplate} = await page.${baseLibraryDescription.getDataMethod}(${argumentTemplate});
 
-  const excludeValues = toArray(data.except);
-  const includeValues = toArray(data.like);
-
   return getRandomArrayItem(
     ${lastKey}
-      .map(item => item${severalValues.type.includes('field:') ? '[data.field]' : ''}.text)
-      .filter(fieldText => !excludeValues.includes(fieldText))
-      .filter(fieldText => (includeValues.length ? includeValues.some(item => fieldText.includes(item)) : true)),
-    data.quantity);
+      .map(item => item${severalValues.type.includes('field:') ? '[field]' : ''}.text),
+    quantity);
 };\n
+
+${severalFields}
 `;
 }
 

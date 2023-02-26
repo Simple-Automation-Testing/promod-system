@@ -153,10 +153,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   const actionSignature = safeJSONstringify(action).replace(
     `"${collectionDescription.action}": null`,
     // TODO this approach should be improved
-    `${collectionDescription.action}: null,
-    ${collectionDescription.whereNot}: data._whereNot,
-    ${collectionDescription.where}: data._where,
-    ${collectionDescription.visible}: data._visible, `,
+    `...descriptions, ${collectionDescription.action}: null`,
   );
 
   return `
@@ -166,7 +163,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
     _visible?: ${__visible || 'any'}
   }
   type T${name} = ${__countResult}
-  const ${name} = async function(data: T${name}Entry = {}): Promise<T${name}[]> {
+  const ${name} = async function({...descriptions}: T${name}Entry = {}): Promise<T${name}[]> {
     const result = await page.${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     return result.${result}
