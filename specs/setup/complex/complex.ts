@@ -2,7 +2,7 @@ import { ElementTest } from '../base/element';
 import { StructureAsFragment, StructureAsPage } from '../base/structure';
 import { PromodSystemCollection } from '../../../system/base-interfaces/collection';
 
-import type { PromodElementType, PromodElementsType } from 'promod/built/interface';
+import type { PromodElementsType } from 'promod/built/interface';
 
 class TestUserFormFragment extends StructureAsFragment {
   private username: ElementTest;
@@ -47,7 +47,7 @@ class CollectionItemFragment extends StructureAsFragment {
 class TestComplexPage extends StructureAsPage {
   private userform: TestUserFormFragment;
   private userdata: ElementTest;
-  private collection: PromodSystemCollection;
+  private collection: PromodSystemCollection<PromodElementsType, typeof CollectionItemFragment>;
 
   constructor() {
     super('body', 'Test Complex Page');

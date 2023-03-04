@@ -1,12 +1,10 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import { waitForCondition } from 'sat-utils';
-import { seleniumWD } from 'promod';
 import { PromodSystemStructure } from '../../../system/base-interfaces/structure';
 import { PromodSystemCollection } from '../../../system/base-interfaces/collection';
 
 import type { PromodElementType, PromodElementsType } from 'promod/built/interface';
-
-const { $ } = seleniumWD;
+import { $ } from '../engine';
 
 class StructureTest extends PromodSystemStructure<PromodElementType> {
   constructor(locator, structureName, rootElement) {
@@ -31,13 +29,13 @@ class StructureAsPage extends PromodSystemStructure<PromodElementType> {
     return new Child(locator, name, this.rootElement.$(locator));
   }
 
-  initCollection<TcollectionItem = any, TrootElements = PromodElementsType>(
+  initCollection<TcollectionItem>(
     locator: string,
     name: string,
     Collection: typeof PromodSystemCollection,
     Child: TcollectionItem,
   ) {
-    return new Collection<TrootElements, TcollectionItem>(locator, name, this.rootElement.$$(locator), Child);
+    return new Collection<PromodElementsType, TcollectionItem>(locator, name, this.rootElement.$$(locator), Child);
   }
 
   async waitLoadedState() {
@@ -56,13 +54,13 @@ class StructureAsFragment extends PromodSystemStructure<PromodElementType> {
     return new Child(locator, name, this.rootElement.$(locator), ...rest);
   }
 
-  initCollection<TcollectionItem = any, TrootElements = PromodElementsType>(
+  initCollection<TcollectionItem>(
     locator: string,
     name: string,
     Collection: typeof PromodSystemCollection,
     Child: TcollectionItem,
   ) {
-    return new Collection<TrootElements, TcollectionItem>(locator, name, this.rootElement.$$(locator), Child);
+    return new Collection<PromodElementsType, TcollectionItem>(locator, name, this.rootElement.$$(locator), Child);
   }
 
   async waitLoadedState() {

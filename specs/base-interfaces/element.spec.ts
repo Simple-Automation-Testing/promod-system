@@ -1,10 +1,9 @@
 import { expect } from 'assertior';
-import { seleniumWD } from 'promod';
 
 import { ElementTest } from '../setup/base/element';
 import { actionFile } from '../.misc/setup';
 
-const { $, browser, getDriver } = seleniumWD;
+import { $, getDriver, browser } from '../setup/engine';
 
 describe('PromodSystemElement', function () {
   describe('[P] Actions', function () {

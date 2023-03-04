@@ -1,12 +1,11 @@
 import { compareToPattern } from 'sat-utils';
 import { expect } from 'assertior';
 import { PromodSystemCollection } from '../../system/base-interfaces';
-import { seleniumWD } from 'promod';
 import { ElementTest } from '../setup/base/element';
 import { StructureAsFragment } from '../setup/base/structure';
 import { collection } from '../.misc/setup';
 
-const { $, getDriver, browser } = seleniumWD;
+import { $, getDriver, browser } from '../setup/engine';
 const { toDataIncludes } = compareToPattern;
 
 class LastLayerItem extends StructureAsFragment {

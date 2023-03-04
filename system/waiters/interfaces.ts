@@ -1,9 +1,3 @@
-interface IWaitConditionOpts {
-  timeout?: number;
-  interval?: number;
-  dontThrow?: boolean;
-  message?: string | ((timeout: number, callbackError?: any) => Promise<string> | string);
-  waiterError?: new (...args: any[]) => any;
-}
+import type { IWaiterOpts } from 'sat-utils';
 
-export { IWaitConditionOpts };
+export type IWaitConditionOpts = IWaiterOpts;

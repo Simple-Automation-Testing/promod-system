@@ -9,6 +9,7 @@ import {
   isObject,
   lengthToIndexesArray,
   getRandomArrayItem,
+  isFunction,
 } from 'sat-utils';
 import { getCollectionElementInstance, getCollectionActionData } from './utils';
 import { PromodeSystemCollectionStateError } from './error';
@@ -100,7 +101,7 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
     Object.assign(baseLibraryDescription, baseLibraryDescriptionMap);
   }
 
-  constructor(locator, collectionName, rootElements, CollectionItemClass) {
+  constructor(locator: string, collectionName: string, rootElements: TrootElements, CollectionItemClass: TitemClass) {
     this.rootLocator = locator;
     this.rootElements = rootElements;
     this.identifier = collectionName;
@@ -110,11 +111,14 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
     this.logger = collection;
   }
 
-  async getRoot(index) {
+  async getRoot(index: number) {
     return this.rootElements[baseLibraryDescription.getBaseElementFromCollectionByIndex](index);
   }
 
   set collectionLogger(logger: { log: (...args) => void }) {
+    if (!isFunction(logger.log)) {
+      throw new TypeError('collectionLogger: logger should have a log method');
+    }
     this.logger = logger;
   }
 
@@ -130,7 +134,7 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
   /**
    * @override
    */
-  async waitLoadedState(methodSignature?: string) {}
+  async waitLoadedState(methodSignature?: string, ignoreWaiting?: boolean) {}
 
   overrideChildrenBaseMethods(...methods) {
     this.overrideCollectionItems.push(...methods);
@@ -162,8 +166,8 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
     return this.interactionActionCall(action, 'sendKeys');
   }
 
-  async get(action): Promise<any> {
-    return this.gatherDataActionCall(action, 'get');
+  async get(action, ignoreWaiting?: boolean): Promise<any> {
+    return this.gatherDataActionCall(action, 'get', ignoreWaiting);
   }
 
   async isDisplayed(action) {
@@ -223,10 +227,10 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
   /**
    * @private
    */
-  private async gatherDataActionCall(action, methodSignature: 'get' | 'isDisplayed') {
+  private async gatherDataActionCall(action, methodSignature: 'get' | 'isDisplayed', ignoreWaiting?: boolean) {
     this.logger.log(`PromodSystemCollection ${methodSignature} action call with data `, action);
 
-    await this.waitLoadedState(methodSignature);
+    await this.waitLoadedState(methodSignature, ignoreWaiting);
 
     const { [collectionDescription.action]: _action, ...descriptionInteractionElements } = this.alignActionData(action);
 

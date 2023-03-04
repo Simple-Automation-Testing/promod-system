@@ -1,24 +1,22 @@
 import { expect } from 'assertior';
-import { seleniumWD } from 'promod';
 
 import { ElementTest } from '../setup/base/element';
 import { StructureTest } from '../setup/base/structure';
 import { actionFile } from '../.misc/setup';
 
-const { $, browser, getDriver } = seleniumWD;
+import { $, getDriver, browser } from '../setup/engine';
 
 describe('PromodSystemStructure', function () {
-  describe('[P] Actions with element', function () {
-    before(async () => {
-      await getDriver(browser);
-    });
+  before(async () => {
+    await getDriver(browser);
+  });
+  after(async () => {
+    await browser.quitAll();
+  });
 
+  describe('[P] Actions with element', function () {
     beforeEach(async () => {
       await browser.get(actionFile);
-    });
-
-    after(async () => {
-      await browser.quitAll();
     });
 
     it('click default with null', async () => {

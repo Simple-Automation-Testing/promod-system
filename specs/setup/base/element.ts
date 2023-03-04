@@ -1,11 +1,9 @@
 /* eslint-disable unicorn/prefer-dom-node-text-content */
-import { seleniumWD } from 'promod';
 import { waitForCondition } from 'sat-utils';
 import { PromodSystemElement } from '../../../system/base-interfaces/element';
 
 import type { PromodElementType } from 'promod/built/interface';
-
-const { browser } = seleniumWD;
+import { browser } from '../engine';
 
 class ElementTest extends PromodSystemElement<PromodElementType> {
   constructor(locator, name, rootElement: PromodElementType) {

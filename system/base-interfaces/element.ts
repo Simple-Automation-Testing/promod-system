@@ -1,4 +1,4 @@
-import { isString, isNumber, isObject, compareToPattern, getType, isNull } from 'sat-utils';
+import { isFunction, isString, isNumber, isObject, compareToPattern, getType, isNull } from 'sat-utils';
 import { promodLogger } from '../logger';
 import { config } from '../config';
 
@@ -130,6 +130,9 @@ class PromodSystemElement<TrootElement = any> {
    * @set logger
    */
   set elementLogger(logger: { log: (...args) => void }) {
+    if (!isFunction(logger.log)) {
+      throw new TypeError('elementLogger: logger should have a log method');
+    }
     this.logger = logger;
   }
 
@@ -141,7 +144,7 @@ class PromodSystemElement<TrootElement = any> {
   /**
    * @override
    */
-  async waitLoadedState(methodSignature?: string, ...rest) {}
+  async waitLoadedState(methodSignature?: string, ignoreWaiting?: boolean) {}
 
   /**
    * @override
@@ -247,10 +250,10 @@ class PromodSystemElement<TrootElement = any> {
     await this.rootElement[elementAction.hover]();
   }
 
-  async get(action?, ...rest): Promise<any> {
+  async get(action?, ignoreWaiting?: boolean): Promise<any> {
     this.logger.log('PromodSystemElement get action call with data ', action);
 
-    await this.waitLoadedState(action, ...rest);
+    await this.waitLoadedState(action, ignoreWaiting);
 
     return this.baseGetData(action);
   }

@@ -1,10 +1,9 @@
 import { expect } from 'assertior';
 import { PromodSystemCollection } from '../../system/base-interfaces';
-import { seleniumWD } from 'promod';
 import { ElementTest } from '../setup/base/element';
 import { actionFile } from '../.misc/setup';
 
-const { $$, $, getDriver, browser } = seleniumWD;
+import { $$, $, getDriver, browser } from '../setup/engine';
 
 function getSimpleCollection() {
   const collectionItems = $$('#simple_collection > button');
@@ -32,17 +31,16 @@ function getCollectionWithElementsThatAreNotExist() {
 }
 
 describe('PromodSystemCollection', function () {
-  describe('[P] Actions', function () {
-    before(async () => {
-      await getDriver(browser);
-    });
+  before(async () => {
+    await getDriver(browser);
+  });
+  after(async () => {
+    await browser.quitAll();
+  });
 
+  describe('[P] Actions', function () {
     beforeEach(async () => {
       await browser.get(actionFile);
-    });
-
-    after(async () => {
-      await browser.quitAll();
     });
 
     it('click as click', async () => {

@@ -187,6 +187,9 @@ class PromodSystemStructure<TrootElement = any> {
   }
 
   set structureLogger(logger: { log: (...args) => void }) {
+    if (!isFunction(logger.log)) {
+      throw new TypeError('elementLogger: logger should have a log method');
+    }
     this.logger = logger;
   }
 
