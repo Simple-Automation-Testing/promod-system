@@ -58,7 +58,7 @@ type TresultBasedOnArgument<TflowcallArgument, TflowResult extends Record<string
 
 `;
 
-  const pageName = pageInstance.identifier;
+  const pageName = pageInstance[baseLibraryDescription.entityId];
 
   const asActorAndPage = `on ${pageName}`;
 

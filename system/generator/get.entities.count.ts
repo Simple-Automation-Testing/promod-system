@@ -158,9 +158,9 @@ function createTemplate(asActorAndPage, actionDescriptor) {
 
   return `
   type T${name}Entry = {
-    _whereNot?: ${__where || 'any'}
-    _where?: ${__where || 'any'}
-    _visible?: ${__visible || 'any'}
+    ${collectionDescription.whereNot || '_whereNot'}?: ${__where || 'any'}
+    ${collectionDescription.where || '_where'}?: ${__where || 'any'}
+    ${collectionDescription.visible || '_visible'}?: ${__visible || 'any'}
   }
   type T${name} = ${__countResult}
   const ${name} = async function({...descriptions}: T${name}Entry = {}): Promise<T${name}[]> {
