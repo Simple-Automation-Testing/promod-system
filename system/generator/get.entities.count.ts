@@ -17,7 +17,7 @@ import { getCollectionsPathes } from './check.that.action.exists';
 
 const descriptionKeys = ['__countResult', '__visible', '__where'];
 
-function removeKeys(data, keysPath) {
+function removeKeys(data: { [k: string]: any }, keysPath: string) {
   const [first, ...rest] = keysPath.split('.');
 
   if (isEmptyArray(rest)) {
@@ -25,13 +25,10 @@ function removeKeys(data, keysPath) {
   } else {
     const part = removeKeys(data[first], rest.join('.'));
 
-    if (
-      (isNotEmptyObject(part) && compareToPattern(Object.keys(part).sort(), descriptionKeys.sort()).result) ||
-      isEmptyObject(part) ||
-      isEmptyArray(part) ||
-      isNull(part) ||
-      isUndefined(part)
-    ) {
+    if (isNotEmptyObject(part) && compareToPattern(Object.keys(part).sort(), descriptionKeys.sort()).result) {
+      // TODO this should be improved
+      data[first] = {};
+    } else if (isEmptyObject(part) || isEmptyArray(part) || isNull(part) || isUndefined(part)) {
       delete data[first];
     } else {
       data[first] = part;
@@ -55,7 +52,7 @@ function getKeyFormat(dataItem) {
       const { __countResult, __visible, __where } = dataItem[key];
 
       return { [key]: { [collectionDescription.action]: null }, __countResult, __visible, __where };
-    } else if (isObject(dataItem[key])) {
+    } else if (isNotEmptyObject(dataItem[key]) && isActionInside) {
       const { __countResult, __visible, __where, ...rest } = getKeyFormat(dataItem[key]);
       return { [key]: rest, __countResult, __visible, __where };
     }
@@ -84,9 +81,10 @@ function getActionsList(data) {
   const actions = [];
 
   while (isNotEmptyObject(data) && safeJSONstringify(data).includes(collectionDescription.action)) {
-    for (const key of Object.keys(data)) {
+    for (const key of Object.keys(data).filter(k =>
+      safeJSONstringify(data[k]).includes(collectionDescription.action),
+    )) {
       const { __countResult, __visible, __where, ...result } = getKeyFormat(data[key]);
-
       const action = { [key]: result };
 
       data = removeKeys(data, getSanitizeDataKeys(action));
