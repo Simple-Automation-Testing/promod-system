@@ -142,8 +142,8 @@ function getName(data) {
 }
 
 function createTemplate(asActorAndPage, actionDescriptor) {
-  const { baseLibraryDescription, collectionDescription } = config.get();
-  const { action, __countResult, __visible, __where } = actionDescriptor;
+  const { baseLibraryDescription = {}, collectionDescription = {} } = config.get();
+  const { action, __countResult, __visible = 'any', __where = 'any' } = actionDescriptor || {};
 
   const result = getResult(action);
   const name = camelize(`${asActorAndPage} Get Collection From ${getName(action)}`);
@@ -156,9 +156,9 @@ function createTemplate(asActorAndPage, actionDescriptor) {
 
   return `
   type T${name}Entry = {
-    ${collectionDescription.whereNot || '_whereNot'}?: ${__where || 'any'}
-    ${collectionDescription.where || '_where'}?: ${__where || 'any'}
-    ${collectionDescription.visible || '_visible'}?: ${__visible || 'any'}
+    ${collectionDescription.whereNot || '_whereNot'}?: ${__where} | ${__where}[];
+    ${collectionDescription.where || '_where'}?: ${__where} | ${__where}[];
+    ${collectionDescription.visible || '_visible'}?: ${__visible} | ${__visible}[];
   }
   type T${name} = ${__countResult}
   const ${name} = async function({...descriptions}: T${name}Entry = {}): Promise<T${name}[]> {
