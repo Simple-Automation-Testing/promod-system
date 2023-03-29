@@ -36,7 +36,8 @@ function getFlowEntryType(dataObj, { namePart = '', additional = '' } = {}) {
     (descriptionType, key, index, allDescriptionKeys) => {
       const endString = index !== allDescriptionKeys.length - 1 && allDescriptionKeys.length > 1 ? '\n' : '';
 
-      return (descriptionType += `${key}?: ${restCollectionDescription[key]}${endString}`);
+      const descriptor = restCollectionDescription[key] || 'any';
+      return (descriptionType += `${key}?: ${descriptor}|${descriptor}[];${endString}`);
     },
     ``,
   );
