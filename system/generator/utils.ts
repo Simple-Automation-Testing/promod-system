@@ -15,7 +15,9 @@ function getFragmentInteractionFields(instance) {
   const { systemPropsList } = config.get();
   const instanceOwnKeys = Object.getOwnPropertyNames(instance);
 
-  return instanceOwnKeys.filter(item => !systemPropsList.includes(item));
+  const iteractionFields = instanceOwnKeys.filter(item => !systemPropsList.includes(item));
+
+  return iteractionFields.length ? iteractionFields : null;
 }
 
 export { getAllBaseActions, getFragmentInteractionFields };

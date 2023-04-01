@@ -1,204 +1,111 @@
 /* eslint-disable sonarjs/no-nested-template-literals */
-import { isObject, camelize } from 'sat-utils';
+import { camelize, safeJSONstringify } from 'sat-utils';
 import { config } from '../config/config';
-import { getPathesToCollections } from './get.fragments.for.random.getting';
-import { isCollectionDescription, toRandomTemplateFormat, finTypedObject } from './utils.random';
+import { getCollectionsPathes } from './check.that.action.exists';
+import { getResult, getActionsList, isCollectionDescription, getName, getFieldsEnumList } from './utils.random';
 
-function getWaitForCollectionArgumentTemplate(dataObj, expression = '>0') {
-  return Object.keys(dataObj).reduce((template, key) => {
-    return isObject(dataObj[key]) && !isCollectionDescription(dataObj[key])
-      ? `${template} ${key}: ${getWaitForCollectionArgumentTemplate(dataObj[key], expression)} }`
-      : `${template} ${key}: { length: \`${expression}\` } }`;
-  }, '{');
-}
+function createFlowTemplates(asActorAndPage, actionDescriptor) {
+  const { baseLibraryDescription = {}, collectionDescription = {} } = config.get();
+  const { action, __countResult, __visible = 'any', __where = 'any', _fields } = actionDescriptor || {};
 
-function getFieldsEnumList(fieldsArr: string[]) {
-  return fieldsArr.reduce((enumList, item, index, arr) => {
-    const separator = index === arr.length - 1 ? '' : '|';
-    return `${enumList} '${item}' ${separator}`;
-  }, '');
-}
+  const result = getResult(action);
+  const typeName = camelize(`${asActorAndPage} get random Data and Field Values from ${getName(action)}`);
+  const oneValue = camelize(`${asActorAndPage} get random field value from ${getName(action)}`);
+  const severalValues = camelize(`${asActorAndPage} get several random field values from ${getName(action)}`);
+  const randomData = camelize(`${asActorAndPage} get random data from ${getName(action)}`);
 
-function getPropPath(dataObj) {
-  if (!isCollectionDescription(dataObj)) {
-    return `${Object.keys(dataObj)[0]} ${getPropPath(dataObj[Object.keys(dataObj)[0]])}`;
-  }
+  const actionFields = `${_fields ? `{ [_field]: null }` : 'null'}`;
 
-  return '';
-}
+  const actionSignature = safeJSONstringify(action).replace(
+    `"${collectionDescription.action}": null`,
+    // TODO this approach should be improved
+    `...descriptions, ${collectionDescription.action}: ${actionFields}`,
+  );
+  const waitingSignature = actionSignature.replace(
+    `...descriptions, ${collectionDescription.action}: ${actionFields}`,
+    `...descriptions, length: '>0'`,
+  );
+  const randomDataActionSignature = actionSignature.replace(
+    `...descriptions, ${collectionDescription.action}: ${actionFields}`,
+    `...descriptions, ${collectionDescription.action}: _fields.reduce((act, k) => {
+      act[k] = null;
 
-function getFlowEntryType(dataObj, { namePart = '', additional = '' } = {}) {
-  const typeName = `T${camelize(getPropPath(dataObj))}${namePart}`;
-
-  const { _fields, ...restCollectionDescription } = finTypedObject(dataObj);
-
-  const descriptionType = Object.keys(restCollectionDescription).reduce(
-    (descriptionType, key, index, allDescriptionKeys) => {
-      const endString = index !== allDescriptionKeys.length - 1 && allDescriptionKeys.length > 1 ? '\n' : '';
-
-      const descriptor = restCollectionDescription[key] || 'any';
-      return (descriptionType += `${key}?: ${descriptor}|${descriptor}[];${endString}`);
-    },
-    ``,
+      return act
+    }, {})`,
   );
 
-  const exectLikePart = `${additional ? additional + '\n' : ''}${descriptionType}`;
+  const fieldsType = `${_fields ? `type T${typeName}EntryFields = ${getFieldsEnumList(_fields)}` : ''}`;
+  const descriptionsType = `type T${typeName}Entry = {
+    ${collectionDescription.whereNot || '_whereNot'}?: ${__where} | ${__where}[];
+    ${collectionDescription.where || '_where'}?: ${__where} | ${__where}[];
+    ${collectionDescription.visible || '_visible'}?: ${__visible} | ${__visible}[];
+  }`;
+  // TODO usage of the resultsType is required for future optimizations
+  const resultsType = `type T${typeName}Result = ${__countResult}`;
 
-  return _fields
-    ? {
-        typeName,
-        type: `type ${typeName} = {
-  field: ${getFieldsEnumList(_fields)}
-${exectLikePart}
-};`,
-      }
-    : {
-        typeName,
-        type: `type ${typeName} = {
-${exectLikePart}
-};`,
-      };
-}
-
-function getReturnArgumentTemplate(dataObj) {
-  const { collectionDescription } = config.get();
-  const { _fields } = finTypedObject(dataObj);
-
-  return Object.keys(dataObj).reduce((template, key) => {
-    if (isObject(dataObj[key]) && !isCollectionDescription(dataObj[key])) {
-      return `${template} ${key}: ${getReturnArgumentTemplate(dataObj[key])} }`;
-    } else if (_fields) {
-      return `${template} ${key}: { ...descriptors, ${collectionDescription.action}: { [field]: null } } }`;
-    } else {
-      return `${template} ${key}: { ...descriptors, ${collectionDescription.action}: null } }`;
-    }
-  }, '{');
-}
-
-function getReturnArgumentTemplateForSeveralFields(dataObj) {
-  const { collectionDescription } = config.get();
-
-  return Object.keys(dataObj).reduce((template, key) => {
-    return isObject(dataObj[key]) && !isCollectionDescription(dataObj[key])
-      ? `${template} ${key}: ${getReturnArgumentTemplateForSeveralFields(dataObj[key])} }`
-      : `${template} ${key}: { ...descriptors, ${collectionDescription.action}: fields.reduce((act, k) => {
-        act[k] = null;
-
-        return act
-      }, {}) } }`;
-  }, '{');
-}
-
-function getReturnTemplateAndLastKey(dataObj) {
-  let lastKey;
-
-  function getReturnTemplate(dataObj) {
-    return Object.keys(dataObj).reduce((template, key) => {
-      if (isObject(dataObj[key]) && !isCollectionDescription(dataObj[key])) {
-        return `${template} ${key}: ${getReturnTemplate(dataObj[key])} }`;
-      } else {
-        lastKey = key;
-        return `${template} ${key} }`;
-      }
-    }, '{');
-  }
-  const returnTemplate = getReturnTemplate(dataObj);
-
-  return {
-    returnTemplate,
-    lastKey,
-  };
-}
-
-function createFlowTemplates(asActorAndPage, dataObj) {
-  const { baseLibraryDescription } = config.get();
-
-  const oneValue = getFlowEntryType(dataObj);
-  const severalValues = getFlowEntryType(dataObj, { namePart: 'SeveralValues', additional: 'quantity: number;' });
-
-  const { lastKey, returnTemplate } = getReturnTemplateAndLastKey(dataObj);
-  const argumentTemplate = getReturnArgumentTemplate(dataObj);
-  const severalFieldsArgumentTemplate = getReturnArgumentTemplateForSeveralFields(dataObj);
-
-  const oneValueName = camelize(`${asActorAndPage} get random field value from ${getPropPath(dataObj)}`);
-  const severalValuesName = camelize(`${asActorAndPage} get several random field values from ${getPropPath(dataObj)}`);
-  const severalFieldsName = camelize(`${asActorAndPage} get random data from ${getPropPath(dataObj)}`);
-
-  const severalFields = oneValue.type.includes('field:')
+  const severalFields = fieldsType
     ? `
-type ${oneValue.typeName}Fields = ${finTypedObject(dataObj)
-        ._fields.map(field => "'" + field + "'")
-        .join('|')}
-type ${oneValue.typeName}Values<T extends ReadonlyArray<${oneValue.typeName}Fields>> = {
+type T${randomData}Values<T extends ReadonlyArray<T${typeName}EntryFields>> = {
   [K in T extends ReadonlyArray<infer U> ? U : never]: string;
 };
-    const ${severalFieldsName} = async function<T extends ReadonlyArray<${
-        oneValue.typeName
-      }Fields>>(fields: T, descriptors: Omit<${oneValue.typeName}, 'field'> = {}): Promise<${
-        oneValue.typeName
-      }Values<T>> {
-  await page.${baseLibraryDescription.waitForVisibilityMethod}(${getWaitForCollectionArgumentTemplate(dataObj)})
-  const ${returnTemplate} = await page.${baseLibraryDescription.getDataMethod}(${severalFieldsArgumentTemplate});
+    const ${randomData} = async function<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<T${randomData}Values<T>> {
+      await page.${baseLibraryDescription.waitForVisibilityMethod}(${waitingSignature}, { everyArrayItem: false })
+      const result = await page.${baseLibraryDescription.getDataMethod}(${randomDataActionSignature});
 
+      const flatResult = result.${result}
   return getRandomArrayItem(
-    ${lastKey}
-      .map(item => fields.reduce((requredData, k ) => {
+    flatResult
+      .map(item => _fields.reduce((requredData, k ) => {
         requredData[k] = item[k].text
 
         return requredData
-      }, {} as ${oneValue.typeName}Values<T>))
+      }, {} as T${randomData}Values<T>))
   );
 };\n`
     : '';
 
-  return `\n
-${oneValue.type}
-const ${oneValueName} = async function({${oneValue.type.includes('field:') ? 'field,' : ''} ...descriptors}: ${
-    oneValue.typeName
-  } = {${oneValue.type.includes('field:') ? `field: '${finTypedObject(dataObj)._fields[0]}'` : ''}}): Promise<string> {
-  await page.${baseLibraryDescription.waitForVisibilityMethod}(${getWaitForCollectionArgumentTemplate(dataObj)})
-  const ${returnTemplate} = await page.${baseLibraryDescription.getDataMethod}(${argumentTemplate});
+  return `
+  ${fieldsType}
+  ${descriptionsType}
 
-  return getRandomArrayItem(
-    ${lastKey}
-      .map(item => item${oneValue.type.includes('field:') ? '[field]' : ''}.text),
-  );
-};\n
+  const ${oneValue} = async function(${
+    _fields ? `_field: T${typeName}EntryFields, ` : ''
+  } descriptions: T${typeName}Entry = {}): Promise<string> {
+    await page.${baseLibraryDescription.waitForVisibilityMethod}(${waitingSignature}, { everyArrayItem: false })
+    const result = await page.${baseLibraryDescription.getDataMethod}(${actionSignature});
 
-${severalValues.type}
-const ${severalValuesName} = async function({${
-    oneValue.type.includes('field:') ? 'field, quantity,' : 'quantity,'
-  } ...descriptors}: ${severalValues.typeName} = {quantity: 2, ${
-    severalValues.type.includes('field:') ? `field: '${finTypedObject(dataObj)._fields[0]}'` : ''
-  }}): Promise<string[]> {
-  await page.${baseLibraryDescription.waitForVisibilityMethod}(${getWaitForCollectionArgumentTemplate(
-    dataObj,
-    '>=${quantity}',
-  )})
-  const ${returnTemplate} = await page.${baseLibraryDescription.getDataMethod}(${argumentTemplate});
+    const flatResult = result.${result}
 
-  return getRandomArrayItem(
-    ${lastKey}
-      .map(item => item${severalValues.type.includes('field:') ? '[field]' : ''}.text),
-    quantity);
-};\n
+    return getRandomArrayItem(
+      flatResult
+        .map(item => item${_fields ? '[_field]' : ''}.text),
+    );
+  }
 
-${severalFields}
+  const ${severalValues} = async function(${
+    _fields ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,` : 'quantity: number = 2,'
+  } descriptions: T${typeName}Entry = {}): Promise<string[]> {
+    await page.${baseLibraryDescription.waitForVisibilityMethod}(${waitingSignature}, { everyArrayItem: false })
+    const result = await page.${baseLibraryDescription.getDataMethod}(${actionSignature});
+
+    const flatResult = result.${result}
+
+    return getRandomArrayItem(
+      flatResult
+        .map(item => item${_fields ? '[_field]' : ''}.text),
+      quantity,
+    );
+  }
+  ${severalFields}
 `;
 }
 
 function getRandomResultsFlows(asActorAndPage, pageInstance) {
-  const { systemPropsList } = config.get();
+  const data = getCollectionsPathes(pageInstance);
 
-  const pageFields = Object.getOwnPropertyNames(pageInstance);
+  const actions = getActionsList(data);
 
-  const interactionFields = pageFields.filter(field => !systemPropsList.includes(field));
-
-  const randomResultData = interactionFields
-    .filter(field => getPathesToCollections(pageInstance[field], field))
-    .flatMap(field => toRandomTemplateFormat(getPathesToCollections(pageInstance[field], field)));
-
-  return randomResultData.reduce((flows, dataObject) => {
+  return actions.reduce((flows, dataObject) => {
     return `${flows}${createFlowTemplates(asActorAndPage, dataObject)}`;
   }, '');
 }

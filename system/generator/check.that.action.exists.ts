@@ -20,6 +20,7 @@ function getCollectionsPathes(instance) {
       __countResult: getElementType(getCollectionItemInstance(instance), 'get', 'resultType'),
       __visible: getElementType(getCollectionItemInstance(instance), '_visible', 'resultType'),
       __where: getElementType(getCollectionItemInstance(instance), '_where', 'resultType'),
+      _fields: getFragmentInteractionFields(getCollectionItemInstance(instance)),
     };
   }
 
@@ -48,6 +49,7 @@ function getCollectionsPathes(instance) {
         __countResult: getFragmentTypes(collectionInstance, 'get', 'resultType'),
         __visible: getFragmentTypes(collectionInstance, '_visible', 'resultType'),
         __where: getFragmentTypes(collectionInstance, '_where', 'resultType'),
+        _fields: getFragmentInteractionFields(collectionInstance),
       };
     } else if (isCollectionWithItemBaseElement(instance[fragmentChildFieldName])) {
       const collectionInstance = getCollectionItemInstance(instance[fragmentChildFieldName]);
@@ -58,6 +60,7 @@ function getCollectionsPathes(instance) {
         __countResult: getElementType(collectionInstance, 'get', 'resultType'),
         __visible: getElementType(collectionInstance, '_visible', 'resultType'),
         __where: getElementType(collectionInstance, '_where', 'resultType'),
+        _fields: getFragmentInteractionFields(collectionInstance),
       };
     } else if (baseElementsActionsDescription[childConstructorName]) {
       // noop

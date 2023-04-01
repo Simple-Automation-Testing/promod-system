@@ -22,9 +22,7 @@ function getCollectionItemTypes(collectionItemInstance) {
 
   const getType = checkThatBaseElement(collectionItemInstance) ? getElementType : getElementsTypes;
 
-  const instanceInteractionFields = getFragmentInteractionFields(collectionItemInstance);
-
-  const _fields = instanceInteractionFields.length ? instanceInteractionFields : null;
+  const _fields = getFragmentInteractionFields(collectionItemInstance);
 
   const types = Object.keys(collectionRandomDataDescription).reduce((description, key) => {
     description[key] = getType(
