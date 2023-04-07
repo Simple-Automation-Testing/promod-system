@@ -1,5 +1,5 @@
 /* eslint-disable complexity, sonarjs/cognitive-complexity, sonarjs/no-identical-functions*/
-import { isString, isObject, prettifyCamelCase, isNull, isPrimitive } from 'sat-utils';
+import { toArray, isArray, isString, isObject, prettifyCamelCase, isNull, isPrimitive } from 'sat-utils';
 
 import {
   isBase,
@@ -7,10 +7,33 @@ import {
   getIntexesMessage,
   getDescriptorMessage,
   isPropValueCollection,
-  isPropValuesRandomCollectionItem,
   getWaitingOptionsPrettyMessage,
 } from './base';
 import { config } from '../config';
+
+function getFieldsEnumList(fieldsArr: string[]) {
+  return fieldsArr.reduce((enumList, item, index, arr) => {
+    const separator = index === arr.length - 1 ? '' : ',';
+    return `${enumList} '${item}'${separator}`;
+  }, '');
+}
+
+const collectionRandomDataDescriptionMessage = (fileds: string | string[], data: { [k: string]: any }) => {
+  const { collectionDescription } = config.get();
+  const { [collectionDescription.index]: index, [collectionDescription.count]: count, ...restDescription } = data;
+
+  const fieldMessagePart = isArray(fileds) ? 'fields' : 'field';
+  const filedsList = getFieldsEnumList(toArray(fileds));
+
+  const descriptionMessage = Object.keys(restDescription).reduce((description, key) => {
+    return `${description}${getDescriptorMessage(
+      restDescription[key],
+      ` ${prettifyCamelCase(key.replace(/[^\da-z]/gi, '')).toLowerCase()} `,
+    )}`;
+  }, 'collection should have ');
+
+  return `get random ${fieldMessagePart} ${filedsList} ${descriptionMessage}`;
+};
 
 const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') => {
   const { collectionDescription, actionFormatter } = config.get();
@@ -55,47 +78,6 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
 
       return `${actionMessagePart}`;
     };
-
-    const collectionRandomDataDescriptionMessage = (data: { [k: string]: any }, startMessage: string) => {
-      const {
-        [collectionDescription.index]: index,
-        // TODO - add possibility to add count information
-        [collectionDescription.count]: count,
-        except,
-        like,
-        field,
-        ...restDescription
-      } = data;
-
-      const exceptMessagePart =
-        except && except.length
-          ? `, initial list should not have values like ${except.length === 1 ? 'this' : 'these'} '${except.join(
-              ',',
-            )}' `
-          : '';
-      const likeMessagePart =
-        like && like.length
-          ? `, initial list should have values like ${like.length === 1 ? 'this' : 'these'} '${like.join(',')}' `
-          : '';
-
-      const fieldMessagePart = field ? ` field '${field}' ` : ' ';
-
-      const descriptionMessage = Object.keys(restDescription).reduce((description, key) => {
-        return `${description}${getDescriptorMessage(
-          restDescription[key],
-          ` ${prettifyCamelCase(key.replace(/[^\da-z]/gi, '')).toLowerCase()} collection `,
-        )}`;
-      }, '');
-
-      return `${startMessage}${fieldMessagePart}${exceptMessagePart}${likeMessagePart}${descriptionMessage}`;
-    };
-
-    if (isPropValuesRandomCollectionItem(dataObj, action)) {
-      return collectionRandomDataDescriptionMessage(
-        dataObj,
-        prettifyCamelCase(actionFormatter ? actionFormatter(action) : action, { firstWordUpperCase: true }),
-      );
-    }
 
     if (isPropValueCollection(dataObj, action)) {
       return collectionDescriptionMessage(
@@ -150,4 +132,4 @@ const getArgumentsMessage = (
   waitOpts?: { [k: string]: any },
 ) => `${getArgumentObjectMessage(argumentObj, action, message)}${getWaitingOptionsPrettyMessage(waitOpts)}`;
 
-export { getArgumentsMessage };
+export { getArgumentsMessage, collectionRandomDataDescriptionMessage };

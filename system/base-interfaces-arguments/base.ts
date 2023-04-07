@@ -96,18 +96,6 @@ const isPropValueCollection = (propValue: { [k: string]: any }, action, propName
   );
 };
 
-const isPropValuesRandomCollectionItem = (propValue: { [k: string]: any }, action) => {
-  const { prettyMethodName = {} } = config.get();
-  // TODO move to config in case if it will be configurable
-  const randomDataFields = ['except', 'like', 'field', '_where', '_whereNot', '_visible'];
-
-  // TODO move to config in case if it will be configurable
-  return (
-    prettyMethodName?.getRandom?.includes(action) ||
-    (isObject(propValue) && randomDataFields.some((prop: string) => Object.keys(propValue).includes(prop)))
-  );
-};
-
 const isActionableAction = (actionFlow: string) => {
   const { prettyMethodName = {} } = config.get();
   const { action, click, sendKeys } = prettyMethodName;
@@ -144,6 +132,5 @@ export {
   doesArgumentHaveCollection,
   getWaitingOptionsPrettyMessage,
   isPropValueCollection,
-  isPropValuesRandomCollectionItem,
   isActionableAction,
 };
