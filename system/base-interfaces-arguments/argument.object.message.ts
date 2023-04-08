@@ -25,12 +25,15 @@ const collectionRandomDataDescriptionMessage = (fileds: string | string[], data:
   const fieldMessagePart = isArray(fileds) ? 'fields' : 'field';
   const filedsList = getFieldsEnumList(toArray(fileds));
 
-  const descriptionMessage = Object.keys(restDescription).reduce((description, key) => {
-    return `${description}${getDescriptorMessage(
-      restDescription[key],
-      ` ${prettifyCamelCase(key.replace(/[^\da-z]/gi, '')).toLowerCase()} `,
-    )}`;
-  }, 'collection should have ');
+  const descriptionMessage = Object.keys(restDescription).reduce(
+    (description, key) => {
+      return `${description}${getDescriptorMessage(
+        restDescription[key],
+        ` ${prettifyCamelCase(key.replace(/[^\da-z]/gi, '')).toLowerCase()} `,
+      )}`;
+    },
+    Object.keys(restDescription).length ? `collection should have ` : '',
+  );
 
   return `get random ${fieldMessagePart} ${filedsList} ${descriptionMessage}`;
 };
