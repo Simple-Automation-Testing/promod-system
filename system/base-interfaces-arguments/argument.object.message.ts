@@ -20,7 +20,7 @@ function getFieldsEnumList(fieldsArr: string[]) {
 
 const collectionRandomDataDescriptionMessage = (fileds: string | string[], data: { [k: string]: any }) => {
   const { collectionDescription } = config.get();
-  const { [collectionDescription.index]: index, [collectionDescription.count]: count, ...restDescription } = data;
+  const { [collectionDescription.index]: index, [collectionDescription.count]: count, ...restDescription } = data || {};
 
   const fieldMessagePart = isArray(fileds) ? 'fields' : 'field';
   const filedsList = getFieldsEnumList(toArray(fileds));
