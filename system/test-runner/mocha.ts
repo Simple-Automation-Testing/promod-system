@@ -82,6 +82,15 @@ function getPreparedRunner<T>(fixtures?: T) {
           }
         }
       },
+      addCaseProperties: async opts => {
+        for (const reporter of activeReporters) {
+          try {
+            await reporter.addCaseProperties(opts);
+          } catch (error) {
+            warn(error);
+          }
+        }
+      },
       addCustomData: async (...args: any[]) => {
         for (const reporter of activeReporters) {
           try {
