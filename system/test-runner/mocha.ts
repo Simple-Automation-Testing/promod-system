@@ -4,18 +4,19 @@ import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 
 const { warn, error } = console;
 
+type TtestOpts = {
+  [k: string]: string | string[];
+};
+
 export type TreporterInstance = {
   startCase: (testCaseTitle: string) => void;
 
+  addCaseProperties: (opts: TtestOpts) => void;
   addStep: (stepData: string, stepArguments?: any, stepResult?: any) => void;
   addCustomData?: (...args) => void;
 
   finishSuccessCase: (testCaseTitle: string) => void;
   finishFailedCase: (testCaseTitle: string, error: Error) => void;
-};
-
-type TtestOpts = {
-  [k: string]: string | string[];
 };
 
 type TtestBody<T> = (fixtures?: T) => Promise<void> | any;
@@ -41,6 +42,7 @@ function checkExecutionTags(testTags?: string | string[]): boolean {
 const reportersManager = {
   addReporter: (...args) => ({}),
   startCase: (...args) => ({}),
+  addCaseProperties: (...args) => ({}),
   addStep: (...args) => ({}),
   addCustomData: (...args) => ({}),
   finishSuccessCase: (...args) => ({}),
@@ -137,7 +139,7 @@ function getPreparedRunner<T>(fixtures?: T) {
     checkTest,
   };
 
-  function testBodyWrapper(testName, fn) {
+  function testBodyWrapper(testName, fn, opts) {
     return async function () {
       try {
         // TODO improve this approach
@@ -159,6 +161,7 @@ function getPreparedRunner<T>(fixtures?: T) {
           }
         });
         await reportersManager.startCase(testName);
+        await reportersManager.addCaseProperties(opts);
 
         if (_beforeEachCase) {
           await _beforeEachCase.call(this, fixtures);
@@ -205,6 +208,7 @@ function getPreparedRunner<T>(fixtures?: T) {
 
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
+      opts = {};
     }
     if (isFunction(_updateCaseName)) {
       const result = _updateCaseName(testName);
@@ -213,7 +217,7 @@ function getPreparedRunner<T>(fixtures?: T) {
       }
     }
 
-    global.it(testName, testBodyWrapper(testName, fn));
+    global.it(testName, testBodyWrapper(testName, fn, opts));
   }
 
   /**
@@ -225,8 +229,9 @@ function getPreparedRunner<T>(fixtures?: T) {
   test.only = function testOnly(testName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
+      opts = {};
     }
-    global.it.only(testName, testBodyWrapper(testName, fn));
+    global.it.only(testName, testBodyWrapper(testName, fn, opts));
   };
 
   /**
@@ -244,8 +249,9 @@ function getPreparedRunner<T>(fixtures?: T) {
   ) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
+      opts = {};
     }
-    global.it.skip(`${skipReason} ${testName}`, testBodyWrapper(testName, fn));
+    global.it.skip(`${skipReason} ${testName}`, testBodyWrapper(testName, fn, opts));
   };
 
   /**
@@ -258,11 +264,12 @@ function getPreparedRunner<T>(fixtures?: T) {
   test.if = function testIf(condition, testName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
+      opts = {};
     }
     if (condition()) {
       test(testName, opts, fn);
     } else {
-      global.it.skip(testName, testBodyWrapper(testName, fn));
+      global.it.skip(testName, testBodyWrapper(testName, fn, opts));
     }
   };
 

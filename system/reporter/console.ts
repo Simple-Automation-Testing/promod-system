@@ -1,5 +1,5 @@
 // @ts-check
-import { colors } from 'sat-utils';
+import { colors, safeJSONstringify, isNotEmptyObject } from 'sat-utils';
 
 const { log } = console;
 
@@ -13,6 +13,14 @@ class ConsoleReporter {
   inSuite(suiteTitle: string) {
     if (this.isEnabled) {
       log(colors.blue('START SUITE: '), suiteTitle);
+    }
+  }
+
+  addCaseProperties(opts) {
+    if (this.isEnabled && isNotEmptyObject(opts)) {
+      log(`${colors.blue('CASE PROPERTIES:')}
+${safeJSONstringify(opts)}
+______________________________________________________`);
     }
   }
 

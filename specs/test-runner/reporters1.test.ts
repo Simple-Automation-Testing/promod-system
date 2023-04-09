@@ -18,6 +18,8 @@ class ReporterExample {
 
   addStep(stepData: string) {}
 
+  addCaseProperties(opts) {}
+
   addCustomData(...args: any[]) {}
 
   finishSuccessCase(testCaseTitle: string) {
@@ -31,6 +33,8 @@ const reporterObj = {
   startCase(testCaseTitle: string) {},
 
   addStep(stepData: string) {},
+
+  addCaseProperties(opts) {},
 
   addCustomData(...args: any[]) {},
 

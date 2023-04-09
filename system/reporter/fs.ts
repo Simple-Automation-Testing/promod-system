@@ -1,4 +1,5 @@
 // @ts-check
+import { safeJSONstringify, isNotEmptyObject } from 'sat-utils';
 import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 
@@ -18,6 +19,14 @@ class FsReporter {
   inSuite(suiteTitle: string) {
     if (this.isEnabled) {
       this.suiteTitle = suiteTitle;
+    }
+  }
+
+  addCaseProperties(opts) {
+    if (this.isEnabled && isNotEmptyObject(opts)) {
+      this.data.push(`CASE PROPERTIES:
+${safeJSONstringify(opts)}
+______________________________________________________`);
     }
   }
 

@@ -22,6 +22,7 @@ class ReporterExample {
   finishSuccessCase(testCaseTitle: string) {
     titleByClass = testCaseTitle;
   }
+  addCaseProperties(opts) {}
 
   finishFailedCase(testCaseTitle: string, error: Error) {}
 }
@@ -36,6 +37,7 @@ const reporterObj = {
   finishSuccessCase(testCaseTitle: string) {
     titleByObj = testCaseTitle;
   },
+  addCaseProperties(opts) {},
   finishFailedCase(testCaseTitle: string, error: Error) {},
 };
 
