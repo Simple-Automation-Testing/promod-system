@@ -28,7 +28,7 @@ function getCollectionsPathes(instance) {
     return getCollectionsPathes(getCollectionItemInstance(instance));
   }
 
-  const interactionFields = getFragmentInteractionFields(instance);
+  const interactionFields = getFragmentInteractionFields(instance) || [];
 
   const result = {};
 
@@ -81,7 +81,7 @@ function checkThatFragmentHasItemsToAction(instance, action: string) {
     return checkThatFragmentHasItemsToAction(getCollectionItemInstance(instance), action);
   }
 
-  const interactionFields = getFragmentInteractionFields(instance);
+  const interactionFields = getFragmentInteractionFields(instance) || [];
 
   let result = false;
   for (const fragmentChildFieldName of interactionFields) {

@@ -47,7 +47,7 @@ function getPathesToCollections(childInstance, name) {
       return getCollectionItemTypes(getCollectionItemInstance(instance));
     }
 
-    const interactionFields = getFragmentInteractionFields(instance);
+    const interactionFields = getFragmentInteractionFields(instance) || [];
 
     for (const field of interactionFields) {
       const childConstructorName = instance[field].constructor.name;
