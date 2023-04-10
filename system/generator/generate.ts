@@ -9,6 +9,8 @@ import { getAllBaseActions } from './utils';
 import { getRandomResultsFlows } from './get.random.results.flows';
 import { getCountFlows } from './get.entities.count';
 
+const { PROMOD_S_GENERATE_DEFAULT_IMPORT, PROMOD_S_GENERATE_ACTIONS_TYPE } = process.env;
+
 const flowExpressionMatcher = /(?<=const ).*(?= = async)/gim;
 const flowDeclarationMatcher = /(?<=function ).*(?=\()/gim;
 
@@ -80,16 +82,42 @@ ${interactionFlowsTemplate.join('\n')}
 ${collectionEntities}
 
 `;
-
   const flows = body.match(flowMatcher) || [];
+
+  let defaultExport = '';
+  let actionsType = '';
+  let commonExport = `export {
+    ${flows.join(',\n  ')},
+  }`;
+
+  if (PROMOD_S_GENERATE_DEFAULT_IMPORT) {
+    defaultExport = `const ${pageName}Actions = {
+  ${flows.join(',\n  ')},
+}
+export default ${pageName}Actions;
+`;
+
+    commonExport = '';
+  }
+
+  if (PROMOD_S_GENERATE_ACTIONS_TYPE && defaultExport !== '') {
+    actionsType = `export type T${pageName}Actions = typeof ${pageName}Actions;`;
+  }
+
+  if (PROMOD_S_GENERATE_ACTIONS_TYPE && defaultExport === '') {
+    actionsType = `const ${pageName}Actions = {
+  ${flows.join(',\n  ')},
+}
+
+export type T${pageName}Actions = typeof ${pageName}Actions;`;
+  }
 
   fs.writeFileSync(
     `${pagePath.replace('.ts', '.actions.ts')}`,
     `${body}
-
-export {
-  ${flows.join(',\n  ')},
-};
+${defaultExport}
+${actionsType}
+${commonExport}
 `,
   );
 };
