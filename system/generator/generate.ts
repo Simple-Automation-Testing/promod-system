@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { isString, isRegExp } from 'sat-utils';
+import { isString, isRegExp, camelize } from 'sat-utils';
 import { getBaseImport } from './get.base.import';
 import { getAllBaseElements } from './get.base';
 import { config } from '../config/config';
@@ -63,6 +63,7 @@ type TresultBasedOnArgument<TflowcallArgument, TflowResult extends Record<string
   const pageName = pageInstance[baseLibraryDescription.entityId];
 
   const asActorAndPage = `on ${pageName}`;
+  const mainActions = camelize(`${pageName} Actions`);
 
   const actions = getAllBaseActions().filter(action => !Object.values(collectionDescription).includes(action));
 
@@ -91,25 +92,25 @@ ${collectionEntities}
   }`;
 
   if (PROMOD_S_GENERATE_DEFAULT_IMPORT) {
-    defaultExport = `const ${pageName}Actions = {
+    defaultExport = `const ${mainActions} = {
   ${flows.join(',\n  ')},
 }
-export default ${pageName}Actions;
+export default ${mainActions};
 `;
 
     commonExport = '';
   }
 
   if (PROMOD_S_GENERATE_ACTIONS_TYPE && defaultExport !== '') {
-    actionsType = `export type T${pageName}Actions = typeof ${pageName}Actions;`;
+    actionsType = `export type T${mainActions} = typeof ${mainActions};`;
   }
 
   if (PROMOD_S_GENERATE_ACTIONS_TYPE && defaultExport === '') {
-    actionsType = `const ${pageName}Actions = {
+    actionsType = `const ${mainActions} = {
   ${flows.join(',\n  ')},
 }
 
-export type T${pageName}Actions = typeof ${pageName}Actions;`;
+export type T${mainActions} = typeof ${mainActions};`;
   }
 
   fs.writeFileSync(

@@ -20,6 +20,7 @@ export type TreporterInstance = {
 };
 
 type TtestBody<T> = (fixtures?: T) => Promise<void> | any;
+type TcheckTestCondition = (testName: string, opts?: TtestOpts) => boolean;
 type TdescribeBody<T> = (fixtures?: T) => void;
 
 /**
@@ -270,12 +271,18 @@ function getPreparedRunner<T>(fixtures?: T) {
    * @param {(fixtures?: any) => Promise<void> | any} [fn] test case body
    * @returns {void}
    */
-  test.if = function testIf(condition, testName, opts: TtestOpts | TtestBody<T>, fn?: TtestBody<T>) {
+  test.if = function testIf(
+    condition: TcheckTestCondition,
+    testName,
+    opts: TtestOpts | TtestBody<T>,
+    fn?: TtestBody<T>,
+  ) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<T>;
       opts = {};
     }
-    if (condition()) {
+
+    if (condition(testName, opts as TtestOpts)) {
       test(testName, opts, fn);
     } else {
       global.it.skip(testName, testBodyWrapper(testName, fn, opts));
