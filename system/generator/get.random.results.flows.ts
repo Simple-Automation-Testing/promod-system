@@ -2,11 +2,11 @@
 import { camelize, safeJSONstringify } from 'sat-utils';
 import { config } from '../config/config';
 import { getCollectionsPathes } from './check.that.action.exists';
-import { getResult, getActionsList, isCollectionDescription, getName, getFieldsEnumList } from './utils.random';
+import { getResult, getActionsList, getName, getFieldsEnumList } from './utils.random';
 
 function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const { baseLibraryDescription = {}, collectionDescription = {} } = config.get();
-  const { action, __countResult, __visible = 'any', __where = 'any', _fields } = actionDescriptor || {};
+  const { action, /* __countResult, */ __visible = 'any', __where = 'any', _fields } = actionDescriptor || {};
 
   const result = getResult(action);
   const typeName = camelize(`${asActorAndPage} get random Data and Field Values from ${getName(action)}`);
@@ -41,14 +41,11 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
     ${collectionDescription.visible || '_visible'}?: ${__visible} | ${__visible}[];
   }`;
   // TODO usage of the resultsType is required for future optimizations
-  const resultsType = `type T${typeName}Result = ${__countResult}`;
+  // const resultsType = `type T${typeName}Result = ${__countResult}`;
 
   const severalFields = fieldsType
     ? `
-type T${randomData}Values<T extends ReadonlyArray<T${typeName}EntryFields>> = {
-  [K in T extends ReadonlyArray<infer U> ? U : never]: string;
-};
-    const ${randomData} = async function<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<T${randomData}Values<T>> {
+    const ${randomData} = async function<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> {
       await page.${baseLibraryDescription.waitForVisibilityMethod}(${waitingSignature}, { everyArrayItem: false })
       const result = await page.${baseLibraryDescription.getDataMethod}(${randomDataActionSignature});
 
@@ -59,7 +56,7 @@ type T${randomData}Values<T extends ReadonlyArray<T${typeName}EntryFields>> = {
         requredData[k] = item[k].text
 
         return requredData
-      }, {} as T${randomData}Values<T>))
+      }, {} as TobjectFromStringArray<T>))
   );
 };\n`
     : '';

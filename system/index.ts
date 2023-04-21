@@ -7,3 +7,6 @@ export * from './reporter';
 export * from './test-runner';
 
 export * from './test-rail-report';
+
+// types
+export type { TobjectFromStringArray, TresultBasedOnArgument, TChainableActions, IsEq } from './generator/types';

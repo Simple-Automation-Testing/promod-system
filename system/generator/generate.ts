@@ -50,13 +50,10 @@ const createPageStructure = (pagePath: string) => {
   const pageInstance = new PageClass();
 
   const globalImport = `import { toArray, getRandomArrayItem } from 'sat-utils';
+import type { TresultBasedOnArgument, TobjectFromStringArray } from 'promod-system'
 import {
     ${getBaseImport(getAllBaseElements(pageInstance))}
   } from '${pathToLibFolder}${pathToBase}';
-
-type TresultBasedOnArgument<TflowcallArgument, TflowResult extends Record<string | number | symbol, unknown>> = {
-  [K in keyof TflowcallArgument]: TflowResult[K];
-};
 
 `;
 
