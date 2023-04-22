@@ -1,6 +1,6 @@
 {
   "name": "promod-system",
-  "version": "2.3.0-rc1",
+  "version": "2.3.1-rc1",
   "description": "Library promod condition waitings",
   "main": "./built/index.js",
   "bin": "./bin/cli.js",
@@ -55,7 +55,7 @@
   "dependencies": {
     "dayjs": "^1.11.7",
     "node-fetch": "2.6.8",
-    "sat-utils": "1.7.5",
+    "sat-utils": "1.8.0",
     "yargs": "17.6.2"
   }
 }

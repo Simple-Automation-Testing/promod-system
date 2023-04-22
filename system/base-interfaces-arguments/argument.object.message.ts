@@ -91,7 +91,7 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
 
     return Object.keys(dataObj).reduce((actionMessage, key, index, keys) => {
       const isLastKey = keys.length - 1 === index;
-      const messageEnd = isLastKey ? '' : ' and then ';
+      const messageEnd = isLastKey ? '' : ' \n and then ';
 
       const formattedAction = actionFormatter && isPrimitive(dataObj[key]) ? actionFormatter(action) : action;
 
