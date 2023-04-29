@@ -21,7 +21,7 @@ function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType
 }
 
 function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field }) {
-  const { repeatingActions = [] } = config.get();
+  const { repeatingActions = [], baseLibraryDescription = {} } = config.get();
 
   const isActionVoid = flowResultType === 'void';
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
@@ -29,9 +29,9 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
 
   let entryDataType = `Tentry${optionsSecondArgument}`;
 
-  let flowBody = `${
-    isActionVoid ? 'return' : `const { ${field} } =`
-  } await page.${action}({ ${field}: data }${additionalArguments});${isActionVoid ? '' : `\n\treturn ${field};`}`;
+  let flowBody = `${isActionVoid ? 'return' : `const { ${field} } =`} await ${
+    !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+  }${action}({ ${field}: data }${additionalArguments});${isActionVoid ? '' : `\n\treturn ${field};`}`;
 
   /**
    * @info
@@ -47,7 +47,9 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
     entryDataType = `Tentry | Tentry[]${optionsSecondArgument}`;
 
     flowBody = `for (const actionData of toArray(data)) {
-      await page.${action}({ ${field}: actionData }${additionalArguments})
+      await ${
+        !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+      }${action}({ ${field}: actionData }${additionalArguments})
     }`;
   }
 
@@ -103,7 +105,9 @@ function createFlowTemplateForPageElements(name, action, instance) {
 type ${typeName} = ${flowArgumentType}
 type ${typeName}Result = ${resultTypeClarification}
 const ${flowActionName} = async function<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {
-  return await page.${action}(data${optionsSecondArgument ? ', opts' : ''});
+  return await ${
+    !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+  }${action}(data${optionsSecondArgument ? ', opts' : ''});
 };\n`;
 }
 

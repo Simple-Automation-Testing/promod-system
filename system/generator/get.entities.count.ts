@@ -26,7 +26,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   }
   type T${name} = ${__countResult}
   const ${name} = async function({...descriptions}: T${name}Entry = {}): Promise<T${name}[]> {
-    const result = await page.${baseLibraryDescription.getDataMethod}(${actionSignature});
+    const result = await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     return result.${result}
   }`;

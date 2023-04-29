@@ -31,29 +31,53 @@ const createPageStructure = (pagePath: string) => {
       .map(() => '../')
       .join('') || './';
 
+  let getPage: () => any;
+  let pageBaseLine;
   const pageModule = require(pagePath);
 
-  const PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
-    if (isString(baseLibraryDescription.pageId)) {
-      return name.includes(baseLibraryDescription.pageId);
-    } else if (isRegExp(baseLibraryDescription.pageId)) {
-      return name.match(baseLibraryDescription.pageId);
-    } else {
-      throw new TypeError('"pageId" should exist in "baseLibraryDescription", pageId should be a string or regexp');
+  if (baseLibraryDescription.getPageInstance) {
+    getPage = pageModule[baseLibraryDescription.getPageInstance];
+    console.log(Object.keys(pageModule), baseLibraryDescription.getPageInstance);
+    if (!getPage) {
+      throw new Error(
+        `Page "getPageInstance" method was not found. Search pattern is '${baseLibraryDescription.getPageInstance}'`,
+      );
     }
-  });
 
-  if (!PageClass) {
-    throw new Error(`Page Class was not found. Search pattern is '${baseLibraryDescription.pageId}'`);
+    pageBaseLine = `import { ${baseLibraryDescription.getPageInstance} } from './${pageRelativeTsPath}';`;
+  } else {
+    const PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
+      if (isString(baseLibraryDescription.pageId)) {
+        return name.includes(baseLibraryDescription.pageId);
+      } else if (isRegExp(baseLibraryDescription.pageId)) {
+        return name.match(baseLibraryDescription.pageId);
+      } else {
+        throw new TypeError('"pageId" should exist in "baseLibraryDescription", pageId should be a string or regexp');
+      }
+    });
+
+    if (!PageClass) {
+      throw new Error(`Page Class was not found. Search pattern is '${baseLibraryDescription.pageId}'`);
+    }
+
+    pageBaseLine = `import { ${PageClass.prototype.constructor.name} } from './${pageRelativeTsPath}';
+
+const page = new ${PageClass.prototype.constructor.name}();`;
+
+    getPage = () => new PageClass();
   }
 
-  const pageInstance = new PageClass();
+  const pageInstance = getPage();
+
+  console.log(pageInstance)
 
   const globalImport = `import { toArray, getRandomArrayItem } from 'sat-utils';
 import type { TresultBasedOnArgument, TobjectFromStringArray } from 'promod-system'
 import {
     ${getBaseImport(getAllBaseElements(pageInstance))}
   } from '${pathToLibFolder}${pathToBase}';
+
+${pageBaseLine}
 
 `;
 
@@ -71,10 +95,6 @@ import {
 
   const body = `${globalImport}
 
-  import { ${PageClass.prototype.constructor.name} } from './${pageRelativeTsPath}';
-
-
-  const page = new ${PageClass.prototype.constructor.name}();
 ${randomResultsFlowsTemplate}
 ${interactionFlowsTemplate.join('\n')}
 ${collectionEntities}
