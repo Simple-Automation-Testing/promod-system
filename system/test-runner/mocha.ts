@@ -241,6 +241,12 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       fn = opts as TtestBody<Tfixtures>;
       opts = {} as TrequiredOpts;
     }
+    if (isFunction(_updateCaseName)) {
+      const result = _updateCaseName(testName);
+      if (isString(result)) {
+        testName = result;
+      }
+    }
     global.it.only(testName, testBodyWrapper(testName, fn, opts));
   };
 
