@@ -12,11 +12,17 @@ function getCollectionItemInstance(collectionInstance) {
   );
 }
 
+function isCollectionInstance(instance) {
+  const { baseLibraryDescription } = config.get();
+
+  return instance?.constructor?.name?.includes(baseLibraryDescription.collectionId);
+}
+
 function isCollectionWithItemBaseElement(instance) {
   const { baseLibraryDescription, baseElementsActionsDescription } = config.get();
 
-  return !!(
-    instance?.constructor?.name.includes(baseLibraryDescription.collectionId) &&
+  return (
+    isCollectionInstance(instance) &&
     baseElementsActionsDescription[instance[baseLibraryDescription.collectionItemId]?.name]
   );
 }
@@ -25,9 +31,14 @@ function isCollectionWithItemFragment(instance) {
   const { baseLibraryDescription } = config.get();
 
   return (
-    instance?.constructor?.name.includes(baseLibraryDescription.collectionId) &&
+    isCollectionInstance(instance) &&
     instance[baseLibraryDescription.collectionItemId].name.includes(baseLibraryDescription.fragmentId)
   );
 }
 
-export { getCollectionItemInstance, isCollectionWithItemBaseElement, isCollectionWithItemFragment };
+export {
+  getCollectionItemInstance,
+  isCollectionWithItemBaseElement,
+  isCollectionWithItemFragment,
+  isCollectionInstance,
+};

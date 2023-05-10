@@ -5,15 +5,13 @@ import {
   isNull,
   compareToPattern,
   waitForCondition,
-  safeHasOwnPropery,
   isFunction,
   isAsyncFunction,
   isEmptyObject,
   safeJSONstringify,
 } from 'sat-utils';
-import { PromodSystemCollection } from './collection';
 import { promodLogger } from '../logger';
-import { getCollectionElementInstance, getCollectionActionData } from './utils';
+import { getCollectionRecomposedData } from './data.transformation';
 
 import type { TbaseLibraryDescriptionMap, TcollectionActionDescriptionMap, TsystemPropsList } from './types';
 
@@ -412,33 +410,7 @@ class PromodSystemStructure<TrootElement = any> {
   }
 
   private alignWaitConditionData(cloneData, component = this) {
-    const collectionActionProps = new Set(Object.values(collectionDescription).filter(key => key !== 'length'));
-    const { length, ...rest } = cloneData;
-
-    for (const key of Object.keys(rest)) {
-      if (
-        isObject(rest[key]) &&
-        !collectionActionProps.has(key) &&
-        component[key] instanceof PromodSystemCollection &&
-        !safeHasOwnPropery(rest[key], collectionDescription.action)
-      ) {
-        const itemsArrayChild = getCollectionElementInstance(component[key], baseLibraryDescription);
-        const { _outOfDescription, ...data } = getCollectionActionData(rest[key], collectionDescription);
-
-        rest[key] = {
-          ...data,
-          [collectionDescription.action]: this.alignWaitConditionData(_outOfDescription, itemsArrayChild),
-        };
-      } else if (isObject(rest[key]) && !collectionActionProps.has(key)) {
-        rest[key] = this.alignWaitConditionData(rest[key], component[key]);
-      } else if (collectionActionProps.has(key)) {
-        rest[key] = { ...rest[key] };
-      } else {
-        rest[key] = null;
-      }
-    }
-
-    return rest;
+    return getCollectionRecomposedData(cloneData, component);
   }
 }
 
