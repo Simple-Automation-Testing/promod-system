@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 import * as path from 'path';
 import * as fs from 'fs';
 import { isString, isRegExp, camelize } from 'sat-utils';
@@ -14,7 +15,7 @@ const { PROMOD_S_GENERATE_DEFAULT_IMPORT, PROMOD_S_GENERATE_ACTIONS_TYPE } = pro
 const flowExpressionMatcher = /(?<=const ).*(?= = async)/gim;
 const flowDeclarationMatcher = /(?<=function ).*(?=\()/gim;
 
-const createPageStructure = (pagePath: string) => {
+function createPageStructure(pagePath: string) {
   const { pathToBase, baseLibraryDescription, promod = {}, collectionDescription } = config.get();
 
   const flowMatcher = promod.actionsDeclaration === 'declaration' ? flowDeclarationMatcher : flowExpressionMatcher;
@@ -37,7 +38,7 @@ const createPageStructure = (pagePath: string) => {
 
   if (baseLibraryDescription.getPageInstance) {
     getPage = pageModule[baseLibraryDescription.getPageInstance];
-    console.log(Object.keys(pageModule), baseLibraryDescription.getPageInstance);
+
     if (!getPage) {
       throw new Error(
         `Page "getPageInstance" method was not found. Search pattern is '${baseLibraryDescription.getPageInstance}'`,
@@ -68,8 +69,6 @@ const page = new ${PageClass.prototype.constructor.name}();`;
   }
 
   const pageInstance = getPage();
-
-  console.log(pageInstance)
 
   const globalImport = `import { toArray, getRandomArrayItem } from 'sat-utils';
 import type { TresultBasedOnArgument, TobjectFromStringArray } from 'promod-system'
@@ -138,6 +137,6 @@ ${actionsType}
 ${commonExport}
 `,
   );
-};
+}
 
 export { createPageStructure };

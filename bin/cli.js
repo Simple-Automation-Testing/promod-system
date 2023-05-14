@@ -13,10 +13,12 @@ const argv = yargs(hideBin(process.argv)).argv;
 
 const { createPageStructure } = require('../built/generator/generate');
 const { createTemplateConfig } = require('../built/config/config.template');
+const { logEnvUsage } = require('../built/config/env');
 
 if (argv.clihelp) {
   console.info(`
     Usage:
+      --envhelp                     - env vars that system uses
       --clihelp                     - get usage description
       --generate-config             - generate base config
       --file="/path/to/page.ts"                       - generate actions for required page
@@ -27,12 +29,14 @@ if (argv.clihelp) {
 
 if (argv.ts) {
   require('ts-node').register({
-    compilerOptions: {
-      module: 'commonjs',
-    },
+    compilerOptions: { module: 'commonjs' },
     disableWarnings: true,
     fast: true,
   });
+}
+
+if (argv.envhelp) {
+  logEnvUsage();
 }
 
 if (argv['generate-config']) {

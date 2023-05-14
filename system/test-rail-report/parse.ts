@@ -1,6 +1,5 @@
 /* eslint-disable no-console, sonarjs/no-identical-functions */
 import * as fs from 'fs';
-import * as path from 'path';
 import { lengthToIndexesArray, getDirFilesList } from 'sat-utils';
 import { config } from '../config/config';
 import {
@@ -361,11 +360,13 @@ function parseGeneralReport() {
     reportExtensions.push(testRunExecutions);
   }
 
-  if (process.env.RESET_REPORT) {
+  if (process.env.PROMOD_S_RESET_REPORT) {
     createGeneralReportTemplate();
   }
 
-  reportExtensions.forEach(extendGeneralReport);
+  reportExtensions.forEach(reportPart => {
+    extendGeneralReport(reportPart);
+  });
 }
 
 export { parseReportToConsoleOutput, parseTestRunExecutionToHTML, parseBurndownToHTML, parseGeneralReport };

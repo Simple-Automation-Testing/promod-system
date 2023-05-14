@@ -16,8 +16,7 @@ function getArgumentTags(): string[] {
  * @returns {boolean}
  */
 function shouldRecallAfterEachOnFail() {
-  // @ts-ignore
-  return process.env.PROMOD_S_RECALL_AFTER_EACH === '1' || process.env.PROMOD_S_RECALL_AFTER_EACH === 1;
+  return Boolean(process.env.PROMOD_S_RECALL_AFTER_EACH);
 }
 
 export { getArgumentTags, shouldRecallAfterEachOnFail };
