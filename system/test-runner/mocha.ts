@@ -15,6 +15,7 @@ export type TreporterInstance<Topts = TtestOpts> = {
   addStep: (stepData: string, stepArguments?: any, stepResult?: any) => void;
   addCustomData?: (...args) => void;
 
+  log?: (...args) => void;
   finishSuccessCase: (testCaseTitle: string) => void;
   finishFailedCase: (testCaseTitle: string, error: Error) => void;
 };
@@ -45,6 +46,7 @@ const reportersManager = {
   startCase: (...args) => ({}),
   addCaseProperties: (...args) => ({}),
   addStep: (...args) => ({}),
+  log: (...args) => ({}),
   addCustomData: (...args) => ({}),
   finishSuccessCase: (...args) => ({}),
   finishFailedCase: (...args) => ({}),
@@ -96,6 +98,15 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
         for (const reporter of activeReporters) {
           try {
             await reporter.addCustomData(...args);
+          } catch (error) {
+            warn(error);
+          }
+        }
+      },
+      log: async (...args: any[]) => {
+        for (const reporter of activeReporters) {
+          try {
+            await reporter.log(...args);
           } catch (error) {
             warn(error);
           }
