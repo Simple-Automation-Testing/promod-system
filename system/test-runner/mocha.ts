@@ -13,9 +13,10 @@ export type TreporterInstance<Topts = TtestOpts> = {
 
   addCaseProperties: (opts: Topts) => void;
   addStep: (stepData: string, stepArguments?: any, stepResult?: any) => void;
-  addCustomData?: (...args) => void;
 
+  addCustomData?: (...args) => void;
   log?: (...args) => void;
+
   finishSuccessCase: (testCaseTitle: string) => void;
   finishFailedCase: (testCaseTitle: string, error: Error) => void;
 };
@@ -70,7 +71,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       startCase: async (testCaseTitle: string) => {
         for (const reporter of activeReporters) {
           try {
-            await reporter.startCase(testCaseTitle);
+            if (reporter.startCase) {
+              await reporter.startCase(testCaseTitle);
+            }
           } catch (error) {
             warn(error);
           }
@@ -79,7 +82,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       addStep: async (stepData: string, stepArguments?: any, stepResult?: any) => {
         for (const reporter of activeReporters) {
           try {
-            await reporter.addStep(stepData, stepArguments, stepResult);
+            if (reporter.addStep) {
+              await reporter.addStep(stepData, stepArguments, stepResult);
+            }
           } catch (error) {
             warn(error);
           }
@@ -88,7 +93,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       addCaseProperties: async opts => {
         for (const reporter of activeReporters) {
           try {
-            await reporter.addCaseProperties(opts);
+            if (reporter.addCaseProperties) {
+              await reporter.addCaseProperties(opts);
+            }
           } catch (error) {
             warn(error);
           }
@@ -97,7 +104,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       addCustomData: async (...args: any[]) => {
         for (const reporter of activeReporters) {
           try {
-            await reporter.addCustomData(...args);
+            if (reporter.addCustomData) {
+              await reporter.addCustomData(...args);
+            }
           } catch (error) {
             warn(error);
           }
@@ -106,7 +115,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       log: async (...args: any[]) => {
         for (const reporter of activeReporters) {
           try {
-            await reporter.log(...args);
+            if (reporter.log) {
+              await reporter.log(...args);
+            }
           } catch (error) {
             warn(error);
           }
@@ -115,7 +126,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       finishSuccessCase: async (testCaseTitle: string) => {
         for (const reporter of activeReporters) {
           try {
-            await reporter.finishSuccessCase(testCaseTitle);
+            if (reporter.finishSuccessCase) {
+              await reporter.finishSuccessCase(testCaseTitle);
+            }
           } catch (error) {
             warn(error);
           }
@@ -124,7 +137,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       finishFailedCase: async (testCaseTitle: string, error: Error) => {
         for (const reporter of activeReporters) {
           try {
-            await reporter.finishFailedCase(testCaseTitle, error);
+            if (reporter.finishFailedCase) {
+              await reporter.finishFailedCase(testCaseTitle, error);
+            }
           } catch (error) {
             warn(error);
           }
