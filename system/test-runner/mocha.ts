@@ -12,7 +12,8 @@ export type TreporterInstance<Topts = TtestOpts> = {
   startCase: (testCaseTitle: string) => void;
 
   addCaseProperties: (opts: Topts) => void;
-  addStep: (stepData: string, stepArguments?: any, stepResult?: any) => void;
+  addStep?: (stepData: string, stepArguments?: any, stepResult?: any) => void | Promise<void>;
+  finishStep?: (...args) => void | Promise<void>;
 
   addCustomData?: (...args) => void;
   log?: (...args) => void;
@@ -46,7 +47,11 @@ const reportersManager = {
   addReporter: (...args) => ({}),
   startCase: (...args) => ({}),
   addCaseProperties: (...args) => ({}),
-  addStep: (...args) => ({}),
+  addStep: (
+    ...args
+  ):
+    | Promise<{ finishStep?: (...args) => void | Promise<void> }>
+    | { finishStep?: (...args) => void | Promise<void> } => ({}),
   log: (...args) => ({}),
   addCustomData: (...args) => ({}),
   finishSuccessCase: (...args) => ({}),
@@ -84,6 +89,19 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
           try {
             if (reporter.addStep) {
               await reporter.addStep(stepData, stepArguments, stepResult);
+            }
+          } catch (error) {
+            warn(error);
+          }
+        }
+
+        return _reportersManager.finishStep;
+      },
+      finishStep: async (...data) => {
+        for (const reporter of activeReporters) {
+          try {
+            if (reporter.finishStep) {
+              await reporter.finishStep(...data);
             }
           } catch (error) {
             warn(error);
