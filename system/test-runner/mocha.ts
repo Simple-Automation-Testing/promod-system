@@ -1,4 +1,4 @@
-/* eslint-disable no-console, no-only-tests/no-only-tests, sonarjs/cognitive-complexity */
+/* eslint-disable unicorn/consistent-function-scoping, no-console, no-only-tests/no-only-tests, sonarjs/cognitive-complexity */
 import { isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
 import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 
@@ -47,11 +47,11 @@ const reportersManager = {
   addReporter: (...args) => ({}),
   startCase: (...args) => ({}),
   addCaseProperties: (...args) => ({}),
-  addStep: (
-    ...args
-  ):
-    | Promise<{ finishStep?: (...args) => void | Promise<void> }>
-    | { finishStep?: (...args) => void | Promise<void> } => ({}),
+  addStep:
+    (...args): Promise<(...args) => void | Promise<void>> | ((...args) => void | Promise<void>) =>
+    (...args) => {
+      /** */
+    },
   log: (...args) => ({}),
   addCustomData: (...args) => ({}),
   finishSuccessCase: (...args) => ({}),
