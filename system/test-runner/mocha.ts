@@ -2,6 +2,7 @@
 import { isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
 import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 
+const { PROMOD_S_SHORE_REPORTER_ERRORS } = process.env;
 const { warn, error } = console;
 
 type TtestOpts = {
@@ -80,7 +81,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
               await reporter.startCase(testCaseTitle);
             }
           } catch (error) {
-            warn(error);
+            if (PROMOD_S_SHORE_REPORTER_ERRORS) {
+              warn(error);
+            }
           }
         }
       },
@@ -91,7 +94,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
               await reporter.addStep(stepData, stepArguments, stepResult);
             }
           } catch (error) {
-            warn(error);
+            if (PROMOD_S_SHORE_REPORTER_ERRORS) {
+              warn(error);
+            }
           }
         }
 
@@ -104,7 +109,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
               await reporter.finishStep(...data);
             }
           } catch (error) {
-            warn(error);
+            if (PROMOD_S_SHORE_REPORTER_ERRORS) {
+              warn(error);
+            }
           }
         }
       },
@@ -115,7 +122,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
               await reporter.addCaseProperties(opts);
             }
           } catch (error) {
-            warn(error);
+            if (PROMOD_S_SHORE_REPORTER_ERRORS) {
+              warn(error);
+            }
           }
         }
       },
@@ -126,7 +135,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
               await reporter.addCustomData(...args);
             }
           } catch (error) {
-            warn(error);
+            if (PROMOD_S_SHORE_REPORTER_ERRORS) {
+              warn(error);
+            }
           }
         }
       },
@@ -137,7 +148,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
               await reporter.log(...args);
             }
           } catch (error) {
-            warn(error);
+            if (PROMOD_S_SHORE_REPORTER_ERRORS) {
+              warn(error);
+            }
           }
         }
       },
@@ -148,7 +161,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
               await reporter.finishSuccessCase(testCaseTitle);
             }
           } catch (error) {
-            warn(error);
+            if (PROMOD_S_SHORE_REPORTER_ERRORS) {
+              warn(error);
+            }
           }
         }
       },
@@ -159,7 +174,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
               await reporter.finishFailedCase(testCaseTitle, error);
             }
           } catch (error) {
-            warn(error);
+            if (PROMOD_S_SHORE_REPORTER_ERRORS) {
+              warn(error);
+            }
           }
         }
       },
