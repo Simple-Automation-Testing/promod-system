@@ -1,5 +1,5 @@
-/* eslint-disable sonarjs/no-nested-template-literals */
-import { camelize, safeJSONstringify } from 'sat-utils';
+/* eslint-disable sonarjs/no-nested-template-literals, sonarjs/cognitive-complexity*/
+import { camelize, stringifyData } from 'sat-utils';
 import { config } from '../config/config';
 import { getCollectionsPathes } from './check.that.action.exists';
 import { getResult, getActionsList, getName, getFieldsEnumList } from './utils.random';
@@ -16,8 +16,8 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
   const actionFields = `${_fields ? `{ [_field]: null }` : 'null'}`;
 
-  const actionSignature = safeJSONstringify(action).replace(
-    `"${collectionDescription.action}": null`,
+  const actionSignature = stringifyData(action).replace(
+    `${collectionDescription.action}: null`,
     // TODO this approach should be improved
     `...descriptions, ${collectionDescription.action}: ${actionFields}`,
   );
@@ -46,8 +46,12 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const severalFields = fieldsType
     ? `
     const ${randomData} = async function<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> {
-      await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${baseLibraryDescription.waitForVisibilityMethod}(${waitingSignature}, { everyArrayItem: false })
-      const result = await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${baseLibraryDescription.getDataMethod}(${randomDataActionSignature});
+      await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
+        baseLibraryDescription.waitForVisibilityMethod
+      }(${waitingSignature}, { everyArrayItem: false })
+      const result = await ${
+        !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+      }${baseLibraryDescription.getDataMethod}(${randomDataActionSignature});
 
       const flatResult = result.${result}
   return getRandomArrayItem(
@@ -68,8 +72,12 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const ${oneValue} = async function(${
     _fields ? `_field: T${typeName}EntryFields, ` : ''
   } descriptions: T${typeName}Entry = {}): Promise<string> {
-    await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${baseLibraryDescription.waitForVisibilityMethod}(${waitingSignature}, { everyArrayItem: false })
-    const result = await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${baseLibraryDescription.getDataMethod}(${actionSignature});
+    await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
+    baseLibraryDescription.waitForVisibilityMethod
+  }(${waitingSignature}, { everyArrayItem: false })
+    const result = await ${
+      !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+    }${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     const flatResult = result.${result}
 
@@ -82,8 +90,12 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const ${severalValues} = async function(${
     _fields ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,` : 'quantity: number = 2,'
   } descriptions: T${typeName}Entry = {}): Promise<string[]> {
-    await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${baseLibraryDescription.waitForVisibilityMethod}(${waitingSignature}, { everyArrayItem: false })
-    const result = await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${baseLibraryDescription.getDataMethod}(${actionSignature});
+    await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
+    baseLibraryDescription.waitForVisibilityMethod
+  }(${waitingSignature}, { everyArrayItem: false })
+    const result = await ${
+      !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+    }${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     const flatResult = result.${result}
 

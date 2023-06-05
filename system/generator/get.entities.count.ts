@@ -1,6 +1,5 @@
-/* eslint-disable sonarjs/cognitive-complexity */
-/* eslint-disable unicorn/consistent-function-scoping */
-import { safeJSONstringify, camelize } from 'sat-utils';
+/* eslint-disable sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
+import { camelize, stringifyData } from 'sat-utils';
 import { config } from '../config/config';
 import { getActionsList, getResult, getName } from './utils.random';
 import { getCollectionsPathes } from './check.that.action.exists';
@@ -12,8 +11,8 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   const result = getResult(action);
   const name = camelize(`${asActorAndPage} Get Collection From ${getName(action)}`);
 
-  const actionSignature = safeJSONstringify(action).replace(
-    `"${collectionDescription.action}": null`,
+  const actionSignature = stringifyData(action).replace(
+    `${collectionDescription.action}: null`,
     // TODO this approach should be improved
     `...descriptions, ${collectionDescription.action}: null`,
   );
@@ -26,7 +25,9 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   }
   type T${name} = ${__countResult}
   const ${name} = async function({...descriptions}: T${name}Entry = {}): Promise<T${name}[]> {
-    const result = await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${baseLibraryDescription.getDataMethod}(${actionSignature});
+    const result = await ${
+      !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+    }${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     return result.${result}
   }`;

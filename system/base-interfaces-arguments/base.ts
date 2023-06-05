@@ -25,12 +25,14 @@ const getIntexesMessage = (indexes: number | number[]) =>
     : '';
 
 const getDescriptorMessage = (descriptorObj, initialMessage = ' where collection ', description = 'state') => {
+  const { collectionDescription = {} } = config.get();
+
   if (isUndefined(descriptorObj) || isNull(descriptorObj)) {
     return '';
   }
 
   if (isPrimitive(descriptorObj)) {
-    return `${initialMessage} ${description} '${descriptorObj}'`;
+    return `${initialMessage} ${description} '${String(descriptorObj)}'`;
   }
 
   if (isBase(Object.keys(descriptorObj))) {
@@ -38,6 +40,9 @@ const getDescriptorMessage = (descriptorObj, initialMessage = ' where collection
   }
 
   return Object.keys(descriptorObj).reduce((contentMessage, key, index, keys) => {
+    if (Object.values(collectionDescription).includes(key))
+      return getDescriptorMessage(descriptorObj[key], initialMessage, description);
+
     const postFix = isObject(descriptorObj[key]) && !isBase(Object.keys(descriptorObj[key])) ? ' item ' : ' ';
     const isLastKey = keys.length - 1 === index;
     const messageEnd = isLastKey ? '' : ' and ';

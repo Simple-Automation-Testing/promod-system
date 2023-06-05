@@ -1,5 +1,5 @@
-/* eslint-disable complexity, sonarjs/cognitive-complexity, sonarjs/no-identical-functions*/
-import { toArray, isArray, isString, isObject, prettifyCamelCase, isNull, isPrimitive } from 'sat-utils';
+/* eslint-disable no-console, complexity, sonarjs/cognitive-complexity, sonarjs/no-identical-functions*/
+import { isFunction, toArray, isArray, isString, isObject, prettifyCamelCase, isNull, isPrimitive } from 'sat-utils';
 
 import {
   isBase,
@@ -40,8 +40,15 @@ const collectionRandomDataDescriptionMessage = (fileds: string | string[], data:
 
 const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') => {
   const { collectionDescription, actionFormatter } = config.get();
+  if (actionFormatter && !isFunction(actionFormatter)) {
+    console.warn('actionFormatter should be a function');
+  }
 
-  const getActionMessage = (dataObj, initialMessage = '') => {
+  const updateActionSignature = isFunction(actionFormatter)
+    ? actionFormatter
+    : (action: string, isItStart?: boolean) => action;
+
+  const getActionMessage = (dataObj, initialMessage = '', isItStart?: boolean) => {
     const collectionDescriptionMessage = (data: { [k: string]: any }, startMessage: string, key?: string) => {
       const {
         [collectionDescription.action]: collectionAction,
@@ -54,27 +61,23 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
       const actionMessage = isString(collectionAction) ? ` '${collectionAction}' to ` : ' ';
       const keyMessagePart = isString(key) ? `'${key}'` : '';
 
-      if (
-        startMessage.endsWith(prettifyCamelCase(action).toLowerCase()) &&
-        isPrimitive(collectionAction) &&
-        actionFormatter
-      ) {
+      if (startMessage.endsWith(prettifyCamelCase(action).toLowerCase()) && isPrimitive(collectionAction)) {
         startMessage = startMessage.replace(
           new RegExp(`(${prettifyCamelCase(action).toLowerCase()})$`),
-          actionFormatter(action).toLowerCase(),
+          updateActionSignature(action, isItStart).toLowerCase(),
         );
       }
 
       const startMessagePart = `${startMessage}${actionMessage}${keyMessagePart} collection items `;
-      const descriptionMessage = Object.keys(restDescription).reduce((description, key) => {
+
+      const descriptionMessage = Object.keys(restDescription).reduce((description, descriptorKey) => {
         return `${description}${getDescriptorMessage(
-          restDescription[key],
-          ` ${prettifyCamelCase(key.replace(/[^\da-z]/gi, '')).toLowerCase()} collection `,
+          restDescription[descriptorKey],
+          ` ${prettifyCamelCase(descriptorKey.replace(/[^\da-z]/gi, '')).toLowerCase()} collection `,
         )}`;
       }, '');
 
       const indexesMessagePart = getIntexesMessage(index);
-
       const actionMessagePart = isObject(collectionAction)
         ? getActionMessage(collectionAction, `${startMessagePart}${descriptionMessage}${indexesMessagePart}`)
         : `${startMessagePart}${descriptionMessage}${indexesMessagePart}`;
@@ -83,21 +86,18 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
     };
 
     if (isPropValueCollection(dataObj, action)) {
-      return collectionDescriptionMessage(
-        dataObj,
-        prettifyCamelCase(actionFormatter ? actionFormatter(action) : action, { firstWordUpperCase: true }),
-      );
+      return collectionDescriptionMessage(dataObj, prettifyCamelCase(updateActionSignature(action, isItStart)));
     }
 
     return Object.keys(dataObj).reduce((actionMessage, key, index, keys) => {
       const isLastKey = keys.length - 1 === index;
       const messageEnd = isLastKey ? '' : ' \n and then ';
 
-      const formattedAction = actionFormatter && isPrimitive(dataObj[key]) ? actionFormatter(action) : action;
+      const formattedAction = updateActionSignature(action, isItStart);
 
-      const startAction = actionMessage
-        ? `${actionMessage}${prettifyCamelCase(formattedAction, { firstWordUpperCase: true }).toLowerCase()}`
-        : `${prettifyCamelCase(formattedAction, { firstWordUpperCase: true })}`;
+      const formatedAction = prettifyCamelCase(formattedAction);
+
+      const startAction = actionMessage ? `${actionMessage}${formatedAction.toLowerCase()}` : `${formatedAction}`;
 
       if (isPropValueCollection(dataObj[key], action, key)) {
         return collectionDescriptionMessage(dataObj[key], startAction, key);
@@ -105,11 +105,11 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
 
       // TODO improve
       if (isNull(dataObj[key])) {
-        return `${startAction}'${key}' element${messageEnd}`;
+        return `${startAction} '${key}' element${messageEnd}`;
       }
 
       if (isPrimitive(dataObj[key])) {
-        return `${startAction} '${dataObj[key]}' to '${key}' element${messageEnd}`;
+        return `${startAction} '${key}' element '${dataObj[key]}' ${messageEnd}`;
       }
 
       if (isBase(dataObj[key])) {
@@ -122,10 +122,12 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
       }
 
       return actionMessage;
-    }, initialMessage);
+    }, `${initialMessage}\n`);
   };
 
-  return getActionMessage(argumentObj, message);
+  return ((message: string) => message.charAt(0).toUpperCase() + message.slice(1))(
+    getActionMessage(argumentObj, message, true).trim(),
+  );
 };
 
 const getArgumentsMessage = (
