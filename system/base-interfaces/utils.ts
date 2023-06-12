@@ -36,15 +36,20 @@ type TCollectionAction = {
  *   length: 'length',
  * };
  */
-function getCollectionActionData(dataObj, config: TCollectionAction): { [k: string]: any; _outOfDescription: any } {
+function getCollectionActionData(
+  dataObj,
+  collectionDescription: TCollectionAction,
+): { [k: string]: any; _outOfDescription: any } {
   const copied = { ...dataObj };
 
-  // remove length from data obj
+  /**
+   * !@info - remove array length and collection comparison object or array
+   */
   delete copied.length;
 
   const data: any = {};
 
-  Object.values(config).forEach(key => {
+  Object.values(collectionDescription).forEach(key => {
     data[key] = copied[key];
     delete copied[key];
   });
