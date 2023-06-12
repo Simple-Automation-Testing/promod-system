@@ -57,7 +57,7 @@ async function fillTestrunDetails() {
   const testCases = require(allTestCasesPath);
   const testRuns = require(allTestRunsPath);
 
-  const withDetails = [];
+  // const withDetails = [];
 
   let testRunsToPerform: any[] = shuffleArr(
     testRuns.filter(testRun => !getAlreadyStoredRunsIds().includes(testRun.id)),
@@ -82,7 +82,7 @@ async function fillTestrunDetails() {
     }
 
     testRun.details = testRunDetails;
-    withDetails.push(testRun);
+    // withDetails.push(testRun);
 
     fs.writeFileSync(testRunsWithDetailsPath(runId), JSON.stringify(testRun));
 
