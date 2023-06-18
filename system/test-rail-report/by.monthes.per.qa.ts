@@ -50,10 +50,14 @@ function createBugsProductivityByQAPerMonth() {
   fs.writeFileSync(allBugsGroupedCreationByMonthPerQAPath, JSON.stringify(perUser));
 }
 
+/**
+ * !@info this one should be executed sixth
+ */
 function createStoryTestingProductivityByQAPerMonth() {
   if (!fs.existsSync(allStoriesGroupedByTestingMonthPath)) {
     throw new EvalError(`${allStoriesGroupedByTestingMonthPath} file does not exist, please run 'promod-system --*'`);
   }
+
   const stories = require(allStoriesGroupedByTestingMonthPath);
 
   const perUser = Object.keys(testrailReport.users).reduce(
@@ -80,6 +84,9 @@ function createStoryTestingProductivityByQAPerMonth() {
   fs.writeFileSync(allStoriesGroupedByTestingMonthPerQAPath, JSON.stringify(perUser));
 }
 
+/**
+ * !@info this one should be executed eigth
+ */
 function createStoryTestingProductivityByQAPerMonthInStoryPoints() {
   if (!fs.existsSync(allStoriesGroupedByTestingMonthStoryPointsPath)) {
     throw new EvalError(

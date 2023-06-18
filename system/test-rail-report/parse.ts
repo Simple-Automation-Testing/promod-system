@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable no-console, sonarjs/no-identical-functions */
 import * as fs from 'fs';
 import { lengthToIndexesArray, getDirFilesList } from 'sat-utils';
@@ -16,6 +17,7 @@ import {
   allTestRunsGroupedByMonthesPath,
   allTestRunsGroupedByMonthesPerQAPath,
   allBugsGroupedCreationByMonthPerQAPath,
+  allBugsGroupedCreationByMonthPath,
   allStoriesGroupedByTestingMonthPath,
   allStoriesGroupedByTestingMonthPerQAPath,
   allStoriesGroupedByTestingMonthStoryPointsPath,
@@ -33,6 +35,10 @@ function getSeparator() {
     .join('');
 }
 
+function transformBugsToMonthPerQAFormat() {
+  const allBugs = getAllAvailableCreatedBugs();
+}
+
 function getAllAvailableCreatedBugs() {
   const bugsFiles = getDirFilesList(testrailReport.outputDir).filter(filePath => filePath.endsWith('bugs.json'));
   const bugs = [];
@@ -42,10 +48,6 @@ function getAllAvailableCreatedBugs() {
   }
 
   return bugs;
-}
-
-function transformBugsToMonthPerQAFormat() {
-  const allBugs = getAllAvailableCreatedBugs();
 }
 
 function parseByMonth(pathToFile: string, title: string, description: string) {
@@ -111,9 +113,11 @@ function parseReportToConsoleOutput() {
   if (fs.existsSync(allTestCasesGroupedUpdationByMonthPath)) {
     report += parseByMonth(allTestCasesGroupedCreationByMonthPath, 'Grouped by month updation', 'updated cases');
   }
+
   if (fs.existsSync(allTestCasesGroupedUpdationPerQAByMonthPath)) {
     report += parseByMonthPerQA(allTestCasesGroupedUpdationPerQAByMonthPath, 'Grouped by month updation per QA');
   }
+
   if (fs.existsSync(allTestCasesGroupedCreationAutomationByMonthPath)) {
     report += parseByMonth(
       allTestCasesGroupedCreationByMonthPath,
@@ -121,12 +125,14 @@ function parseReportToConsoleOutput() {
       'created automated cases',
     );
   }
+
   if (fs.existsSync(allTestCasesGroupedCreationAutomationPerQAByMonthPath)) {
     report += parseByMonthPerQA(
       allTestCasesGroupedCreationAutomationPerQAByMonthPath,
       'Grouped by month automation per QA',
     );
   }
+
   if (fs.existsSync(allTestCasesGroupedUpdationAutomationByMonthPath)) {
     report += parseByMonth(
       allTestCasesGroupedUpdationAutomationByMonthPath,
@@ -134,6 +140,7 @@ function parseReportToConsoleOutput() {
       'updated automated cases',
     );
   }
+
   if (fs.existsSync(allTestCasesGroupedUpdationAutomationPerQAByMonthPath)) {
     report += parseByMonthPerQA(
       allTestCasesGroupedUpdationAutomationPerQAByMonthPath,
@@ -213,6 +220,29 @@ type TreportType = {
   dataSet: { [k: string]: { [k: string]: number } };
 };
 
+/*
+;(async () => {
+  await getAllTestRailTestCases();
+  await fillTestCaseHistory();
+  await getAllTestRailTestRuns();
+  await fillTestrunDetails();
+
+  mergeTestRuns();
+
+  getTestCaseGroupedByMonth(undefined, 24);
+  createReportByMonthAutomationNew(undefined, 24);
+  createTestExecutionProductivityByQAPerMonth();
+
+  getTestRunsGroupedByMonth(undefined, 24);
+  getTestedStoriesGroupedByMonth(undefined, 24);
+  createStoryTestingProductivityByQAPerMonth();
+
+  getTestedStoriesGroupedByMonthInStoryPoints(undefined, 24);
+  createStoryTestingProductivityByQAPerMonthInStoryPoints();
+
+  parseGeneralReport();
+})();
+*/
 function parseGeneralReport() {
   const reportExtensions: TreportType[] = [];
 
@@ -288,21 +318,48 @@ function parseGeneralReport() {
     reportExtensions.push(testsBurndown);
   }
 
+  if (fs.existsSync(allTestCasesGroupedUpdationAutomationByMonthPath)) {
+    const createdAutomationCasesData = require(allTestCasesGroupedUpdationAutomationByMonthPath);
+
+    const dataDescriptors = sortMonthes(Object.keys(createdAutomationCasesData));
+
+    const automationProgress = dataDescriptors.reduce((data, key) => {
+      data[key] = createdAutomationCasesData[key].length;
+
+      return data;
+    }, {});
+
+    const dataSet = {
+      'Updated automation test cases count': automationProgress,
+    };
+
+    const testsBurndown: TreportType = { reportId: 'automation_updates_progress', dataDescriptors, dataSet };
+
+    reportExtensions.push(testsBurndown);
+  }
+
+  if (fs.existsSync(allBugsGroupedCreationByMonthPerQAPath) && fs.existsSync(allBugsGroupedCreationByMonthPath)) {
+    const dataSet = require(allBugsGroupedCreationByMonthPerQAPath);
+    const monthData = require(allBugsGroupedCreationByMonthPath);
+
+    const monthDataAligned = Object.keys(monthData).reduce((data, key) => {
+      data[key] = monthData[key].length;
+
+      return data;
+    }, {});
+
+    dataSet['Total created bugs'] = monthDataAligned;
+
+    const dataDescriptors = sortMonthes(Object.keys(monthData));
+
+    const testRunExecutions: TreportType = { reportId: 'created_bugs', dataDescriptors, dataSet };
+
+    reportExtensions.push(testRunExecutions);
+  }
+
   if (fs.existsSync(allTestRunsGroupedByMonthesPerQAPath) && fs.existsSync(allTestRunsGroupedByMonthesPath)) {
     const dataSet = require(allTestRunsGroupedByMonthesPerQAPath);
     const monthData = require(allTestRunsGroupedByMonthesPath);
-
-    if (fs.existsSync(allBugsGroupedCreationByMonthPerQAPath)) {
-      const createdBugs = require(allBugsGroupedCreationByMonthPerQAPath);
-      Object.assign(
-        dataSet,
-        Object.keys(createdBugs).reduce((bugsPerQA, key) => {
-          bugsPerQA[`${key} new bugs`] = createdBugs[key];
-
-          return bugsPerQA;
-        }, {}),
-      );
-    }
 
     const monthDataAligned = Object.keys(monthData).reduce((data, key) => {
       data[key] = monthData[key].length;
@@ -361,6 +418,8 @@ function parseGeneralReport() {
   }
 
   if (process.env.PROMOD_S_RESET_REPORT) {
+    console.log(process.env.PROMOD_S_RESET_REPORT);
+
     createGeneralReportTemplate();
   }
 

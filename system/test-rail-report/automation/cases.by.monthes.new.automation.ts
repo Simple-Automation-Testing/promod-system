@@ -5,6 +5,11 @@ import { createReportByMonthAutomation } from './base.cases.by.monthes.automatio
 
 const { testrailReport } = config.get();
 
+/**
+ * !@info this one should be executed second
+ * @param starDate
+ * @param periodInMonthes
+ */
 function createReportByMonthAutomationNew(starDate: string, periodInMonthes: number) {
   createReportByMonthAutomation(
     starDate,

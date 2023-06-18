@@ -49,6 +49,11 @@ function getCollectionRecomposedData(recomposedData, component) {
           ...data,
           [collectionDescription.action]: getCollectionRecomposedData(ignoreComparison, itemsArrayChild),
         };
+      } else if (isNotEmptyArray(_outOfDescription)) {
+        rest[key] = {
+          ...data,
+          [collectionDescription.action]: getCollectionRecomposedData(_outOfDescription[0], itemsArrayChild),
+        };
       } else {
         rest[key] = {
           ...data,

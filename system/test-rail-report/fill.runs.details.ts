@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as fs from 'fs';
 import { resolve, basename } from 'path';
 import { getDirFilesList, shuffleArr, isUndefined } from 'sat-utils';

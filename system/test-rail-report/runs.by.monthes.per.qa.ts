@@ -4,6 +4,9 @@ import { allTestRunsGroupedByMonthesPath, allTestRunsGroupedByMonthesPerQAPath }
 
 const { testrailReport } = config.get();
 
+/**
+ * !@info this one should be executed third
+ */
 function createTestExecutionProductivityByQAPerMonth() {
   if (!fs.existsSync(allTestRunsGroupedByMonthesPath)) {
     throw new EvalError(

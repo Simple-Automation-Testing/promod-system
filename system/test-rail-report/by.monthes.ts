@@ -9,6 +9,7 @@ import {
   allStoriesGroupedByTestingMonthPath,
   allStoriesGroupedByTestingMonthStoryPointsPath,
   allStoriesGroupedByTestingMonthStoryPointsPerQAPath,
+  allTestCasesWithHistoryPath,
 } from './constants';
 import { getDateInterface } from './date';
 
@@ -65,6 +66,11 @@ function getBugsGroupedByMonth(starDate: string, periodInMonthes: number) {
   fs.writeFileSync(allBugsGroupedCreationByMonthPath, JSON.stringify(data));
 }
 
+/**
+ * !@info this one should be executed fifth
+ * @param {string} starDate
+ * @param {number} periodInMonthes
+ */
 function getTestedStoriesGroupedByMonth(starDate: string, periodInMonthes: number) {
   const stories = getAllAvailableTestedStories();
 
@@ -86,6 +92,11 @@ function getTestedStoriesGroupedByMonth(starDate: string, periodInMonthes: numbe
   fs.writeFileSync(allStoriesGroupedByTestingMonthPath, JSON.stringify(data));
 }
 
+/**
+ * !@info this one should be executed seventh
+ * @param {string} starDate
+ * @param {number} periodInMonthes
+ */
 function getTestedStoriesGroupedByMonthInStoryPoints(starDate: string, periodInMonthes: number) {
   const stories = getAllAvailableTestedStories();
 
@@ -109,17 +120,25 @@ function getTestedStoriesGroupedByMonthInStoryPoints(starDate: string, periodInM
   fs.writeFileSync(allStoriesGroupedByTestingMonthStoryPointsPath, JSON.stringify(data));
 }
 
+/**
+ * !@info this one should be executed first
+ * @param {string} starDate
+ * @param {number} periodInMonthes
+ */
 function getTestCaseGroupedByMonth(starDate: string, periodInMonthes: number) {
-  if (!fs.existsSync(allTestCasesPath)) {
-    throw new EvalError(`${allTestCasesPath} file does not exist, please run 'promod-system --fetch-testrail'`);
+  if (!fs.existsSync(allTestCasesWithHistoryPath)) {
+    throw new EvalError(
+      `${allTestCasesWithHistoryPath} file does not exist, please run 'promod-system --fetch-testrail'`,
+    );
   }
-  const testCases = require(allTestCasesPath);
+  const testCases = require(allTestCasesWithHistoryPath);
 
   const data = {};
 
   let iteration = 1;
 
   const { getMonthRangeInUnixBy } = getDateInterface(starDate);
+
   while (iteration <= periodInMonthes) {
     const { startUnix, endUnix, id } = getMonthRangeInUnixBy(iteration++);
 

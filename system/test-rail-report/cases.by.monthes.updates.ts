@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/cognitive-complexity */
+import { isString } from 'sat-utils';
 import * as fs from 'fs';
 import { allTestCasesWithHistoryPath, allTestCasesGroupedUpdationByMonthPath } from './constants';
 import { getDateInterface } from './date';
@@ -25,7 +27,9 @@ function createReportByMonthUpdates(starDate: string, periodInMonthes: number) {
       const properChangesInCurrentMonth = history.filter(({ changes, created_on }) => {
         if (created_on > startUnix && created_on < endUnix) {
           if (changes) {
-            return changes.some(change => testrailReport.countAsChanges.includes(change.field));
+            return changes.some(
+              change => testrailReport.countAsChanges.includes(change.field) && isString(change.old_value),
+            );
           }
 
           return false;

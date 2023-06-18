@@ -40,6 +40,10 @@ function getCollectionActionData(
   dataObj,
   collectionDescription: TCollectionAction,
 ): { [k: string]: any; _outOfDescription: any } {
+  if (Array.isArray(dataObj)) {
+    return { _outOfDescription: dataObj };
+  }
+
   const copied = { ...dataObj };
 
   /**
