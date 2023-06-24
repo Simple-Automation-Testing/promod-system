@@ -2,17 +2,20 @@
 import { isArray, isUndefined, isNull, isObject, toArray, isPrimitive } from 'sat-utils';
 import { config } from '../config';
 
+const { collectionDescription = {} } = config.get();
+
 const stringifyBase = base =>
-  Object.keys(base).reduce(
-    (descriptor, key, index, { length }) => `${descriptor}${key} - ${base[key]}${index === length - 1 ? '' : ', '}`,
-    '',
-  );
+  Object.keys(base).reduce((descriptor, key, index, { length }) => {
+    const act = isNull(base[key]) ? '' : ` - ${base[key]}`;
+    return `${descriptor}${key}${act}${index === length - 1 ? '' : ', '}`;
+  }, '');
 
 const isBase = keys => {
   const { baseResultData } = config.get();
+
   if (isArray(keys)) {
     return keys.some(key => baseResultData.includes(key));
-  } else if (isObject(keys)) {
+  } else if (isObject(keys) && Object.keys(keys).every(k => isPrimitive(keys[k]))) {
     return isBase(Object.keys(keys));
   }
 
@@ -24,9 +27,7 @@ const getIntexesMessage = (indexes: number | number[]) =>
     ? ` where ${toArray(indexes).length === 1 ? 'index is' : 'indexes are'} ${toArray(indexes).join(',')} `
     : '';
 
-const getDescriptorMessage = (descriptorObj, initialMessage = ' where collection ', description = 'state') => {
-  const { collectionDescription = {} } = config.get();
-
+const getDescriptorMessage = (descriptorObj, initialMessage = ' where ', description = 'state') => {
   if (isUndefined(descriptorObj) || isNull(descriptorObj)) {
     return '';
   }
@@ -36,7 +37,7 @@ const getDescriptorMessage = (descriptorObj, initialMessage = ' where collection
   }
 
   if (isBase(Object.keys(descriptorObj))) {
-    return ` where ${description} '${stringifyBase(descriptorObj)}' exists`;
+    return `${initialMessage} ${description} '${stringifyBase(descriptorObj)}' exists`;
   }
 
   return Object.keys(descriptorObj).reduce((contentMessage, key, index, keys) => {
@@ -68,7 +69,6 @@ const getDescriptorMessage = (descriptorObj, initialMessage = ' where collection
 };
 
 const doesArgumentHaveCollection = (obj: { [k: string]: any }) => {
-  const { collectionDescription = {} } = config.get();
   const { collectionPropsId, ...collectionProps } = collectionDescription;
 
   return Object.keys(obj).some(key => {

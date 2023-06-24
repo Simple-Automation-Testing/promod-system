@@ -1,4 +1,4 @@
-import { waitForCondition } from 'sat-utils';
+import { waitForCondition, isObject } from 'sat-utils';
 import { config } from '../config';
 
 import type { IWaitConditionOpts } from './interfaces';
@@ -18,6 +18,10 @@ const {
  * @returns {Promise<boolean>}
  */
 async function waitForTabTitleEqual(browser, title: string, opts: IWaitConditionOpts = {}) {
+  if (!isObject(opts)) {
+    throw new Error('waitForTabTitleEqual(): third argument "opts" should be an object');
+  }
+
   let createErrorMessage;
 
   return waitForCondition(
@@ -39,6 +43,10 @@ async function waitForTabTitleEqual(browser, title: string, opts: IWaitCondition
  * @returns {Promise<boolean>}
  */
 async function waitForTabTitleIncludes(browser, title: string, opts: IWaitConditionOpts = {}) {
+  if (!isObject(opts)) {
+    throw new Error('waitForTabTitleIncludes(): third argument "opts" should be an object');
+  }
+
   let createErrorMessage;
 
   return waitForCondition(
@@ -60,6 +68,10 @@ async function waitForTabTitleIncludes(browser, title: string, opts: IWaitCondit
  * @returns {Promise<boolean>}
  */
 async function waitForUrlIncludes(browser, url: string, opts: IWaitConditionOpts = {}) {
+  if (!isObject(opts)) {
+    throw new Error('waitForUrlIncludes(): third argument "opts" should be an object');
+  }
+
   let createErrorMessage;
 
   return waitForCondition(
@@ -81,6 +93,10 @@ async function waitForUrlIncludes(browser, url: string, opts: IWaitConditionOpts
  * @returns {Promise<boolean>}
  */
 async function waitForUrlNotIncludes(browser, url: string, opts: IWaitConditionOpts = {}) {
+  if (!isObject(opts)) {
+    throw new Error('waitForUrlNotIncludes(): third argument "opts" should be an object');
+  }
+
   let createErrorMessage;
 
   return waitForCondition(
@@ -102,6 +118,10 @@ async function waitForUrlNotIncludes(browser, url: string, opts: IWaitConditionO
  * @returns {Promise<boolean>}
  */
 async function waitForUrlEquals(browser, url: string, opts: IWaitConditionOpts = {}) {
+  if (!isObject(opts)) {
+    throw new Error('waitForUrlEquals(): third argument "opts" should be an object');
+  }
+
   let createErrorMessage;
 
   return waitForCondition(
@@ -123,6 +143,10 @@ async function waitForUrlEquals(browser, url: string, opts: IWaitConditionOpts =
  * @returns {Promise<boolean>}
  */
 async function waitForUrlNotEquals(browser, url: string, opts: IWaitConditionOpts = {}) {
+  if (!isObject(opts)) {
+    throw new Error('waitForUrlNotEquals(): third argument "opts" should be an object');
+  }
+
   let createErrorMessage;
 
   return waitForCondition(
@@ -144,6 +168,10 @@ async function waitForUrlNotEquals(browser, url: string, opts: IWaitConditionOpt
  * @returns {Promise<boolean>}
  */
 async function waitForTabsQuantity(browser, quantity: number, opts: IWaitConditionOpts = {}) {
+  if (!isObject(opts)) {
+    throw new Error('waitForTabsQuantity(): third argument "opts" should be an object');
+  }
+
   let createErrorMessage;
 
   return waitForCondition(
