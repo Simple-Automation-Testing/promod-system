@@ -27,7 +27,7 @@ const getIntexesMessage = (indexes: number | number[]) =>
     ? ` where ${toArray(indexes).length === 1 ? 'index is' : 'indexes are'} ${toArray(indexes).join(',')} `
     : '';
 
-const getDescriptorMessage = (descriptorObj, initialMessage = ' where ', description = 'state') => {
+function getDescriptorMessage(descriptorObj, initialMessage = ' where ', description = 'state') {
   if (isUndefined(descriptorObj) || isNull(descriptorObj)) {
     return '';
   }
@@ -41,16 +41,17 @@ const getDescriptorMessage = (descriptorObj, initialMessage = ' where ', descrip
   }
 
   return Object.keys(descriptorObj).reduce((contentMessage, key, index, keys) => {
-    if (Object.values(collectionDescription).includes(key))
-      return getDescriptorMessage(descriptorObj[key], initialMessage, description);
-
     const postFix = isObject(descriptorObj[key]) && !isBase(Object.keys(descriptorObj[key])) ? ' item ' : ' ';
-    const isLastKey = keys.length - 1 === index;
-    const messageEnd = isLastKey ? '' : ' and ';
-
     const startAction = contentMessage
       ? `${contentMessage}'${key}'${postFix}has ${description} `
       : `element '${key}'${postFix}has ${description} `;
+
+    if (Object.values(collectionDescription).includes(key)) {
+      return getDescriptorMessage(descriptorObj[key], initialMessage, `${description} '${key}'`);
+    }
+
+    const isLastKey = keys.length - 1 === index;
+    const messageEnd = isLastKey ? '' : ' and ';
 
     if (isLastKey && isPrimitive(descriptorObj[key])) {
       return `${startAction}'${descriptorObj[key]}'`;
@@ -65,8 +66,8 @@ const getDescriptorMessage = (descriptorObj, initialMessage = ' where ', descrip
     }
 
     return contentMessage;
-  }, initialMessage);
-};
+  }, initialMessage.trim());
+}
 
 const doesArgumentHaveCollection = (obj: { [k: string]: any }) => {
   const { collectionPropsId, ...collectionProps } = collectionDescription;

@@ -1,5 +1,6 @@
 /* eslint-disable no-console, complexity, sonarjs/cognitive-complexity, sonarjs/no-identical-functions*/
 import {
+  isNotEmptyObject,
   isUndefined,
   isFunction,
   toArray,
@@ -128,6 +129,82 @@ function getActionMessage(action, isFirstCall, dataObj, initialMessage = '') {
   }, `${initialMessage}\n`);
 }
 
+function getWaitingMessageForDataObj(
+  action: string,
+  isFirstCall: () => boolean,
+  data: { [k: string]: any },
+  startMessage: string,
+  key?: string,
+) {
+  const {
+    [collectionDescription.action]: collectionAction,
+    [collectionDescription.index]: index,
+    [collectionDescription.comparison]: toCompare,
+    length,
+
+    ...restDescription
+  } = data;
+
+  const collectionDescriptionMessagePart = Object.values(collectionDescription as { [k: string]: string }).reduce(
+    (description, descriptorKey) => {
+      if (!isUndefined(restDescription[descriptorKey])) {
+        description[descriptorKey] = restDescription[descriptorKey];
+      }
+
+      return description;
+    },
+    {},
+  );
+
+  const collectionComparisonMessagePart = Object.keys(restDescription as { [k: string]: any })
+    .filter(restDescriptionKey => !Object.values(collectionDescription).includes(restDescriptionKey))
+    .reduce(
+      (description, descriptorKey) => {
+        if (!isUndefined(restDescription[descriptorKey])) {
+          description[descriptorKey] = restDescription[descriptorKey];
+        }
+
+        return description;
+      },
+      isUndefined(length) ? {} : { length },
+    );
+
+  const collectionWaitStateMessagePart = [];
+
+  if (isUndefined(toCompare)) {
+    collectionWaitStateMessagePart.push(...toArray(collectionComparisonMessagePart));
+  }
+
+  if (!isUndefined(toCompare) && !isUndefined(length)) {
+    collectionWaitStateMessagePart.push(...toArray(toCompare), { length });
+  } else if (!isUndefined(toCompare)) {
+    collectionWaitStateMessagePart.push(...toArray(toCompare));
+  }
+
+  const descriptionMessage = Object.keys(collectionDescriptionMessagePart).reduce((description, descriptorKey) => {
+    return `${description}${getDescriptorMessage(
+      restDescription[descriptorKey],
+      ` ${prettifyCamelCase(descriptorKey.replace(/[^\da-z]/gi, '')).toLowerCase()} collection `,
+    )}`;
+  }, '');
+
+  const indexesMessagePart = getIntexesMessage(index);
+
+  console.log(collectionWaitStateMessagePart, '<>');
+
+  const waitinStateMessage = collectionWaitStateMessagePart
+    .filter(item => isNotEmptyObject(item))
+    .map(item => `${getDescriptorMessage(item, ' \nwait')}`)
+    .join(' and ');
+
+  const actionMessage = isObject(collectionAction)
+    ? ` required data for waiting comparison ${getActionMessage(action, isFirstCall, collectionAction)}`
+    : '';
+  const keyMessagePart = isString(key) ? `'${key}'` : '';
+
+  return `${startMessage} ${keyMessagePart} collection items${actionMessage}${descriptionMessage} ${waitinStateMessage} ${indexesMessagePart} `;
+}
+
 function getWaitingMessage(
   action: string,
   isFirstCall: () => boolean,
@@ -135,61 +212,9 @@ function getWaitingMessage(
   startMessage: string,
   key?: string,
 ) {
-  if (Array.isArray(data)) {
-    // TODO
-  } else {
-    const {
-      [collectionDescription.action]: collectionAction,
-      [collectionDescription.index]: index,
-      // TODO - add possibility to add count information
-      [collectionDescription.count]: count,
-      [collectionDescription.comparison]: toCompare,
-
-      ...restDescription
-    } = data;
-
-    const collectionDescriptionMessagePart = Object.keys(collectionDescription).reduce((description, descriptorKey) => {
-      if (!isUndefined(restDescription[descriptorKey])) {
-        description[descriptorKey] = restDescription[descriptorKey];
-      }
-
-      return description;
-    }, {});
-
-    const collectionWaitStateMessagePart = isUndefined(toCompare)
-      ? toArray(
-          Object.keys(collectionDescription).reduce((description, descriptorKey) => {
-            if (isUndefined(restDescription[descriptorKey])) {
-              description[descriptorKey] = restDescription[descriptorKey];
-            }
-
-            return description;
-          }, {}),
-        )
-      : toArray(toCompare);
-
-    console.log(collectionWaitStateMessagePart, '!');
-
-    const descriptionMessage = Object.keys(collectionDescriptionMessagePart).reduce((description, descriptorKey) => {
-      return `${description}${getDescriptorMessage(
-        restDescription[descriptorKey],
-        ` ${prettifyCamelCase(descriptorKey.replace(/[^\da-z]/gi, '')).toLowerCase()} collection `,
-      )}`;
-    }, '');
-
-    const indexesMessagePart = getIntexesMessage(index);
-
-    const waitinStateMessage = collectionWaitStateMessagePart
-      .map(item => `${getDescriptorMessage(item, ' wait')}`)
-      .join(' and ');
-
-    const actionMessage = isObject(collectionAction)
-      ? ` required data for waiting comparison ${getActionMessage(action, isFirstCall, collectionAction)}`
-      : '';
-    const keyMessagePart = isString(key) ? `'${key}'` : '';
-
-    return `${startMessage} ${keyMessagePart} collection items${actionMessage}${descriptionMessage} ${waitinStateMessage} ${indexesMessagePart} `;
-  }
+  return toArray(data)
+    .map(dataItem => getWaitingMessageForDataObj(action, isFirstCall, dataItem, startMessage, key))
+    .join('\n');
 }
 
 function collectionDescriptionMessage(
