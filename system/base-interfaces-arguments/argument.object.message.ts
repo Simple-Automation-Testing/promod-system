@@ -53,15 +53,12 @@ function collectionRandomDataDescriptionMessage(fileds: string | string[], data:
   const fieldMessagePart = isArray(fileds) ? 'fields' : 'field';
   const filedsList = getFieldsEnumList(toArray(fileds));
 
-  const descriptionMessage = Object.keys(restDescription).reduce(
-    (description, key) => {
-      return `${description}${getDescriptorMessage(
-        restDescription[key],
-        ` ${prettifyCamelCase(key.replace(/[^\da-z]/gi, '')).toLowerCase()} `,
-      )}`;
-    },
-    Object.keys(restDescription).length ? `collection should have ` : '',
-  );
+  const descriptionMessage = Object.keys(restDescription).reduce((description, descriptorKey) => {
+    return `${description}${getDescriptorMessage(
+      restDescription[descriptorKey],
+      ` ${prettifyCamelCase(descriptorKey.replace(/[^\da-z]/gi, '')).toLowerCase()} collection `,
+    )}`;
+  }, '');
 
   return `get random ${fieldMessagePart} ${filedsList} ${descriptionMessage}`;
 }
@@ -189,8 +186,6 @@ function getWaitingMessageForDataObj(
   }, '');
 
   const indexesMessagePart = getIntexesMessage(index);
-
-  console.log(collectionWaitStateMessagePart, '<>');
 
   const waitinStateMessage = collectionWaitStateMessagePart
     .filter(item => isNotEmptyObject(item))

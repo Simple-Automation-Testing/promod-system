@@ -1,5 +1,14 @@
 /* eslint-disable complexity, sonarjs/cognitive-complexity */
-import { isArray, isUndefined, isNull, isObject, toArray, isPrimitive } from 'sat-utils';
+import {
+  prettifyCamelCase,
+  isEmptyObject,
+  isArray,
+  isUndefined,
+  isNull,
+  isObject,
+  toArray,
+  isPrimitive,
+} from 'sat-utils';
 import { config } from '../config';
 
 const { collectionDescription = {} } = config.get();
@@ -28,22 +37,62 @@ const getIntexesMessage = (indexes: number | number[]) =>
     : '';
 
 function getDescriptorMessage(descriptorObj, initialMessage = ' where ', description = 'state') {
+  const {
+    [collectionDescription.index]: index,
+    [collectionDescription.count]: count,
+    ...restDescription
+  } = descriptorObj || {};
+
+  const collectionDescriptionMessagePart = Object.values(collectionDescription as { [k: string]: string }).reduce(
+    (description, descriptorKey) => {
+      if (!isUndefined(restDescription[descriptorKey])) {
+        description[descriptorKey] = restDescription[descriptorKey];
+      }
+
+      return description;
+    },
+    {},
+  );
+
+  const descriptionMessage = Object.keys(collectionDescriptionMessagePart).reduce((description, descriptorKey) => {
+    return `${description}${getDescriptorMessage(
+      restDescription[descriptorKey],
+      ` ${prettifyCamelCase(descriptorKey.replace(/[^\da-z]/gi, '')).toLowerCase()} collection `,
+    )}`;
+  }, '');
+
+  const restDataMessagePart = Object.keys(restDescription as { [k: string]: any })
+    .filter(restDescriptionKey => !Object.values(collectionDescription).includes(restDescriptionKey))
+    .reduce((description, descriptorKey) => {
+      if (!isUndefined(restDescription[descriptorKey])) {
+        description[descriptorKey] = restDescription[descriptorKey];
+      }
+
+      return description;
+    }, {});
+
+  if (isEmptyObject(restDataMessagePart)) {
+    return descriptionMessage;
+  } else {
+    descriptorObj = restDataMessagePart;
+  }
+
   if (isUndefined(descriptorObj) || isNull(descriptorObj)) {
     return '';
   }
 
   if (isPrimitive(descriptorObj)) {
-    return `${initialMessage} ${description} '${String(descriptorObj)}'`;
+    return `${descriptionMessage} ${initialMessage} ${description} '${String(descriptorObj)}'`;
   }
 
   if (isBase(Object.keys(descriptorObj))) {
-    return `${initialMessage} ${description} '${stringifyBase(descriptorObj)}' exists`;
+    return `${descriptionMessage} ${initialMessage} ${description} '${stringifyBase(descriptorObj)}' exists`;
   }
 
-  return Object.keys(descriptorObj).reduce((contentMessage, key, index, keys) => {
+  const result = Object.keys(descriptorObj).reduce((contentMessage, key, index, keys) => {
     const postFix = isObject(descriptorObj[key]) && !isBase(Object.keys(descriptorObj[key])) ? ' item ' : ' ';
     const startAction = contentMessage
-      ? `${contentMessage}'${key}'${postFix}has ${description} `
+      ? `${contentMessage} '${key}'${postFix}has ${description} `
       : `element '${key}'${postFix}has ${description} `;
 
     if (Object.values(collectionDescription).includes(key)) {
@@ -67,6 +116,8 @@ function getDescriptorMessage(descriptorObj, initialMessage = ' where ', descrip
 
     return contentMessage;
   }, initialMessage.trim());
+
+  return `${descriptionMessage} ${result}`;
 }
 
 const doesArgumentHaveCollection = (obj: { [k: string]: any }) => {
