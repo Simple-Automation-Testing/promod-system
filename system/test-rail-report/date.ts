@@ -18,7 +18,7 @@ function sortMonthes(monthes: string[]) {
 }
 
 function getDateInterface(startData: string = dayjs().format('MM/DD/YYYY')) {
-  const startDate = dayjs(startData, 'MM/DD/YYYY');
+  const startDate = dayjs(startData, 'MM/DD/YYYY').endOf('month');
 
   function getMonthRangeInUnixBy(monthFromDate) {
     const end = startDate.subtract(monthFromDate, 'M');
