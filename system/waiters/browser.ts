@@ -22,18 +22,18 @@ async function waitForTabTitleEqual(browser, title: string, opts: IWaitCondition
     throw new Error('waitForTabTitleEqual(): third argument "opts" should be an object');
   }
 
-  let createErrorMessage;
+  let browserPageTitle;
+  const getBrowserPageTitle = () => browserPageTitle;
 
-  return waitForCondition(
-    async () => {
-      const currentTitle = await browser[browserAction.getTitle]();
+  opts.message = opts.message
+    ? opts.message
+    : () => `Current browser window title ${getBrowserPageTitle()} should equal ${title}`;
 
-      createErrorMessage = () => `Current browser window title ${currentTitle} should equal ${title}`;
+  return waitForCondition(async () => {
+    browserPageTitle = await browser[browserAction.getTitle]();
 
-      return currentTitle === title;
-    },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
-  );
+    return browserPageTitle === title;
+  }, opts);
 }
 
 /**
@@ -47,18 +47,18 @@ async function waitForTabTitleIncludes(browser, title: string, opts: IWaitCondit
     throw new Error('waitForTabTitleIncludes(): third argument "opts" should be an object');
   }
 
-  let createErrorMessage;
+  let browserPageTitle;
+  const getBrowserPageTitle = () => browserPageTitle;
 
-  return waitForCondition(
-    async () => {
-      const currentTitle = await browser[browserAction.getTitle]();
+  opts.message = opts.message
+    ? opts.message
+    : () => `Current browser window title ${getBrowserPageTitle()} should include ${title}`;
 
-      createErrorMessage = () => `Current browser window title ${currentTitle} should include ${title}`;
+  return waitForCondition(async () => {
+    browserPageTitle = await browser[browserAction.getTitle]();
 
-      return currentTitle.includes(title);
-    },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
-  );
+    return browserPageTitle.includes(title);
+  }, opts);
 }
 
 /**
@@ -72,18 +72,18 @@ async function waitForUrlIncludes(browser, url: string, opts: IWaitConditionOpts
     throw new Error('waitForUrlIncludes(): third argument "opts" should be an object');
   }
 
-  let createErrorMessage;
+  let browserPageUrl;
+  const getBrowserPageUrl = () => browserPageUrl;
 
-  return waitForCondition(
-    async () => {
-      const currentUrl = await browser[browserAction.getCurrentUrl]();
+  opts.message = opts.message
+    ? opts.message
+    : () => `Current browser window url ${getBrowserPageUrl()} should include ${url}`;
 
-      createErrorMessage = () => `Current url ${currentUrl} should include ${url}`;
+  return waitForCondition(async () => {
+    browserPageUrl = await browser[browserAction.getCurrentUrl]();
 
-      return currentUrl.includes(url);
-    },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
-  );
+    return browserPageUrl.includes(url);
+  }, opts);
 }
 
 /**
@@ -97,18 +97,18 @@ async function waitForUrlNotIncludes(browser, url: string, opts: IWaitConditionO
     throw new Error('waitForUrlNotIncludes(): third argument "opts" should be an object');
   }
 
-  let createErrorMessage;
+  let browserPageUrl;
+  const getBrowserPageUrl = () => browserPageUrl;
 
-  return waitForCondition(
-    async () => {
-      const currentUrl = await browser[browserAction.getCurrentUrl]();
+  opts.message = opts.message
+    ? opts.message
+    : () => `Current browser window url ${getBrowserPageUrl()} should not include ${url}`;
 
-      createErrorMessage = () => `Current url ${currentUrl} should not include ${url}`;
+  return waitForCondition(async () => {
+    browserPageUrl = await browser[browserAction.getCurrentUrl]();
 
-      return !currentUrl.includes(url);
-    },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
-  );
+    return !browserPageUrl.includes(url);
+  }, opts);
 }
 
 /**
@@ -122,18 +122,18 @@ async function waitForUrlEquals(browser, url: string, opts: IWaitConditionOpts =
     throw new Error('waitForUrlEquals(): third argument "opts" should be an object');
   }
 
-  let createErrorMessage;
+  let browserPageUrl;
+  const getBrowserPageUrl = () => browserPageUrl;
 
-  return waitForCondition(
-    async () => {
-      const currentUrl = await browser[browserAction.getCurrentUrl]();
+  opts.message = opts.message
+    ? opts.message
+    : () => `Current browser window url ${getBrowserPageUrl()} should equal to ${url}`;
 
-      createErrorMessage = () => `Current url ${currentUrl} should equal ${url}`;
+  return waitForCondition(async () => {
+    browserPageUrl = await browser[browserAction.getCurrentUrl]();
 
-      return currentUrl === url;
-    },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
-  );
+    return browserPageUrl === url;
+  }, opts);
 }
 
 /**
@@ -147,18 +147,18 @@ async function waitForUrlNotEquals(browser, url: string, opts: IWaitConditionOpt
     throw new Error('waitForUrlNotEquals(): third argument "opts" should be an object');
   }
 
-  let createErrorMessage;
+  let browserPageUrl;
+  const getBrowserPageUrl = () => browserPageUrl;
 
-  return waitForCondition(
-    async () => {
-      const currentUrl = await browser[browserAction.getCurrentUrl]();
+  opts.message = opts.message
+    ? opts.message
+    : () => `Current browser window url ${getBrowserPageUrl()} should not equal ${url}`;
 
-      createErrorMessage = () => `Current url ${currentUrl} should not equal ${url}`;
+  return waitForCondition(async () => {
+    browserPageUrl = await browser[browserAction.getCurrentUrl]();
 
-      return currentUrl !== url;
-    },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
-  );
+    return browserPageUrl !== url;
+  }, opts);
 }
 
 /**
@@ -172,19 +172,19 @@ async function waitForTabsQuantity(browser, quantity: number, opts: IWaitConditi
     throw new Error('waitForTabsQuantity(): third argument "opts" should be an object');
   }
 
-  let createErrorMessage;
+  let browserTabsQuantity;
+  const getBrowserTabsQuantity = () => browserTabsQuantity;
 
-  return waitForCondition(
-    async () => {
-      const browserTabs = await browser[browserAction.getTabs]();
+  opts.message = opts.message
+    ? opts.message
+    : () => `Current browser tabs quantity ${getBrowserTabsQuantity()} should equal ${quantity}`;
 
-      createErrorMessage = () =>
-        `Current browser tabs quantity is ${browserTabs.length} expected quantity is ${quantity}`;
+  return waitForCondition(async () => {
+    // eslint-disable-next-line unicorn/no-await-expression-member
+    browserTabsQuantity = (await browser[browserAction.getTabs]()).length;
 
-      return browserTabs.length === quantity;
-    },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
-  );
+    return browserTabsQuantity === quantity;
+  }, opts);
 }
 
 const browserWaiters = {
