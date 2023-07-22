@@ -1,4 +1,5 @@
-/* eslint-disable complexity, sonarjs/cognitive-complexity */
+/* eslint-disable sonarjs/no-identical-functions */
+/* eslint-disable sonarjs/no-nested-template-literals, complexity, sonarjs/cognitive-complexity */
 import {
   prettifyCamelCase,
   isEmptyObject,
@@ -8,6 +9,8 @@ import {
   isObject,
   toArray,
   isPrimitive,
+  isString,
+  compareToPattern,
 } from 'sat-utils';
 import { config } from '../config';
 
@@ -15,8 +18,55 @@ const { collectionDescription = {} } = config.get();
 
 const stringifyBase = base =>
   Object.keys(base).reduce((descriptor, key, index, { length }) => {
-    const act = isNull(base[key]) ? '' : ` - ${base[key]}`;
-    return `${descriptor}${key}${act}${index === length - 1 ? '' : ', '}`;
+    if (isNull(base[key])) {
+      return `${descriptor}${key}${''}${index === length - 1 ? '' : ', '}`;
+    }
+
+    const checkNumber = isString(base[key]) && compareToPattern.checkThatCheckNumber(base[key]);
+    const dataIncludes = isString(base[key]) && compareToPattern.checkThatDataIncludes(base[key]);
+    const patternIncludes = isString(base[key]) && compareToPattern.checkThatPatternIncludes(base[key]);
+    const dataLowercase = isString(base[key]) && compareToPattern.checkThatDataLowercase(base[key]);
+    const dataUppercase = isString(base[key]) && compareToPattern.checkThatDataUppercase(base[key]);
+    const patternLowercase = isString(base[key]) && compareToPattern.checkThatPatternLowercase(base[key]);
+    const patternUppercase = isString(base[key]) && compareToPattern.checkThatPatternUppercase(base[key]);
+
+    if (checkNumber) {
+      const data = compareToPattern.removeCheckNumberId(base[key]).trim();
+
+      return `${descriptor}${key} value should follow expression ${data}${index === length - 1 ? '' : ', '}`;
+    }
+
+    if (dataIncludes) {
+      const data = compareToPattern.removeDataIncludesId(base[key]).trim();
+      return `${descriptor}${key} value should include ${data} ${index === length - 1 ? '' : ', '}`;
+    }
+
+    if (patternIncludes) {
+      const data = compareToPattern.removePatternIncludesId(base[key]).trim();
+      return `${descriptor}${key} ${data} should include value from element${index === length - 1 ? '' : ', '}`;
+    }
+
+    if (dataLowercase) {
+      const data = compareToPattern.removeDataLowercase(base[key]).trim();
+      return `${descriptor}${key} should equal to ${data} in lower case${index === length - 1 ? '' : ', '}`;
+    }
+
+    if (dataUppercase) {
+      const data = compareToPattern.removeDataUppercase(base[key]).trim();
+      return `${descriptor}${key} should equal to ${data} in upper case${index === length - 1 ? '' : ', '}`;
+    }
+
+    if (patternLowercase) {
+      const data = compareToPattern.removePatternLowercase(base[key]).trim();
+      return `${descriptor}${key} should equal to ${data} which is lowercased value${index === length - 1 ? '' : ', '}`;
+    }
+
+    if (patternUppercase) {
+      const data = compareToPattern.removePatternUppercase(base[key]).trim();
+      return `${descriptor}${key} should equal to ${data} which is uppercased value${index === length - 1 ? '' : ', '}`;
+    }
+
+    return `${descriptor}${key}${` - "${base[key]}"`}${index === length - 1 ? '' : ', '}`;
   }, '');
 
 const isBase = keys => {
