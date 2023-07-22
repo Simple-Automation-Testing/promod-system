@@ -33,37 +33,41 @@ const stringifyBase = base =>
     if (checkNumber) {
       const data = compareToPattern.removeCheckNumberId(base[key]).trim();
 
-      return `${descriptor}${key} value should follow expression ${data}${index === length - 1 ? '' : ', '}`;
+      return `${descriptor}${key} value should follow expression "${data}"${index === length - 1 ? '' : ', '}`;
     }
 
     if (dataIncludes) {
       const data = compareToPattern.removeDataIncludesId(base[key]).trim();
-      return `${descriptor}${key} value should include ${data} ${index === length - 1 ? '' : ', '}`;
+      return `${descriptor}${key} value should include "${data}" ${index === length - 1 ? '' : ', '}`;
     }
 
     if (patternIncludes) {
       const data = compareToPattern.removePatternIncludesId(base[key]).trim();
-      return `${descriptor}${key} ${data} should include value from element${index === length - 1 ? '' : ', '}`;
+      return `${descriptor}${key} "${data}" should include value from element${index === length - 1 ? '' : ', '}`;
     }
 
     if (dataLowercase) {
       const data = compareToPattern.removeDataLowercase(base[key]).trim();
-      return `${descriptor}${key} should equal to ${data} in lower case${index === length - 1 ? '' : ', '}`;
+      return `${descriptor}${key} should equal to "${data}" in lower case${index === length - 1 ? '' : ', '}`;
     }
 
     if (dataUppercase) {
       const data = compareToPattern.removeDataUppercase(base[key]).trim();
-      return `${descriptor}${key} should equal to ${data} in upper case${index === length - 1 ? '' : ', '}`;
+      return `${descriptor}${key} should equal to "${data}" in upper case${index === length - 1 ? '' : ', '}`;
     }
 
     if (patternLowercase) {
       const data = compareToPattern.removePatternLowercase(base[key]).trim();
-      return `${descriptor}${key} should equal to ${data} which is lowercased value${index === length - 1 ? '' : ', '}`;
+      return `${descriptor}${key} should equal to "${data}" which is lowercased value${
+        index === length - 1 ? '' : ', '
+      }`;
     }
 
     if (patternUppercase) {
       const data = compareToPattern.removePatternUppercase(base[key]).trim();
-      return `${descriptor}${key} should equal to ${data} which is uppercased value${index === length - 1 ? '' : ', '}`;
+      return `${descriptor}${key} should equal to "${data}" which is uppercased value${
+        index === length - 1 ? '' : ', '
+      }`;
     }
 
     return `${descriptor}${key}${` - "${base[key]}"`}${index === length - 1 ? '' : ', '}`;
