@@ -41,7 +41,7 @@ function createPageStructure(pagePath: string) {
 
     if (!getPage) {
       throw new Error(
-        `Page "getPageInstance" method was not found. Search pattern is '${baseLibraryDescription.getPageInstance}'`,
+        `Page "getPageInstance" method was not found. Search pattern is '${baseLibraryDescription.getPageInstance}', file path '${pagePath}'`,
       );
     }
 

@@ -219,7 +219,7 @@ const isActionableAction = (actionFlow: string) => {
 const getWaitingOptionsPrettyMessage = (waitingOptions?: { [key: string]: any }) => {
   if (!isObject(waitingOptions)) return '';
   /** @info sat-utils compareToPattern */
-  const { everyArrayItem, stringIncludes } = waitingOptions;
+  const { everyArrayItem, stringIncludes, isEql } = waitingOptions;
   let waitingMessage = '\n';
 
   waitingMessage =
@@ -231,6 +231,9 @@ const getWaitingOptionsPrettyMessage = (waitingOptions?: { [key: string]: any })
     stringIncludes === false
       ? `${waitingMessage} string should include part of the string`
       : `${waitingMessage} string should equal to string`;
+
+  waitingMessage =
+    isEql === false ? `${waitingMessage}\n expected that condition result should be negative` : waitingMessage;
 
   return waitingMessage;
 };

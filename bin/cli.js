@@ -46,6 +46,7 @@ if (argv['generate-config']) {
 
   if (fs.existsSync(folderPath)) {
     getDirFilesList(folderPath)
+      .filter(file => (argv.ignorePattern ? !file.includes(argv.ignorePattern) : true))
       .filter(file => file.includes(argv.pattern))
       .forEach(createPageStructure);
   } else {
