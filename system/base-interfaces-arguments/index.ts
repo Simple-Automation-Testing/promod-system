@@ -3,11 +3,11 @@ import { getArgumentsMessage, collectionRandomDataDescriptionMessage } from './a
 import { getDefaultMessage } from './argument.regular.message';
 import { config } from '../config';
 
-const getActionArgumentsMessagePart = (
+function getActionArgumentsMessagePart(
   methodName: string,
   argumentObj: { [k: string]: any },
   waitionOption?: { [k: string]: any },
-) => {
+) {
   const { prettyMethodName = {} } = config.get();
 
   if (isUndefined(argumentObj)) {
@@ -37,6 +37,6 @@ const getActionArgumentsMessagePart = (
   }
 
   return getDefaultMessage(argumentObj);
-};
+}
 
 export { getActionArgumentsMessagePart };

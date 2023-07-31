@@ -10,14 +10,15 @@ import {
   toArray,
   isPrimitive,
   isString,
+  isNumber,
   compareToPattern,
 } from 'sat-utils';
 import { config } from '../config';
 
 const { collectionDescription = {} } = config.get();
 
-const stringifyBase = base =>
-  Object.keys(base).reduce((descriptor, key, index, { length }) => {
+const stringifyBase = base => {
+  return Object.keys(base).reduce((descriptor, key, index, { length }) => {
     if (isNull(base[key])) {
       return `${descriptor}${key}${''}${index === length - 1 ? '' : ', '}`;
     }
@@ -72,6 +73,7 @@ const stringifyBase = base =>
 
     return `${descriptor}${key}${` - "${base[key]}"`}${index === length - 1 ? '' : ', '}`;
   }, '');
+};
 
 const isBase = keys => {
   const { baseResultData } = config.get();
@@ -91,6 +93,10 @@ const getIntexesMessage = (indexes: number | number[]) =>
     : '';
 
 function getDescriptorMessage(descriptorObj, initialMessage = ' where ', description = 'state') {
+  if (isString(descriptorObj) || isNumber(isNumber)) {
+    return `'${String(descriptorObj)}' ${initialMessage}`;
+  }
+
   const {
     [collectionDescription.index]: index,
     [collectionDescription.count]: count,

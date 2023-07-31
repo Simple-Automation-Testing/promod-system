@@ -266,7 +266,7 @@ function collectionDescriptionMessage(
   return `${actionMessagePart}`;
 }
 
-const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') => {
+function getArgumentObjectMessage(argumentObj, action = 'Click', message = '') {
   if (actionFormatter && !isFunction(actionFormatter)) {
     warn('actionFormatter should be a function');
   }
@@ -274,7 +274,7 @@ const getArgumentObjectMessage = (argumentObj, action = 'Click', message = '') =
   return ((message: string) => message.charAt(0).toUpperCase() + message.slice(1))(
     getActionMessage(action, actionVisitor(), argumentObj, message).trim(),
   );
-};
+}
 
 const getArgumentsMessage = (
   argumentObj: { [k: string]: any },
