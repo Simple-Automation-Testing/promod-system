@@ -1,4 +1,4 @@
-import { waitForCondition, isObject } from 'sat-utils';
+import { waitForCondition, isObject, toArray, compareToPattern } from 'sat-utils';
 import { config } from '../config';
 
 import type { IWaitConditionOpts } from './interfaces';
@@ -8,8 +8,63 @@ const {
     getCurrentUrl: 'getCurrentUrl',
     getTabs: 'getTabs',
     getTitle: 'getTitle',
+    getCookies: 'getCookies',
   },
 } = config.get();
+
+/**
+ * @param {object} browser browser interaction interface
+ * @param {cookieObj} cookieObj expected cookieObj
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
+async function waitForCookies(
+  browser,
+  cookieObj: { [k: string]: string } | { [k: string]: string }[],
+  opts: IWaitConditionOpts = {},
+) {
+  if (!isObject(opts)) {
+    throw new Error('waitForTabTitleEqual(): third argument "opts" should be an object');
+  }
+
+  const expectedCookies = toArray(cookieObj);
+  opts.message = opts.message ? opts.message : () => `Current browser page does not have required cookies`;
+
+  return waitForCondition(async () => {
+    const browserPageCookies = await browser[browserAction.getCookies]();
+
+    return expectedCookies.every(cookie =>
+      browserPageCookies.some(browserCookie => compareToPattern(browserCookie, cookie).result),
+    );
+  }, opts);
+}
+
+/**
+ * @param {object} browser browser interaction interface
+ * @param {cookieObj} cookieObj expected cookieObj
+ * @param {IWaitConditionOpts} opts
+ * @returns {Promise<boolean>}
+ */
+async function waitForCookiesDoNoExist(
+  browser,
+  cookieObj: { [k: string]: string } | { [k: string]: string }[],
+  opts: IWaitConditionOpts = {},
+) {
+  if (!isObject(opts)) {
+    throw new Error('waitForTabTitleEqual(): third argument "opts" should be an object');
+  }
+
+  const expectedCookies = toArray(cookieObj);
+  opts.message = opts.message ? opts.message : () => `Current browser page does not have required cookies`;
+
+  return waitForCondition(async () => {
+    const browserPageCookies = await browser[browserAction.getCookies]();
+
+    return expectedCookies.every(
+      cookie => !browserPageCookies.some(browserCookie => compareToPattern(browserCookie, cookie).result),
+    );
+  }, opts);
+}
 
 /**
  * @param {object} browser browser interaction interface
@@ -210,6 +265,8 @@ const browserWaiters = {
   waitForTabTitleIncludes,
   waitForUrlNotEquals,
   waitForUrlNotIncludes,
+  waitForCookies,
+  waitForCookiesDoNoExist,
 };
 
 function createBrowserWaiters() {
