@@ -1,12 +1,12 @@
 /* eslint-disable unicorn/consistent-function-scoping, no-console, no-only-tests/no-only-tests, sonarjs/cognitive-complexity */
-import { isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
+import { sleep, isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
 import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 
 const { PROMOD_S_SHORE_REPORTER_ERRORS } = process.env;
 const { warn, error } = console;
 
 type TtestOpts = {
-  [k: string]: string | string[];
+  [k: string]: string | string[] | number | number[] | unknown;
 };
 
 export type TreporterInstance<Topts = TtestOpts> = {
@@ -297,7 +297,11 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
    * @param {(fixtures?: any) => Promise<void> | any} [fn] test case body
    * @returns {void}
    */
-  test.only = function testOnly(testName, opts: TrequiredOpts | TtestBody<Tfixtures>, fn?: TtestBody<Tfixtures>) {
+  test.only = function testOnly(
+    testName: string,
+    opts: TrequiredOpts | TtestBody<Tfixtures>,
+    fn?: TtestBody<Tfixtures>,
+  ) {
     if (!isObject(opts)) {
       fn = opts as TtestBody<Tfixtures>;
       opts = {} as TrequiredOpts;
@@ -309,6 +313,39 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       }
     }
     global.it.only(testName, testBodyWrapper(testName, fn, opts));
+  };
+
+  /**
+   * @param {number} waitingtime test case title
+   * @param {string} testName test case title
+   * @param {object|(fixtures?: any) => Promise<void> | any} opts test cases configuration options, or test case body
+   * @param {(fixtures?: any) => Promise<void> | any} [fn] test case body
+   * @returns {void}
+   */
+  test.debug = function debug(
+    waitingtime: number,
+    testName: string,
+    opts: TrequiredOpts | TtestBody<Tfixtures>,
+    fn?: TtestBody<Tfixtures>,
+  ) {
+    if (!isObject(opts)) {
+      fn = opts as TtestBody<Tfixtures>;
+      opts = {} as TrequiredOpts;
+    }
+    if (isFunction(_updateCaseName)) {
+      const result = _updateCaseName(testName);
+      if (isString(result)) {
+        testName = result;
+      }
+    }
+    global.it.only(testName, async function () {
+      try {
+        await testBodyWrapper(testName, fn, opts)();
+      } catch (error) {
+        console.error(error);
+        await sleep(waitingtime);
+      }
+    });
   };
 
   /**
