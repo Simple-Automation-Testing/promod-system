@@ -5,7 +5,7 @@ import { getCollectionsPathes } from './check.that.action.exists';
 import { getResult, getActionsList, getName, getFieldsEnumList } from './utils.random';
 
 function createFlowTemplates(asActorAndPage, actionDescriptor) {
-  const { baseLibraryDescription = {}, collectionDescription = {} } = config.get();
+  const { baseLibraryDescription = {}, collectionDescription = {}, promod = {} } = config.get();
   const { action, /* __countResult, */ __visible = 'any', __where = 'any', _fields } = actionDescriptor || {};
 
   const result = getResult(action);
@@ -43,9 +43,21 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   // TODO usage of the resultsType is required for future optimizations
   // const resultsType = `type T${typeName}Result = ${__countResult}`;
 
+  const isDeclaration = promod.actionsDeclaration === 'declaration';
+  const firstLine = isDeclaration
+    ? `async function ${randomData}<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> {`
+    : `const ${randomData} = async function<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> {`;
+
+  const firstLineSeveral = isDeclaration
+    ? `async function ${severalValues}(${
+        _fields ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,` : 'quantity: number = 2,'
+      } descriptions: T${typeName}Entry = {}): Promise<string[]> {`
+    : `const ${severalValues} = async function(${
+        _fields ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,` : 'quantity: number = 2,'
+      } descriptions: T${typeName}Entry = {}): Promise<string[]> {`;
   const severalFields = fieldsType
     ? `
-    const ${randomData} = async function<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> {
+    ${firstLine}
       await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
         baseLibraryDescription.waitForVisibilityMethod
       }(${waitingSignature}, { everyArrayItem: false })
@@ -65,13 +77,19 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 };\n`
     : '';
 
+  const firstLineOneValue = isDeclaration
+    ? `async function ${oneValue}(${
+        _fields ? `_field: T${typeName}EntryFields, ` : ''
+      } descriptions: T${typeName}Entry = {}): Promise<string> {`
+    : `const ${oneValue} = async function(${
+        _fields ? `_field: T${typeName}EntryFields, ` : ''
+      } descriptions: T${typeName}Entry = {}): Promise<string> {`;
+
   return `
   ${fieldsType}
   ${descriptionsType}
 
-  const ${oneValue} = async function(${
-    _fields ? `_field: T${typeName}EntryFields, ` : ''
-  } descriptions: T${typeName}Entry = {}): Promise<string> {
+  ${firstLineOneValue}
     await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
     baseLibraryDescription.waitForVisibilityMethod
   }(${waitingSignature}, { everyArrayItem: false })
@@ -87,9 +105,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
     );
   }
 
-  const ${severalValues} = async function(${
-    _fields ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,` : 'quantity: number = 2,'
-  } descriptions: T${typeName}Entry = {}): Promise<string[]> {
+  ${firstLineSeveral}
     await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
     baseLibraryDescription.waitForVisibilityMethod
   }(${waitingSignature}, { everyArrayItem: false })

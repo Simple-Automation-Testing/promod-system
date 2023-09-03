@@ -13,7 +13,7 @@ import { getCountFlows } from './get.entities.count';
 const { PROMOD_S_GENERATE_DEFAULT_IMPORT, PROMOD_S_GENERATE_ACTIONS_TYPE } = process.env;
 
 const flowExpressionMatcher = /(?<=const ).*(?= = async)/gim;
-const flowDeclarationMatcher = /(?<=function ).*(?=\()/gim;
+const flowDeclarationMatcher = /(?<=function )[\w$]+/gim;
 
 function createPageStructure(pagePath: string) {
   const { pathToBase, baseLibraryDescription, promod = {}, collectionDescription } = config.get();

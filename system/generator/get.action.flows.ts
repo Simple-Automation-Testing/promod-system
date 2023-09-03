@@ -21,7 +21,7 @@ function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType
 }
 
 function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field }) {
-  const { repeatingActions = [], baseLibraryDescription = {} } = config.get();
+  const { repeatingActions = [], baseLibraryDescription = {}, promod } = config.get();
 
   const isActionVoid = flowResultType === 'void';
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
@@ -58,10 +58,15 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
     ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
     : `${typeName}Result`;
 
+  const isDeclaration = promod.actionsDeclaration === 'declaration';
+  const firstLine = isDeclaration
+    ? `async function ${name}<Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}> {`
+    : `const ${name} = async function<Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}> {`;
+
   return `
 type ${typeName} = ${flowArgumentType}
 type ${typeName}Result = ${resultTypeClarification}
-const ${name} = async function<Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}> {
+${firstLine}
     ${flowBody}
   };`;
 }
@@ -82,7 +87,7 @@ function createFlowTemplates(name, action, field, instance) {
 
 // TODO try to build generic method for page elements and page fragments
 function createFlowTemplateForPageElements(name, action, instance) {
-  const { actionWithWaitOpts, baseLibraryDescription, prettyMethodName = {} } = config.get();
+  const { actionWithWaitOpts, baseLibraryDescription, prettyMethodName = {}, promod } = config.get();
 
   const prettyFlowActionNamePart = prettyMethodName[action] || action;
 
@@ -101,10 +106,16 @@ function createFlowTemplateForPageElements(name, action, instance) {
     ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
     : `${typeName}Result`;
 
+  const isDeclaration = promod.actionsDeclaration === 'declaration';
+
+  const firstLine = isDeclaration
+    ? `async function${flowActionName}<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {`
+    : `const ${flowActionName} = async function<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {`;
+
   return `
 type ${typeName} = ${flowArgumentType}
 type ${typeName}Result = ${resultTypeClarification}
-const ${flowActionName} = async function<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {
+${firstLine}
   return await ${
     !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
   }${action}(data${optionsSecondArgument ? ', opts' : ''});

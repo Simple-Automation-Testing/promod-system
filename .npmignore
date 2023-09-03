@@ -1,7 +1,7 @@
 ./specs
 ./units
 .eslin*
-specs
+specs/*
 promod.system.config.js
 .vscode
 playground.*

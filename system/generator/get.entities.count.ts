@@ -5,7 +5,7 @@ import { getActionsList, getResult, getName } from './utils.random';
 import { getCollectionsPathes } from './check.that.action.exists';
 
 function createTemplate(asActorAndPage, actionDescriptor) {
-  const { baseLibraryDescription = {}, collectionDescription = {} } = config.get();
+  const { baseLibraryDescription = {}, collectionDescription = {}, promod } = config.get();
   const { action, __countResult, __visible = 'any', __where = 'any' } = actionDescriptor || {};
 
   const result = getResult(action);
@@ -17,6 +17,10 @@ function createTemplate(asActorAndPage, actionDescriptor) {
     `...descriptions, ${collectionDescription.action}: null`,
   );
 
+  const isDeclaration = promod.actionsDeclaration === 'declaration';
+  const firstLine = isDeclaration
+    ? `async function ${name}({...descriptions}: T${name}Entry = {}): Promise<T${name}[]> {`
+    : `const ${name} = async function({...descriptions}: T${name}Entry = {}): Promise<T${name}[]> {`;
   return `
   type T${name}Entry = {
     ${collectionDescription.whereNot || '_whereNot'}?: ${__where} | ${__where}[];
@@ -24,7 +28,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
     ${collectionDescription.visible || '_visible'}?: ${__visible} | ${__visible}[];
   }
   type T${name} = ${__countResult}
-  const ${name} = async function({...descriptions}: T${name}Entry = {}): Promise<T${name}[]> {
+  ${firstLine}
     const result = await ${
       !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
     }${baseLibraryDescription.getDataMethod}(${actionSignature});
