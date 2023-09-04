@@ -3,13 +3,23 @@ import { config } from '../config/config';
 function getCollectionItemInstance(collectionInstance) {
   const { baseLibraryDescription } = config.get();
 
-  return new collectionInstance[baseLibraryDescription.collectionItemId](
-    collectionInstance[baseLibraryDescription.rootLocatorId],
+  const collectionRoot = collectionInstance[baseLibraryDescription.rootLocatorId] || 'a';
+
+  const instance = new collectionInstance[baseLibraryDescription.collectionItemId](
+    collectionRoot,
     collectionInstance[baseLibraryDescription.entityId],
     collectionInstance[baseLibraryDescription.collectionRootElementsId][
       baseLibraryDescription.getBaseElementFromCollectionByIndex
     ](0),
   );
+
+  instance[baseLibraryDescription.entityId] = collectionInstance[baseLibraryDescription.entityId];
+  instance[baseLibraryDescription.rootLocatorId] = collectionInstance[baseLibraryDescription.rootLocatorId];
+  instance[baseLibraryDescription.collectionRootElementsId] =
+    collectionInstance[baseLibraryDescription.collectionRootElementsId][
+      baseLibraryDescription.getBaseElementFromCollectionByIndex
+    ](0);
+  return instance;
 }
 
 function isCollectionInstance(instance) {

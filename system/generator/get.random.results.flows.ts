@@ -1,11 +1,11 @@
 /* eslint-disable sonarjs/no-nested-template-literals, sonarjs/cognitive-complexity*/
-import { camelize, stringifyData } from 'sat-utils';
+import { camelize, stringifyData, toArray } from 'sat-utils';
 import { config } from '../config/config';
 import { getCollectionsPathes } from './check.that.action.exists';
 import { getResult, getActionsList, getName, getFieldsEnumList } from './utils.random';
 
 function createFlowTemplates(asActorAndPage, actionDescriptor) {
-  const { baseLibraryDescription = {}, collectionDescription = {}, promod = {} } = config.get();
+  const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();
   const { action, /* __countResult, */ __visible = 'any', __where = 'any', _fields } = actionDescriptor || {};
 
   const result = getResult(action);
@@ -33,6 +33,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
       return act
     }, {})`,
   );
+  const contentResult = toArray(baseResultData).includes('text') ? '.text' : '';
 
   const fieldsType = `${_fields ? `type T${typeName}EntryFields = ${getFieldsEnumList(_fields)}` : ''}`;
   const descriptionsType = `type T${typeName}Entry = {
@@ -44,6 +45,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   // const resultsType = `type T${typeName}Result = ${__countResult}`;
 
   const isDeclaration = promod.actionsDeclaration === 'declaration';
+
   const firstLine = isDeclaration
     ? `async function ${randomData}<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> {`
     : `const ${randomData} = async function<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> {`;
@@ -55,12 +57,16 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
     : `const ${severalValues} = async function(${
         _fields ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,` : 'quantity: number = 2,'
       } descriptions: T${typeName}Entry = {}): Promise<string[]> {`;
+  const waiting = baseLibraryDescription.waitForVisibilityMethod
+    ? `await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
+        baseLibraryDescription.waitForVisibilityMethod
+      }(${waitingSignature}, { everyArrayItem: false })`
+    : '';
+
   const severalFields = fieldsType
     ? `
     ${firstLine}
-      await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
-        baseLibraryDescription.waitForVisibilityMethod
-      }(${waitingSignature}, { everyArrayItem: false })
+      ${waiting}
       const result = await ${
         !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
       }${baseLibraryDescription.getDataMethod}(${randomDataActionSignature});
@@ -69,7 +75,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   return getRandomArrayItem(
     flatResult
       .map(item => _fields.reduce((requredData, k ) => {
-        requredData[k] = item[k].text
+        requredData[k] = item[k]${contentResult}
 
         return requredData
       }, {} as TobjectFromStringArray<T>))
@@ -90,9 +96,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   ${descriptionsType}
 
   ${firstLineOneValue}
-    await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
-    baseLibraryDescription.waitForVisibilityMethod
-  }(${waitingSignature}, { everyArrayItem: false })
+    ${waiting}
     const result = await ${
       !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
     }${baseLibraryDescription.getDataMethod}(${actionSignature});
@@ -101,14 +105,12 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
     return getRandomArrayItem(
       flatResult
-        .map(item => item${_fields ? '[_field]' : ''}.text),
+        .map(item => item${_fields ? '[_field]' : ''}${contentResult}),
     );
   }
 
   ${firstLineSeveral}
-    await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
-    baseLibraryDescription.waitForVisibilityMethod
-  }(${waitingSignature}, { everyArrayItem: false })
+    ${waiting}
     const result = await ${
       !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
     }${baseLibraryDescription.getDataMethod}(${actionSignature});
@@ -117,7 +119,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
     return getRandomArrayItem(
       flatResult
-        .map(item => item${_fields ? '[_field]' : ''}.text),
+        .map(item => item${_fields ? '[_field]' : ''}${contentResult}),
       quantity,
     );
   }
