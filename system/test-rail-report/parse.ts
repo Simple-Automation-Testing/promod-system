@@ -418,8 +418,6 @@ function parseGeneralReport() {
   }
 
   if (process.env.PROMOD_S_RESET_REPORT) {
-    console.log(process.env.PROMOD_S_RESET_REPORT);
-
     createGeneralReportTemplate();
   }
 

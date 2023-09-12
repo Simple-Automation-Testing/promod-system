@@ -111,7 +111,7 @@ function getSanitizeDataKeys(sanitizePattern) {
 
   if (isNull(sanitizePattern[firstKey])) {
     pathKeys = firstKey;
-  } else if (isObject(sanitizePattern[firstKey])) {
+  } else if (isNotEmptyObject(sanitizePattern[firstKey])) {
     pathKeys = `${firstKey}.${getSanitizeDataKeys(sanitizePattern[firstKey])}`;
   } else {
     throw new Error(`Something is wrong`);
@@ -146,9 +146,13 @@ function getActionsList(data) {
 
   const actions = [];
 
-  while (isNotEmptyObject(data) && safeJSONstringify(data).includes(collectionDescription.action)) {
+  /**
+   * @info it is possible that some wrapping is done and we need to make sure
+   * that collection action key is wrapped in default JSON double quotes
+   */
+  while (isNotEmptyObject(data) && safeJSONstringify(data).includes(`"${collectionDescription.action}"`)) {
     for (const key of Object.keys(data).filter(k =>
-      safeJSONstringify(data[k]).includes(collectionDescription.action),
+      safeJSONstringify(data[k]).includes(`"${collectionDescription.action}"`),
     )) {
       const { __countResult, _type, _fields, ...result } = getKeyFormat(data[key]);
       const action = { [key]: result };
@@ -222,4 +226,6 @@ export {
   getResult,
   getName,
   getFieldsEnumList,
+  getSanitizeDataKeys,
+  getKeyFormat,
 };

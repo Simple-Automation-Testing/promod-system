@@ -77,7 +77,6 @@ function createReportByMonthAutomation(starDate: string, periodInMonthes: number
     iteration++;
   }
 
-  // console.log(JSON.stringify(testCaseIdsToCheck));
   fs.writeFileSync(resultPath, JSON.stringify(data));
 }
 

@@ -19,10 +19,9 @@ function getCollectionsPathes(instance) {
     baseCollectionActionsDescription,
   } = config.get();
 
-  // TODO figure out what is going wrong when wrap is in progress
-  // function wrap(itemType) {
-  //   return `Omit<${itemType}, '${collectionDescription.action}'>`;
-  // }
+  function wrap(itemType) {
+    return `Omit<${itemType}, '${collectionDescription.action}'>`;
+  }
 
   const { action, ...collectionReducedType } = baseCollectionActionsDescription['get']['entryType'];
   if (isCollectionWithItemBaseElement(instance)) {
@@ -64,7 +63,7 @@ function getCollectionsPathes(instance) {
       result[fragmentChildFieldName] = {
         [collectionDescription.action]: null,
 
-        // __countResult: getElementType(collectionInstance, 'get', 'resultType'),
+        __countResult: getElementType(collectionInstance, 'get', 'resultType'),
         _type: getCollectionTypes(instance[fragmentChildFieldName], 'get', 'entryType', collectionReducedType, wrap),
         _fields: getFragmentInteractionFields(collectionInstance),
       };
@@ -73,7 +72,6 @@ function getCollectionsPathes(instance) {
     }
   }
 
-  // throw '!!!!!!!!!';
   return result;
 }
 
