@@ -10,7 +10,8 @@ import {
   isCollectionWithItemFragment,
 } from './utils.collection';
 
-function getColletionActionType(collectionsItem, getTypes, collectionActionType, collectionActionDescriptor?) {
+function getColletionActionType(collectionsItem, getTypes, collectionActionType, ...rest) {
+  let [collectionActionDescriptor] = rest;
   return Object.keys(collectionActionType).reduce((typeString, actionKey, index, allActions) => {
     const actionDescriptor = collectionActionType[actionKey] as { action: string; actionType: string };
 
@@ -32,7 +33,8 @@ function getColletionActionType(collectionsItem, getTypes, collectionActionType,
   }, '');
 }
 
-function getCollectionTypes(instance, action, actionType, collectionActionDescriptor?) {
+function getCollectionTypes(instance, action, actionType, ...rest) {
+  let [collectionActionDescriptor, wrap] = rest;
   const { baseCollectionActionsDescription, baseElementsActionsDescription } = config.get();
 
   const collectionsItem = getCollectionItemInstance(instance);
@@ -61,7 +63,7 @@ function getCollectionTypes(instance, action, actionType, collectionActionDescri
   );
 
   if (generic) {
-    colletionItemType = `${generic}<${colletionItemType}>`;
+    colletionItemType = wrap ? wrap(`${generic}<${colletionItemType}>`) : `${generic}<${colletionItemType}>`;
   }
   if (endType) {
     colletionItemType = `${colletionItemType}${endType}`;
@@ -71,13 +73,13 @@ function getCollectionTypes(instance, action, actionType, collectionActionDescri
   return types;
 }
 
-function getFragmentTypes(instance, action, actionType, collectionActionDescriptor?) {
+function getFragmentTypes(instance, action, actionType, ...rest) {
   const { resultActionsMap, baseLibraryDescription } = config.get();
 
   if (resultActionsMap[action] === 'void' && actionType === 'resultType') return 'void';
 
   if (instance.constructor.name === baseLibraryDescription.collectionId) {
-    const types = getCollectionTypes(instance, action, actionType, collectionActionDescriptor);
+    const types = getCollectionTypes(instance, action, actionType, ...rest);
 
     return createType(types, action);
   }
@@ -107,7 +109,7 @@ function getFragmentTypes(instance, action, actionType, collectionActionDescript
       // logger here
       return {
         [itemFiledName]: {
-          [action]: getFragmentTypes(instance[itemFiledName], action, actionType, collectionActionDescriptor),
+          [action]: getFragmentTypes(instance[itemFiledName], action, actionType, ...rest),
         },
       };
     });
@@ -127,10 +129,7 @@ function getFragmentTypes(instance, action, actionType, collectionActionDescript
       // logger here
       return {
         [itemFiledName]: {
-          [action]: createType(
-            getCollectionTypes(instance[itemFiledName], action, actionType, collectionActionDescriptor),
-            action,
-          ),
+          [action]: createType(getCollectionTypes(instance[itemFiledName], action, actionType, ...rest), action),
         },
       };
     });

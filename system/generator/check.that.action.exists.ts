@@ -9,17 +9,27 @@ import {
   isCollectionWithItemFragment,
 } from './utils.collection';
 import { getElementType } from './get.base';
-import { getFragmentTypes } from './get.instance.elements.type';
+import { getCollectionTypes, getFragmentTypes } from './get.instance.elements.type';
 
 function getCollectionsPathes(instance) {
-  const { baseElementsActionsDescription, baseLibraryDescription, collectionDescription } = config.get();
+  const {
+    baseElementsActionsDescription,
+    baseLibraryDescription,
+    collectionDescription,
+    baseCollectionActionsDescription,
+  } = config.get();
 
+  // TODO figure out what is going wrong when wrap is in progress
+  // function wrap(itemType) {
+  //   return `Omit<${itemType}, '${collectionDescription.action}'>`;
+  // }
+
+  const { action, ...collectionReducedType } = baseCollectionActionsDescription['get']['entryType'];
   if (isCollectionWithItemBaseElement(instance)) {
     return {
       [collectionDescription.action]: null,
       __countResult: getElementType(getCollectionItemInstance(instance), 'get', 'resultType'),
-      __visible: getElementType(getCollectionItemInstance(instance), '_visible', 'resultType'),
-      __where: getElementType(getCollectionItemInstance(instance), '_where', 'resultType'),
+      _type: getCollectionTypes(instance, 'get', 'entryType', collectionReducedType, wrap),
       _fields: getFragmentInteractionFields(getCollectionItemInstance(instance)),
     };
   }
@@ -42,24 +52,20 @@ function getCollectionsPathes(instance) {
       }
     } else if (isCollectionWithItemFragment(instance[fragmentChildFieldName])) {
       const collectionInstance = getCollectionItemInstance(instance[fragmentChildFieldName]);
-
       result[fragmentChildFieldName] = {
         [collectionDescription.action]: getCollectionsPathes(collectionInstance),
 
         __countResult: getFragmentTypes(collectionInstance, 'get', 'resultType'),
-        __visible: getFragmentTypes(collectionInstance, '_visible', 'resultType'),
-        __where: getFragmentTypes(collectionInstance, '_where', 'resultType'),
+        _type: getCollectionTypes(instance[fragmentChildFieldName], 'get', 'entryType', collectionReducedType, wrap),
         _fields: getFragmentInteractionFields(collectionInstance),
       };
     } else if (isCollectionWithItemBaseElement(instance[fragmentChildFieldName])) {
       const collectionInstance = getCollectionItemInstance(instance[fragmentChildFieldName]);
-
       result[fragmentChildFieldName] = {
         [collectionDescription.action]: null,
 
-        __countResult: getElementType(collectionInstance, 'get', 'resultType'),
-        __visible: getElementType(collectionInstance, '_visible', 'resultType'),
-        __where: getElementType(collectionInstance, '_where', 'resultType'),
+        // __countResult: getElementType(collectionInstance, 'get', 'resultType'),
+        _type: getCollectionTypes(instance[fragmentChildFieldName], 'get', 'entryType', collectionReducedType, wrap),
         _fields: getFragmentInteractionFields(collectionInstance),
       };
     } else if (baseElementsActionsDescription[childConstructorName]) {
@@ -67,6 +73,7 @@ function getCollectionsPathes(instance) {
     }
   }
 
+  // throw '!!!!!!!!!';
   return result;
 }
 

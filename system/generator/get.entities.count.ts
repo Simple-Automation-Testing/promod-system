@@ -6,7 +6,7 @@ import { getCollectionsPathes } from './check.that.action.exists';
 
 function createTemplate(asActorAndPage, actionDescriptor) {
   const { baseLibraryDescription = {}, collectionDescription = {}, promod } = config.get();
-  const { action, __countResult, __visible = 'any', __where = 'any' } = actionDescriptor || {};
+  const { action, __countResult, _type } = actionDescriptor || {};
 
   const result = getResult(action);
   const name = camelize(`${asActorAndPage} Get Collection From ${getName(action)}`);
@@ -21,12 +21,9 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   const firstLine = isDeclaration
     ? `async function ${name}({...descriptions}: T${name}Entry = {}): Promise<T${name}[]> {`
     : `const ${name} = async function({...descriptions}: T${name}Entry = {}): Promise<T${name}[]> {`;
+  // TODO add better types interactions
   return `
-  type T${name}Entry = {
-    ${collectionDescription.whereNot || '_whereNot'}?: ${__where} | ${__where}[];
-    ${collectionDescription.where || '_where'}?: ${__where} | ${__where}[];
-    ${collectionDescription.visible || '_visible'}?: ${__visible} | ${__visible}[];
-  }
+  type T${name}Entry = ${_type.get}
   type T${name} = ${__countResult}
   ${firstLine}
     const result = await ${

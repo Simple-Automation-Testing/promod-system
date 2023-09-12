@@ -6,7 +6,7 @@ import { getResult, getActionsList, getName, getFieldsEnumList } from './utils.r
 
 function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();
-  const { action, /* __countResult, */ __visible = 'any', __where = 'any', _fields } = actionDescriptor || {};
+  const { action, /* __countResult, */ _type, _fields } = actionDescriptor || {};
 
   const result = getResult(action);
   const typeName = camelize(`${asActorAndPage} get random Data and Field Values from ${getName(action)}`);
@@ -36,11 +36,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const contentResult = toArray(baseResultData).includes('text') ? '.text' : '';
 
   const fieldsType = `${_fields ? `type T${typeName}EntryFields = ${getFieldsEnumList(_fields)}` : ''}`;
-  const descriptionsType = `type T${typeName}Entry = {
-    ${collectionDescription.whereNot || '_whereNot'}?: ${__where} | ${__where}[];
-    ${collectionDescription.where || '_where'}?: ${__where} | ${__where}[];
-    ${collectionDescription.visible || '_visible'}?: ${__visible} | ${__visible}[];
-  }`;
+  const descriptionsType = `type T${typeName}Entry = ${_type.get}`;
   // TODO usage of the resultsType is required for future optimizations
   // const resultsType = `type T${typeName}Result = ${__countResult}`;
 
