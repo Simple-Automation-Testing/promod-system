@@ -68,7 +68,6 @@ function getAllBaseElements(instance, baseElements = []) {
   }
 
   const interactionFields = getFragmentInteractionFields(instance) || [];
-
   interactionFields.forEach(fragmentChildFieldName => {
     const childConstructorName = instance[fragmentChildFieldName].constructor.name;
 

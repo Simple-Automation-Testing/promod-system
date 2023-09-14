@@ -224,18 +224,6 @@ const collectionDescription = {
   length: 'length',
 };
 
-const systemPropsList = [
-  'index',
-  'rootLocator',
-  'rootElements',
-  'identifier',
-  'CollectionItemClass',
-  'overrideElement',
-  'parent',
-  'loaderLocator',
-  'rootElement',
-];
-
 const elementAction = {
   isEnabled: 'isEnabled',
   isDisplayed: 'isDisplayed',
@@ -273,7 +261,6 @@ module.exports = {
   baseLibraryDescription,
   collectionRandomDataDescription,
   resultActionsMap,
-  systemPropsList,
   actionWithWaitOpts,
   baseElementsActionsDescription,
   baseCollectionActionsDescription,

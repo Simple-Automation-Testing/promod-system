@@ -104,7 +104,7 @@ class PromodSystemElement<TrootElement = any> {
     this.rootLocator = locator;
     this.identifier = elementName;
     this.rootElement = rootElement;
-    this.parent = null;
+    this.parent = () => null;
     this.index = 0;
 
     this.logger = element;

@@ -1,7 +1,8 @@
 import { config } from '../config/config';
 
+const { baseElementsActionsDescription, baseLibraryDescription } = config.get();
+
 function getAllBaseActions() {
-  const { baseElementsActionsDescription } = config.get();
   return Array.from(
     new Set(
       Object.keys(baseElementsActionsDescription).flatMap(element =>
@@ -12,12 +13,19 @@ function getAllBaseActions() {
 }
 
 function getFragmentInteractionFields(instance) {
-  const { systemPropsList } = config.get();
   const instanceOwnKeys = Object.getOwnPropertyNames(instance);
 
-  const iteractionFields = instanceOwnKeys
-    .filter(item => !systemPropsList.includes(item))
-    .filter(item => item !== 'undefined');
+  const elementsList = Object.keys(baseElementsActionsDescription);
+  const baseInterfaces = [baseLibraryDescription.fragmentId, baseLibraryDescription.collectionId];
+
+  const iteractionFields = instanceOwnKeys.filter(item => {
+    const fieldConstructorName: string = instance[item]?.constructor?.name;
+
+    return (
+      elementsList.includes(fieldConstructorName) ||
+      baseInterfaces.some(baseInterface => fieldConstructorName?.endsWith(baseInterface))
+    );
+  });
 
   return iteractionFields.length ? iteractionFields : null;
 }

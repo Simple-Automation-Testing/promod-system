@@ -4,12 +4,19 @@ import { config } from '../config/config';
 import { getElementsTypes, getFragmentTypes } from './get.instance.elements.type';
 import { checkThatFragmentHasItemsToAction } from './check.that.action.exists';
 import { checkThatElementHasAction } from './get.base';
+import { getFragmentInteractionFields } from './utils';
 
 const noTransormTypes = new Set(['void', 'boolean']);
 
-function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType) {
-  const { collectionActionTypes } = config.get();
+const {
+  repeatingActions = [],
+  baseLibraryDescription = {},
+  promod,
+  collectionActionTypes,
+  prettyMethodName = {},
+} = config.get();
 
+function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType) {
   if (noTransormTypes.has(resultTypeClarification.trim())) {
     return false;
   }
@@ -21,8 +28,6 @@ function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType
 }
 
 function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field }) {
-  const { repeatingActions = [], baseLibraryDescription = {}, promod } = config.get();
-
   const isActionVoid = flowResultType === 'void';
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
   const additionalArguments = optionsSecondArgument ? ', opts' : '';
@@ -123,10 +128,7 @@ ${firstLine}
 }
 
 function getActionFlows(asActorAndPage: string, instance: object, action: string) {
-  const { systemPropsList, prettyMethodName = {}, baseLibraryDescription } = config.get();
-
-  const pageFields = Object.getOwnPropertyNames(instance);
-  const interactionFields = pageFields.filter(field => !systemPropsList.includes(field));
+  const interactionFields = getFragmentInteractionFields(instance);
 
   const pageElementActions = interactionFields.filter(field => checkThatElementHasAction(instance[field], action));
 

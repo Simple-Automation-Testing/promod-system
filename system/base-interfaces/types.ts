@@ -20,8 +20,6 @@ type TcollectionActionDescriptionMap = {
   length: string;
 };
 
-type TsystemPropsList = string[];
-
 type TbaseLibraryDescriptionMap = {
   entityId: string;
   rootLocatorId: string;
@@ -38,4 +36,4 @@ type TbaseLibraryDescriptionMap = {
   getBaseElementFromCollectionByIndex: string;
 };
 
-export type { TelementActionsMap, TcollectionActionDescriptionMap, TbaseLibraryDescriptionMap, TsystemPropsList };
+export type { TelementActionsMap, TcollectionActionDescriptionMap, TbaseLibraryDescriptionMap };

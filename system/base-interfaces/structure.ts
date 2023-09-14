@@ -1,7 +1,6 @@
 /* eslint-disable unicorn/prefer-switch */
 import {
   isObject,
-  isArray,
   isNull,
   compareToPattern,
   waitForCondition,
@@ -12,8 +11,9 @@ import {
 } from 'sat-utils';
 import { promodLogger } from '../logger';
 import { getCollectionRecomposedData } from './data.transformation';
+import { getFragmentInteractionFields } from '../generator/utils';
 
-import type { TbaseLibraryDescriptionMap, TcollectionActionDescriptionMap, TsystemPropsList } from './types';
+import type { TbaseLibraryDescriptionMap, TcollectionActionDescriptionMap } from './types';
 
 import { config } from '../config';
 
@@ -39,18 +39,6 @@ const structure = {
 };
 
 const {
-  systemPropsList = [
-    'index',
-    'rootLocator',
-    'rootElements',
-    'identifier',
-    'CollectionItemClass',
-    'overrideElement',
-    'parent',
-    'loaderLocator',
-    'rootElement',
-    'logger',
-  ],
   collectionDescription = {
     action: '_action',
     where: '_where',
@@ -167,18 +155,11 @@ class PromodSystemStructure<TrootElement = any> {
     Object.assign(baseLibraryDescription, baseLibraryDescriptionMap);
   }
 
-  static updateSystemPropsList(systemPropsList: TsystemPropsList) {
-    if (!isArray(systemPropsList)) {
-      throw new TypeError('updateBaseLibraryDescription(): expects that baseLibraryDescriptionMap be an object');
-    }
-    Object.assign(systemPropsList, systemPropsList);
-  }
-
   constructor(locator, structureName, rootElement) {
     this.rootLocator = locator;
     this.identifier = structureName;
     this.rootElement = rootElement;
-    this.parent = null;
+    this.parent = () => null;
     this.index = 0;
 
     this.logger = structure;
@@ -385,19 +366,12 @@ class PromodSystemStructure<TrootElement = any> {
   }
 
   private getStructureActionFields() {
-    const properties = Object.getOwnPropertyNames(this)
-      .filter(
-        propertyName =>
-          !systemPropsList.includes(propertyName) &&
-          !isFunction(this[propertyName]) &&
-          !isAsyncFunction(this[propertyName]),
-      )
-      .reduce((propertyNames, value) => {
-        if (!this[value]?.constructor.name.includes(baseLibraryDescription.fragmentId)) {
-          propertyNames[value] = null;
-        }
-        return propertyNames;
-      }, {});
+    const properties = getFragmentInteractionFields(this).reduce((propertyNames, value) => {
+      if (!this[value]?.constructor.name.includes(baseLibraryDescription.fragmentId)) {
+        propertyNames[value] = null;
+      }
+      return propertyNames;
+    }, {});
 
     if (isEmptyObject(properties)) {
       throw new Error(`${this.identifier}: This structure doesn't have action props`);
