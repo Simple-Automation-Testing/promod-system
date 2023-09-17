@@ -4,7 +4,7 @@ import { config } from '../config/config';
 import { getElementsTypes, getFragmentTypes } from './get.instance.elements.type';
 import { checkThatFragmentHasItemsToAction } from './check.that.action.exists';
 import { checkThatElementHasAction } from './get.base';
-import { getFragmentInteractionFields } from './utils';
+import { getInstanceInteractionFields } from './utils';
 
 const noTransormTypes = new Set(['void', 'boolean']);
 
@@ -128,7 +128,7 @@ ${firstLine}
 }
 
 function getActionFlows(asActorAndPage: string, instance: object, action: string) {
-  const interactionFields = getFragmentInteractionFields(instance);
+  const interactionFields = getInstanceInteractionFields(instance);
 
   const pageElementActions = interactionFields.filter(field => checkThatElementHasAction(instance[field], action));
 

@@ -2,34 +2,34 @@
 import { safeJSONstringify } from 'sat-utils';
 import { config } from '../config/config';
 import { checkThatElementHasAction } from './get.base';
-import { getFragmentInteractionFields } from './utils';
+import { getInstanceInteractionFields } from './utils';
+import { getElementType } from './get.base';
+import { getCollectionTypes, getFragmentTypes } from './get.instance.elements.type';
 import {
   getCollectionItemInstance,
   isCollectionWithItemBaseElement,
   isCollectionWithItemFragment,
 } from './utils.collection';
-import { getElementType } from './get.base';
-import { getCollectionTypes, getFragmentTypes } from './get.instance.elements.type';
+
+const {
+  baseElementsActionsDescription,
+  baseLibraryDescription,
+  collectionDescription,
+  baseCollectionActionsDescription,
+} = config.get();
+
+function wrap(itemType) {
+  return `Omit<${itemType}, '${collectionDescription.action}'>`;
+}
 
 function getCollectionsPathes(instance) {
-  const {
-    baseElementsActionsDescription,
-    baseLibraryDescription,
-    collectionDescription,
-    baseCollectionActionsDescription,
-  } = config.get();
-
-  function wrap(itemType) {
-    return `Omit<${itemType}, '${collectionDescription.action}'>`;
-  }
-
   const { action, ...collectionReducedType } = baseCollectionActionsDescription['get']['entryType'];
   if (isCollectionWithItemBaseElement(instance)) {
     return {
       [collectionDescription.action]: null,
       __countResult: getElementType(getCollectionItemInstance(instance), 'get', 'resultType'),
       _type: getCollectionTypes(instance, 'get', 'entryType', collectionReducedType, wrap),
-      _fields: getFragmentInteractionFields(getCollectionItemInstance(instance)),
+      _fields: getInstanceInteractionFields(getCollectionItemInstance(instance)),
     };
   }
 
@@ -37,7 +37,7 @@ function getCollectionsPathes(instance) {
     return getCollectionsPathes(getCollectionItemInstance(instance));
   }
 
-  const interactionFields = getFragmentInteractionFields(instance) || [];
+  const interactionFields = getInstanceInteractionFields(instance);
 
   const result = {};
 
@@ -56,7 +56,7 @@ function getCollectionsPathes(instance) {
 
         __countResult: getFragmentTypes(collectionInstance, 'get', 'resultType'),
         _type: getCollectionTypes(instance[fragmentChildFieldName], 'get', 'entryType', collectionReducedType, wrap),
-        _fields: getFragmentInteractionFields(collectionInstance),
+        _fields: getInstanceInteractionFields(collectionInstance),
       };
     } else if (isCollectionWithItemBaseElement(instance[fragmentChildFieldName])) {
       const collectionInstance = getCollectionItemInstance(instance[fragmentChildFieldName]);
@@ -65,7 +65,7 @@ function getCollectionsPathes(instance) {
 
         __countResult: getElementType(collectionInstance, 'get', 'resultType'),
         _type: getCollectionTypes(instance[fragmentChildFieldName], 'get', 'entryType', collectionReducedType, wrap),
-        _fields: getFragmentInteractionFields(collectionInstance),
+        _fields: getInstanceInteractionFields(collectionInstance),
       };
     } else if (baseElementsActionsDescription[childConstructorName]) {
       // noop
@@ -86,7 +86,7 @@ function checkThatFragmentHasItemsToAction(instance, action: string) {
     return checkThatFragmentHasItemsToAction(getCollectionItemInstance(instance), action);
   }
 
-  const interactionFields = getFragmentInteractionFields(instance) || [];
+  const interactionFields = getInstanceInteractionFields(instance);
 
   let result = false;
   for (const fragmentChildFieldName of interactionFields) {

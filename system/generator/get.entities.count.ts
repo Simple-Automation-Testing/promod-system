@@ -4,8 +4,9 @@ import { config } from '../config/config';
 import { getActionsList, getResult, getName } from './utils.random';
 import { getCollectionsPathes } from './check.that.action.exists';
 
+const { baseLibraryDescription = {}, collectionDescription = {}, promod = {} } = config.get();
+
 function createTemplate(asActorAndPage, actionDescriptor) {
-  const { baseLibraryDescription = {}, collectionDescription = {}, promod } = config.get();
   const { action, __countResult, _type } = actionDescriptor || {};
 
   const result = getResult(action);

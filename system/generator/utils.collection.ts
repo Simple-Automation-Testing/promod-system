@@ -1,8 +1,8 @@
 import { config } from '../config/config';
 
-function getCollectionItemInstance(collectionInstance) {
-  const { baseLibraryDescription } = config.get();
+const { baseLibraryDescription, baseElementsActionsDescription } = config.get();
 
+function getCollectionItemInstance(collectionInstance) {
   const collectionRoot = collectionInstance[baseLibraryDescription.rootLocatorId] || 'a';
 
   const instance = new collectionInstance[baseLibraryDescription.collectionItemId](
@@ -23,14 +23,11 @@ function getCollectionItemInstance(collectionInstance) {
 }
 
 function isCollectionInstance(instance) {
-  const { baseLibraryDescription } = config.get();
 
   return instance?.constructor?.name?.includes(baseLibraryDescription.collectionId);
 }
 
 function isCollectionWithItemBaseElement(instance) {
-  const { baseLibraryDescription, baseElementsActionsDescription } = config.get();
-
   return (
     isCollectionInstance(instance) &&
     baseElementsActionsDescription[instance[baseLibraryDescription.collectionItemId]?.name]
@@ -38,8 +35,6 @@ function isCollectionWithItemBaseElement(instance) {
 }
 
 function isCollectionWithItemFragment(instance) {
-  const { baseLibraryDescription } = config.get();
-
   return (
     isCollectionInstance(instance) &&
     instance[baseLibraryDescription.collectionItemId].name.includes(baseLibraryDescription.fragmentId)

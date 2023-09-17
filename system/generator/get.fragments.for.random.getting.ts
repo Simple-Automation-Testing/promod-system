@@ -4,7 +4,7 @@
 import { isNotEmptyObject } from 'sat-utils';
 import { config } from '../config/config';
 import { getElementsTypes } from './get.instance.elements.type';
-import { getFragmentInteractionFields } from './utils';
+import { getInstanceInteractionFields } from './utils';
 import {
   checkThatElementHasAction,
   getElementType,
@@ -22,7 +22,7 @@ function getCollectionItemTypes(collectionItemInstance) {
 
   const getType = checkThatBaseElement(collectionItemInstance) ? getElementType : getElementsTypes;
 
-  const _fields = getFragmentInteractionFields(collectionItemInstance);
+  const _fields = getInstanceInteractionFields(collectionItemInstance);
 
   const types = Object.keys(collectionRandomDataDescription).reduce((description, key) => {
     description[key] = getType(
@@ -47,7 +47,7 @@ function getPathesToCollections(childInstance, name) {
       return getCollectionItemTypes(getCollectionItemInstance(instance));
     }
 
-    const interactionFields = getFragmentInteractionFields(instance) || [];
+    const interactionFields = getInstanceInteractionFields(instance);
 
     for (const field of interactionFields) {
       const childConstructorName = instance[field].constructor.name;

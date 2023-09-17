@@ -1,8 +1,8 @@
 import { config } from '../config/config';
 
-function getCollectionTypesImport() {
-  const { collectionActionTypes } = config.get();
+const { collectionActionTypes, baseLibraryDescription } = config.get();
 
+function getCollectionTypesImport() {
   const types = Object.values(collectionActionTypes);
   if (types.length === 1) return `${types[0]}, `;
 
@@ -24,7 +24,6 @@ function getElementImportType(elementName) {
 }
 
 function getBaseImport(baseElements) {
-  const { baseLibraryDescription } = config.get();
   const uniqBaseElements = Array.from(new Set(baseElements));
 
   const collectionActionsImportPart = uniqBaseElements.includes(baseLibraryDescription.collectionId)

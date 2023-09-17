@@ -4,8 +4,9 @@ import { config } from '../config/config';
 import { getCollectionsPathes } from './check.that.action.exists';
 import { getResult, getActionsList, getName, getFieldsEnumList } from './utils.random';
 
+const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();
+
 function createFlowTemplates(asActorAndPage, actionDescriptor) {
-  const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();
   const { action, /* __countResult, */ _type, _fields } = actionDescriptor || {};
 
   const result = getResult(action);
@@ -14,7 +15,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const severalValues = camelize(`${asActorAndPage} get several random field values from ${getName(action)}`);
   const randomData = camelize(`${asActorAndPage} get random data from ${getName(action)}`);
 
-  const actionFields = `${_fields ? `{ [_field]: null }` : 'null'}`;
+  const actionFields = `${_fields?.length ? `{ [_field]: null }` : 'null'}`;
 
   const actionSignature = stringifyData(action).replace(
     `${collectionDescription.action}: null`,
@@ -35,7 +36,8 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   );
   const contentResult = toArray(baseResultData).includes('text') ? '.text' : '';
 
-  const fieldsType = `${_fields ? `type T${typeName}EntryFields = ${getFieldsEnumList(_fields)}` : ''}`;
+  const fieldsType = `${_fields?.length ? `type T${typeName}EntryFields = ${getFieldsEnumList(_fields)}` : ''}`;
+
   const descriptionsType = `type T${typeName}Entry = ${_type.get}`;
   // TODO usage of the resultsType is required for future optimizations
   // const resultsType = `type T${typeName}Result = ${__countResult}`;
@@ -48,10 +50,14 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
   const firstLineSeveral = isDeclaration
     ? `async function ${severalValues}(${
-        _fields ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,` : 'quantity: number = 2,'
+        _fields?.length
+          ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,`
+          : 'quantity: number = 2,'
       } descriptions: T${typeName}Entry = {}): Promise<string[]> {`
     : `const ${severalValues} = async function(${
-        _fields ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,` : 'quantity: number = 2,'
+        _fields?.length
+          ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,`
+          : 'quantity: number = 2,'
       } descriptions: T${typeName}Entry = {}): Promise<string[]> {`;
   const waiting = baseLibraryDescription.waitForVisibilityMethod
     ? `await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
@@ -81,10 +87,10 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
   const firstLineOneValue = isDeclaration
     ? `async function ${oneValue}(${
-        _fields ? `_field: T${typeName}EntryFields, ` : ''
+        _fields?.length ? `_field: T${typeName}EntryFields, ` : ''
       } descriptions: T${typeName}Entry = {}): Promise<string> {`
     : `const ${oneValue} = async function(${
-        _fields ? `_field: T${typeName}EntryFields, ` : ''
+        _fields?.length ? `_field: T${typeName}EntryFields, ` : ''
       } descriptions: T${typeName}Entry = {}): Promise<string> {`;
 
   return `
@@ -101,7 +107,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
     return getRandomArrayItem(
       flatResult
-        .map(item => item${_fields ? '[_field]' : ''}${contentResult}),
+        .map(item => item${_fields?.length ? '[_field]' : ''}${contentResult}),
     );
   }
 
@@ -115,7 +121,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
     return getRandomArrayItem(
       flatResult
-        .map(item => item${_fields ? '[_field]' : ''}${contentResult}),
+        .map(item => item${_fields?.length ? '[_field]' : ''}${contentResult}),
       quantity,
     );
   }

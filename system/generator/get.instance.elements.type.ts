@@ -3,7 +3,7 @@ import { createType } from './create.type';
 import { config } from '../config/config';
 import { checkThatFragmentHasItemsToAction } from './check.that.action.exists';
 import { checkThatElementHasAction, checkThatBaseElement, getElementActionType, getElementType } from './get.base';
-import { getFragmentInteractionFields } from './utils';
+import { getInstanceInteractionFields } from './utils';
 import {
   getCollectionItemInstance,
   isCollectionWithItemBaseElement,
@@ -84,7 +84,7 @@ function getFragmentTypes(instance, action, actionType, ...rest) {
     return createType(types, action);
   }
 
-  const instanceOwnKeys = getFragmentInteractionFields(instance);
+  const instanceOwnKeys = getInstanceInteractionFields(instance);
 
   const fragmentElements = instanceOwnKeys
     .filter(itemFiledName => {
@@ -142,7 +142,7 @@ function getElementsTypes(instance, action, actionType) {
 
   if (resultActionsMap[action] === 'void' && actionType === 'resultType') return 'void';
 
-  const instanceElements = getFragmentInteractionFields(instance)
+  const instanceElements = getInstanceInteractionFields(instance)
     .filter(itemFiledName => checkThatElementHasAction(instance[itemFiledName], action))
     .map(itemFiledName => ({ [itemFiledName]: getElementActionType(instance[itemFiledName], action, actionType) }));
 

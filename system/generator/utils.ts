@@ -12,22 +12,22 @@ function getAllBaseActions() {
   );
 }
 
-function getFragmentInteractionFields(instance) {
+function getInstanceInteractionFields(instance: { [k: string]: any }, onlyBaseElements?: boolean) {
   const instanceOwnKeys = Object.getOwnPropertyNames(instance);
 
   const elementsList = Object.keys(baseElementsActionsDescription);
   const baseInterfaces = [baseLibraryDescription.fragmentId, baseLibraryDescription.collectionId];
 
-  const iteractionFields = instanceOwnKeys.filter(item => {
+  return instanceOwnKeys.filter(item => {
     const fieldConstructorName: string = instance[item]?.constructor?.name;
-
+    if (onlyBaseElements) {
+      return elementsList.includes(fieldConstructorName);
+    }
     return (
       elementsList.includes(fieldConstructorName) ||
       baseInterfaces.some(baseInterface => fieldConstructorName?.endsWith(baseInterface))
     );
   });
-
-  return iteractionFields.length ? iteractionFields : null;
 }
 
-export { getAllBaseActions, getFragmentInteractionFields };
+export { getAllBaseActions, getInstanceInteractionFields };

@@ -14,10 +14,9 @@ import { config } from '../config/config';
 
 // TODO refactor
 const descriptionKeys = ['__countResult', '_type', '_fields'];
+const { collectionRandomDataDescription, collectionDescription } = config.get();
 
 function isCollectionDescription(data) {
-  const { collectionRandomDataDescription } = config.get();
-
   return isNotEmptyObject(data) && Object.keys(collectionRandomDataDescription).some(key => key in data);
 }
 
@@ -142,8 +141,6 @@ function removeKeys(data: { [k: string]: any }, keysPath: string) {
 }
 
 function getActionsList(data) {
-  const { collectionDescription } = config.get();
-
   const actions = [];
 
   /**
@@ -167,7 +164,6 @@ function getActionsList(data) {
 }
 
 function getResult(data, flat?) {
-  const { collectionDescription } = config.get();
   return Object.keys(data).reduce((pattern, key) => {
     if (key !== collectionDescription.action) {
       const result = getResult(data[key], flat);
@@ -200,8 +196,6 @@ function getResult(data, flat?) {
 }
 
 function getName(data) {
-  const { collectionDescription } = config.get();
-
   return Object.keys(data).reduce((pattern, key) => {
     if (key === collectionDescription.action) {
       return `${pattern}${isObject(data[key]) ? getName(data[key]) : ''}`;

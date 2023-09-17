@@ -11,7 +11,7 @@ import {
 } from 'sat-utils';
 import { promodLogger } from '../logger';
 import { getCollectionRecomposedData } from './data.transformation';
-import { getFragmentInteractionFields } from '../generator/utils';
+import { getInstanceInteractionFields } from '../generator/utils';
 
 import type { TbaseLibraryDescriptionMap, TcollectionActionDescriptionMap } from './types';
 
@@ -366,15 +366,10 @@ class PromodSystemStructure<TrootElement = any> {
   }
 
   private getStructureActionFields() {
-    const properties = getFragmentInteractionFields(this).reduce((propertyNames, value) => {
-      if (!this[value]?.constructor.name.includes(baseLibraryDescription.fragmentId)) {
-        propertyNames[value] = null;
-      }
-      return propertyNames;
-    }, {});
+    const properties = getInstanceInteractionFields(this, true);
 
     if (isEmptyObject(properties)) {
-      throw new Error(`${this.identifier}: This structure doesn't have action props`);
+      throw new Error(`${this.identifier}: This structure doesn't have action element props`);
     }
     return properties;
   }

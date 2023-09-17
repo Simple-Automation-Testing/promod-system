@@ -2,10 +2,11 @@
 import { isString } from 'sat-utils';
 import { config } from '../config/config';
 import { getCollectionItemInstance, isCollectionWithItemBaseElement } from './utils.collection';
-import { getFragmentInteractionFields } from './utils';
+import { getInstanceInteractionFields } from './utils';
+
+const { baseElementsActionsDescription, baseLibraryDescription } = config.get();
 
 function checkThatBaseElement(elementConstructorName: string) {
-  const { baseElementsActionsDescription } = config.get();
   if (!isString(elementConstructorName)) {
     elementConstructorName = (elementConstructorName as any as object).constructor.name;
   }
@@ -14,8 +15,6 @@ function checkThatBaseElement(elementConstructorName: string) {
 }
 
 function checkThatElementHasAction(elementConstructorName: string, action: string) {
-  const { baseElementsActionsDescription } = config.get();
-
   if (!isString(elementConstructorName)) {
     elementConstructorName = (elementConstructorName as any as object).constructor.name;
   }
@@ -30,8 +29,7 @@ function checkThatElementHasAction(elementConstructorName: string, action: strin
 }
 
 function getElementType(instance, action: string, actionType: string) {
-  const { baseElementsActionsDescription } = config.get();
-  const prop = instance.constructor.name;
+  const prop = instance?.constructor?.name;
 
   if (baseElementsActionsDescription[prop][action] && baseElementsActionsDescription[prop][action][actionType]) {
     return `${prop}${baseElementsActionsDescription[prop][action][actionType]}`;
@@ -51,8 +49,6 @@ function getElementActionType(instance, action: string, actionType: string) {
 }
 
 function getAllBaseElements(instance, baseElements = []) {
-  const { baseElementsActionsDescription, baseLibraryDescription } = config.get();
-
   if (instance.constructor.name === baseLibraryDescription.collectionId) {
     baseElements.push(baseLibraryDescription.collectionId);
 
@@ -67,7 +63,7 @@ function getAllBaseElements(instance, baseElements = []) {
     }
   }
 
-  const interactionFields = getFragmentInteractionFields(instance) || [];
+  const interactionFields = getInstanceInteractionFields(instance);
   interactionFields.forEach(fragmentChildFieldName => {
     const childConstructorName = instance[fragmentChildFieldName].constructor.name;
 
@@ -87,7 +83,7 @@ function getAllBaseElements(instance, baseElements = []) {
 }
 
 function getFragmentBaseElementsFields(instance) {
-  const interationFields = getFragmentInteractionFields(instance);
+  const interationFields = getInstanceInteractionFields(instance);
 
   return interationFields.filter(field => checkThatBaseElement(instance[field]));
 }
