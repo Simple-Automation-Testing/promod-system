@@ -2,7 +2,7 @@
 import { isObject, camelize, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../config/config';
 import { getElementsTypes, getFragmentTypes } from './get.instance.elements.type';
-import { checkThatFragmentHasItemsToAction } from './check.that.action.exists';
+import { checkThatInstanceHasActionItems } from './check.that.action.exists';
 import { checkThatElementHasAction } from './get.base';
 import { getInstanceInteractionFields } from './utils';
 
@@ -114,7 +114,7 @@ function createFlowTemplateForPageElements(name, action, instance) {
   const isDeclaration = promod.actionsDeclaration === 'declaration';
 
   const firstLine = isDeclaration
-    ? `async function${flowActionName}<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {`
+    ? `async function ${flowActionName}<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {`
     : `const ${flowActionName} = async function<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {`;
 
   return `
@@ -133,7 +133,7 @@ function getActionFlows(asActorAndPage: string, instance: object, action: string
   const pageElementActions = interactionFields.filter(field => checkThatElementHasAction(instance[field], action));
 
   const pageFragmentsActions = interactionFields.filter(field =>
-    checkThatFragmentHasItemsToAction(instance[field], action),
+    checkThatInstanceHasActionItems(instance[field], action),
   );
 
   const pageElementAction = pageElementActions.length

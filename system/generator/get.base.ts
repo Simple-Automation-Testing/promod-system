@@ -6,9 +6,9 @@ import { getInstanceInteractionFields } from './utils';
 
 const { baseElementsActionsDescription, baseLibraryDescription } = config.get();
 
-function checkThatBaseElement(elementConstructorName: string) {
+function isBaseElement(elementConstructorName: string) {
   if (!isString(elementConstructorName)) {
-    elementConstructorName = (elementConstructorName as any as object).constructor.name;
+    elementConstructorName = (elementConstructorName as any as object)?.constructor?.name;
   }
 
   return Boolean(baseElementsActionsDescription[elementConstructorName]);
@@ -16,7 +16,7 @@ function checkThatBaseElement(elementConstructorName: string) {
 
 function checkThatElementHasAction(elementConstructorName: string, action: string) {
   if (!isString(elementConstructorName)) {
-    elementConstructorName = (elementConstructorName as any as object).constructor.name;
+    elementConstructorName = (elementConstructorName as any as object)?.constructor?.name;
   }
 
   if (baseElementsActionsDescription[elementConstructorName]) {
@@ -85,11 +85,11 @@ function getAllBaseElements(instance, baseElements = []) {
 function getFragmentBaseElementsFields(instance) {
   const interationFields = getInstanceInteractionFields(instance);
 
-  return interationFields.filter(field => checkThatBaseElement(instance[field]));
+  return interationFields.filter(field => isBaseElement(instance[field]));
 }
 
 export {
-  checkThatBaseElement,
+  isBaseElement,
   getAllBaseElements,
   checkThatElementHasAction,
   getElementType,

@@ -103,8 +103,8 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
 
   constructor(locator: string, collectionName: string, rootElements: TrootElements, CollectionItemClass: TitemClass) {
     this.rootLocator = locator;
-    this.rootElements = rootElements;
     this.identifier = collectionName;
+    this.rootElements = rootElements;
     this.CollectionItemClass = CollectionItemClass;
     this.overrideCollectionItems = [];
 

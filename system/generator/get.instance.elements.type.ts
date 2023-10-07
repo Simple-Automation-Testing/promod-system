@@ -1,8 +1,8 @@
 /* eslint-disable unicorn/prefer-switch, no-use-before-define, sonarjs/cognitive-complexity */
 import { createType } from './create.type';
 import { config } from '../config/config';
-import { checkThatFragmentHasItemsToAction } from './check.that.action.exists';
-import { checkThatElementHasAction, checkThatBaseElement, getElementActionType, getElementType } from './get.base';
+import { checkThatInstanceHasActionItems } from './check.that.action.exists';
+import { checkThatElementHasAction, isBaseElement, getElementActionType, getElementType } from './get.base';
 import { getInstanceInteractionFields } from './utils';
 import {
   getCollectionItemInstance,
@@ -45,7 +45,7 @@ function getCollectionTypes(instance, action, actionType, ...rest) {
 
   const checkActionHandler = baseElementsActionsDescription[collectionsItem.constructor.name]
     ? checkThatElementHasAction
-    : checkThatFragmentHasItemsToAction;
+    : checkThatInstanceHasActionItems;
 
   if (!checkActionHandler(collectionsItem, action)) {
     return '';
@@ -89,9 +89,7 @@ function getFragmentTypes(instance, action, actionType, ...rest) {
   const fragmentElements = instanceOwnKeys
     .filter(itemFiledName => {
       // logger here
-      return (
-        checkThatBaseElement(instance[itemFiledName]) && checkThatElementHasAction(instance[itemFiledName], action)
-      );
+      return isBaseElement(instance[itemFiledName]) && checkThatElementHasAction(instance[itemFiledName], action);
     })
     .map(itemFiledName => ({
       [itemFiledName]: { [action]: getElementType(instance[itemFiledName], action, actionType) },
@@ -102,7 +100,7 @@ function getFragmentTypes(instance, action, actionType, ...rest) {
       // logger here
       return (
         instance[itemFiledName].constructor.name.includes(baseLibraryDescription.fragmentId) &&
-        checkThatFragmentHasItemsToAction(instance[itemFiledName], action)
+        checkThatInstanceHasActionItems(instance[itemFiledName], action)
       );
     })
     .map(itemFiledName => {
@@ -120,7 +118,7 @@ function getFragmentTypes(instance, action, actionType, ...rest) {
       // logger here
       return (
         (isCollectionWithItemFragment(instance[itemFiledName]) &&
-          checkThatFragmentHasItemsToAction(getCollectionItemInstance(instance[itemFiledName]), action)) ||
+          checkThatInstanceHasActionItems(getCollectionItemInstance(instance[itemFiledName]), action)) ||
         (isCollectionWithItemBaseElement(instance[itemFiledName]) &&
           checkThatElementHasAction(getCollectionItemInstance(instance[itemFiledName]), action))
       );

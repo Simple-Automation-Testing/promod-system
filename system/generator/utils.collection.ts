@@ -1,9 +1,35 @@
+/* eslint-disable no-console */
 import { config } from '../config/config';
 
 const { baseLibraryDescription, baseElementsActionsDescription } = config.get();
 
 function getCollectionItemInstance(collectionInstance) {
-  const collectionRoot = collectionInstance[baseLibraryDescription.rootLocatorId] || 'a';
+  let collectionRoot;
+  if (!collectionInstance[baseLibraryDescription.rootLocatorId]) {
+    console.error('baseLibraryDescription should have rootLocatorId, default locator will be "a"');
+    collectionRoot = 'a';
+  } else {
+    collectionRoot = collectionInstance[baseLibraryDescription.rootLocatorId] || 'a';
+  }
+
+  if (!collectionInstance[baseLibraryDescription.collectionItemId]) {
+    throw new TypeError(`baseLibraryDescription should have collectionItemId, i.e
+// collection class
+class Collection {
+  constructor(locator, collectionName, rootElements, InstanceType) {
+    this.rootLocator = locator;
+    this.identifier = collectionName;
+    this.rootElements = rootElements;
+    this.CollectionItemClass = CollectionItemClass;
+  }
+}
+// promod.system.config.js
+const baseLibraryDescription = {
+  // ...rest description
+  collectionItemId: 'CollectionItemClass'
+}
+`);
+  }
 
   const instance = new collectionInstance[baseLibraryDescription.collectionItemId](
     collectionRoot,
@@ -23,7 +49,6 @@ function getCollectionItemInstance(collectionInstance) {
 }
 
 function isCollectionInstance(instance) {
-
   return instance?.constructor?.name?.includes(baseLibraryDescription.collectionId);
 }
 

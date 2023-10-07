@@ -5,12 +5,7 @@ import { isNotEmptyObject } from 'sat-utils';
 import { config } from '../config/config';
 import { getElementsTypes } from './get.instance.elements.type';
 import { getInstanceInteractionFields } from './utils';
-import {
-  checkThatElementHasAction,
-  getElementType,
-  checkThatBaseElement,
-  getFragmentBaseElementsFields,
-} from './get.base';
+import { checkThatElementHasAction, getElementType, isBaseElement, getFragmentBaseElementsFields } from './get.base';
 import {
   getCollectionItemInstance,
   isCollectionWithItemBaseElement,
@@ -20,7 +15,7 @@ import {
 function getCollectionItemTypes(collectionItemInstance) {
   const { collectionRandomDataDescription } = config.get();
 
-  const getType = checkThatBaseElement(collectionItemInstance) ? getElementType : getElementsTypes;
+  const getType = isBaseElement(collectionItemInstance) ? getElementType : getElementsTypes;
 
   const _fields = getInstanceInteractionFields(collectionItemInstance);
 

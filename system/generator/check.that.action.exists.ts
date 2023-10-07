@@ -1,7 +1,7 @@
 /* eslint-disable complexity, sonarjs/cognitive-complexity, no-console*/
 import { safeJSONstringify } from 'sat-utils';
 import { config } from '../config/config';
-import { checkThatElementHasAction } from './get.base';
+import { checkThatElementHasAction, isBaseElement } from './get.base';
 import { getInstanceInteractionFields } from './utils';
 import { getElementType } from './get.base';
 import { getCollectionTypes, getFragmentTypes } from './get.instance.elements.type';
@@ -75,38 +75,37 @@ function getCollectionsPathes(instance) {
   return result;
 }
 
-function checkThatFragmentHasItemsToAction(instance, action: string) {
-  const { baseElementsActionsDescription, baseLibraryDescription } = config.get();
-
+function checkThatInstanceHasActionItems(instance, action: string) {
   if (isCollectionWithItemBaseElement(instance)) {
     return checkThatElementHasAction(getCollectionItemInstance(instance), action);
   }
 
   if (isCollectionWithItemFragment(instance)) {
-    return checkThatFragmentHasItemsToAction(getCollectionItemInstance(instance), action);
+    return checkThatInstanceHasActionItems(getCollectionItemInstance(instance), action);
+  }
+
+  if (isBaseElement(instance)) {
+    return checkThatElementHasAction(instance, action);
   }
 
   const interactionFields = getInstanceInteractionFields(instance);
 
   let result = false;
   for (const fragmentChildFieldName of interactionFields) {
-    const childConstructorName = instance[fragmentChildFieldName].constructor.name;
+    const childConstructorName = instance[fragmentChildFieldName]?.constructor?.name;
 
     if (childConstructorName.includes(baseLibraryDescription.fragmentId)) {
-      result = checkThatFragmentHasItemsToAction(instance[fragmentChildFieldName], action);
+      result = checkThatInstanceHasActionItems(instance[fragmentChildFieldName], action);
 
       if (result) return result;
-    } else if (isCollectionWithItemFragment(instance[fragmentChildFieldName])) {
+    } else if (
+      isCollectionWithItemFragment(instance[fragmentChildFieldName]) ||
+      isCollectionWithItemBaseElement(instance[fragmentChildFieldName])
+    ) {
       const collectionInstance = getCollectionItemInstance(instance[fragmentChildFieldName]);
 
-      const result = checkThatFragmentHasItemsToAction(collectionInstance, action);
+      const result = checkThatInstanceHasActionItems(collectionInstance, action);
 
-      if (result) return result;
-    } else if (isCollectionWithItemBaseElement(instance[fragmentChildFieldName])) {
-      result = checkThatElementHasAction(
-        instance[fragmentChildFieldName][baseLibraryDescription.collectionItemId]?.name,
-        action,
-      );
       if (result) return result;
     } else if (baseElementsActionsDescription[childConstructorName]) {
       result = checkThatElementHasAction(childConstructorName, action);
@@ -117,4 +116,4 @@ function checkThatFragmentHasItemsToAction(instance, action: string) {
   return result;
 }
 
-export { checkThatFragmentHasItemsToAction, getCollectionsPathes };
+export { checkThatInstanceHasActionItems, getCollectionsPathes };
