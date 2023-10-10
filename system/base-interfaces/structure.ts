@@ -366,7 +366,7 @@ class PromodSystemStructure<TrootElement = any> {
   }
 
   private getStructureActionFields() {
-    const properties = getInstanceInteractionFields(this, true);
+    const properties = getInstanceInteractionFields(this, { elements: true });
 
     if (isEmptyObject(properties)) {
       throw new Error(`${this.identifier}: This structure doesn't have action element props`);
