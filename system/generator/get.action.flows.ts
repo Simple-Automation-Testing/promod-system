@@ -3,7 +3,7 @@ import { isObject, camelize, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../config/config';
 import { getElementsTypes, getFragmentTypes } from './get.instance.elements.type';
 import { checkThatInstanceHasActionItems } from './check.that.action.exists';
-import { checkThatElementHasAction } from './get.base';
+import { checkThatElementHasAction, isBaseElement } from './get.base';
 import { getInstanceInteractionFields } from './utils';
 
 const noTransormTypes = new Set(['void', 'boolean']);
@@ -14,6 +14,7 @@ const {
   promod,
   collectionActionTypes,
   prettyMethodName = {},
+  actionWithWaitOpts,
 } = config.get();
 
 function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType) {
@@ -92,8 +93,6 @@ function createFlowTemplates(name, action, field, instance) {
 
 // TODO try to build generic method for page elements and page fragments
 function createFlowTemplateForPageElements(name, action, instance) {
-  const { actionWithWaitOpts, baseLibraryDescription, prettyMethodName = {}, promod } = config.get();
-
   const prettyFlowActionNamePart = prettyMethodName[action] || action;
 
   const flowArgumentType = getElementsTypes(instance, action, 'entryType');
@@ -132,9 +131,9 @@ function getActionFlows(asActorAndPage: string, instance: object, action: string
 
   const pageElementActions = interactionFields.filter(field => checkThatElementHasAction(instance[field], action));
 
-  const pageFragmentsActions = interactionFields.filter(field =>
-    checkThatInstanceHasActionItems(instance[field], action),
-  );
+  const pageFragmentsActions = interactionFields
+    .filter(field => !isBaseElement(instance[field]))
+    .filter(field => checkThatInstanceHasActionItems(instance[field], action));
 
   const pageElementAction = pageElementActions.length
     ? createFlowTemplateForPageElements(asActorAndPage, action, instance)
