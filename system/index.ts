@@ -7,6 +7,7 @@ export * from './reporter';
 export * from './test-runner';
 
 export * from './test-rail-report';
+
 export { getInstanceInteractionFields } from './generator/utils';
 
 // types
