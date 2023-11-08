@@ -1,4 +1,4 @@
-/* eslint-disable sonarjs/no-nested-template-literals, no-console */
+/* eslint-disable sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
 import { isObject, camelize, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../config/config';
 import { getElementsTypes, getFragmentTypes } from './get.instance.elements.type';
@@ -59,7 +59,20 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
     }`;
   }
 
-  const resultTypeClarification = flowResultType === 'void' && optionsSecondArgument ? 'boolean' : flowResultType;
+  let resultTypeClarification;
+
+  if (flowResultType === 'void' && optionsSecondArgument && actionWithWaitOpts?.includes(action)) {
+    resultTypeClarification = 'boolean';
+  } else if (
+    flowResultType === 'void' &&
+    optionsSecondArgument &&
+    optionsSecondArgument.includes(baseLibraryDescription.generalActionOptionsId)
+  ) {
+    resultTypeClarification = 'void';
+  } else {
+    resultTypeClarification = flowResultType;
+  }
+
   const callResultType = shouldResultTypeBeBasedOnArgument(resultTypeClarification, flowArgumentType)
     ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
     : `${typeName}Result`;
@@ -84,9 +97,14 @@ function createFlowTemplates(name, action, field, instance) {
   const flowResultType = getFragmentTypes(instance, action, 'resultType');
   const typeName = `T${camelize(`${field} ${action}`)}`;
 
-  const optionsSecondArgument = actionWithWaitOpts.includes(action)
-    ? `, opts?: ${baseLibraryDescription.waitOptionsId}`
-    : '';
+  let optionsSecondArgument;
+  if (actionWithWaitOpts.includes(action)) {
+    optionsSecondArgument = `, opts?: ${baseLibraryDescription.waitOptionsId}`;
+  } else if (baseLibraryDescription.generalActionOptionsId) {
+    optionsSecondArgument = `, opts?: ${baseLibraryDescription.generalActionOptionsId}`;
+  } else {
+    optionsSecondArgument = '';
+  }
 
   return getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field });
 }
@@ -101,14 +119,24 @@ function createFlowTemplateForPageElements(name, action, instance) {
 
   const flowActionName = camelize(`${name} ${prettyFlowActionNamePart} PageElements`);
 
-  const optionsSecondArgument = actionWithWaitOpts.includes(action)
+  let optionsSecondArgument = actionWithWaitOpts.includes(action)
     ? `, opts?: ${baseLibraryDescription.waitOptionsId}`
     : '';
+
   // TODO waiters returns boolean if error was not thrown
   const resultTypeClarification = flowResultType === 'void' && optionsSecondArgument ? 'boolean' : flowResultType;
   const callResultType = shouldResultTypeBeBasedOnArgument(resultTypeClarification, flowArgumentType)
     ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
     : `${typeName}Result`;
+
+  /**
+   * @info
+   * it is possible that general actions have a call additional options
+   */
+  optionsSecondArgument =
+    !actionWithWaitOpts.includes(action) && baseLibraryDescription.generalActionOptionsId
+      ? `, opts?: ${baseLibraryDescription.generalActionOptionsId}`
+      : '';
 
   const isDeclaration = promod.actionsDeclaration === 'declaration';
 

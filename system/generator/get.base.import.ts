@@ -1,6 +1,6 @@
 import { config } from '../config/config';
 
-const { collectionActionTypes, baseLibraryDescription } = config.get();
+const { collectionActionTypes, baseLibraryDescription, baseElementsActionsDescription } = config.get();
 
 function getCollectionTypesImport() {
   const types = Object.values(collectionActionTypes);
@@ -10,8 +10,6 @@ function getCollectionTypesImport() {
 }
 
 function getElementImportType(elementName) {
-  const { baseElementsActionsDescription } = config.get();
-
   const avaliableAtions = Array.from(
     new Set(
       Object.values(baseElementsActionsDescription[elementName])
@@ -34,7 +32,10 @@ function getBaseImport(baseElements) {
     .filter(item => item !== baseLibraryDescription.collectionId)
     .reduce(
       (importString, element) => `${importString}\n  ${getElementImportType(element)}`,
-      `${baseLibraryDescription.waitOptionsId}, ${collectionActionsImportPart}`,
+      `${baseLibraryDescription.waitOptionsId}, ${
+        baseLibraryDescription.generalActionOptionsId ? baseLibraryDescription.generalActionOptionsId + ',' : ''
+      }
+      ${collectionActionsImportPart}`,
     );
 }
 
