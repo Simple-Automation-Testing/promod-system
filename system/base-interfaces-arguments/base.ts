@@ -93,7 +93,7 @@ const getIntexesMessage = (indexes: number | number[]) =>
     : '';
 
 function getDescriptorMessage(descriptorObj, initialMessage = ' where ', description = 'state') {
-  if (isString(descriptorObj) || isNumber(isNumber)) {
+  if (isString(descriptorObj) || isNumber(descriptorObj)) {
     return `'${String(descriptorObj)}' ${initialMessage}`;
   }
 
