@@ -7,6 +7,7 @@ import {
   isNotEmptyObject,
   isNotEmptyArray,
   safeJSONstringify,
+  isPrimitive,
 } from 'sat-utils';
 import { config } from '../config';
 import { getCollectionElementInstance, getCollectionActionData } from './utils';
@@ -129,8 +130,10 @@ function getCollectionRecomposedData(recomposedData, component) {
       }
     } else if (isObject(rest[key]) && !collectionActionProps.has(key)) {
       rest[key] = getCollectionRecomposedData(rest[key], component && component[key]);
-    } else if (collectionActionProps.has(key)) {
+    } else if (collectionActionProps.has(key) && !isPrimitive(rest[key])) {
       rest[key] = { ...rest[key] };
+    } else if (collectionActionProps.has(key) && isPrimitive(rest[key])) {
+      rest[key] = rest[key];
     } else {
       rest[key] = null;
     }
