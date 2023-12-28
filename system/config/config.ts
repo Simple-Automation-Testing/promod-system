@@ -19,11 +19,11 @@ const config: IConfig = (function getConfiguration() {
      * @returns {typeof configMethods}
      */
     read(ignoreExisting: boolean = true): typeof configMethods {
-      const isFileExist = fs.existsSync(expectedConfigPath);
+      const doesFileExist = fs.existsSync(expectedConfigPath);
 
-      if (!isFileExist && !ignoreExisting) {
+      if (!doesFileExist && !ignoreExisting) {
         throw new Error(`${expectedConfigPath} does not exist`);
-      } else if (isFileExist) {
+      } else if (doesFileExist) {
         const conf = require(expectedConfigPath);
         // TODO validation
         Object.assign(wrappedConfig, conf);
