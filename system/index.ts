@@ -6,6 +6,7 @@ export * from './base-interfaces';
 export * from './reporter';
 export * from './test-runner';
 
+export * from './generator/generate.pure';
 export * from './test-rail-report';
 
 export { getInstanceInteractionFields } from './generator/utils';
