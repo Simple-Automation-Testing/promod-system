@@ -54,7 +54,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
         _fields?.length ? `_field = '${_fields[0]}', quantity = 2,` : 'quantity = 2,'
       } descriptions = {}) {`;
   const waiting = baseLibraryDescription.waitForVisibilityMethod
-    ? `await ${!baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`}${
+    ? `await ${baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'}${
         baseLibraryDescription.waitForVisibilityMethod
       }(${waitingSignature}, { everyArrayItem: false })`
     : '';
@@ -64,7 +64,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
     ${firstLine}
       ${waiting}
       const result = await ${
-        !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+        baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
       }${baseLibraryDescription.getDataMethod}(${randomDataActionSignature});
 
       const flatResult = result.${result}
@@ -89,7 +89,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   ${firstLineOneValue}
     ${waiting}
     const result = await ${
-      !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+      baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
     }${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     const flatResult = result.${result}
@@ -103,7 +103,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   ${firstLineSeveral}
     ${waiting}
     const result = await ${
-      !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+      baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
     }${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     const flatResult = result.${result}

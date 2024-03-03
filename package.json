@@ -1,13 +1,13 @@
 {
   "name": "promod-system",
-  "version": "2.12.0-rc1",
+  "version": "2.13.0",
   "description": "Library promod condition waitings",
   "main": "./built/index.js",
   "bin": "./bin/cli.js",
   "scripts": {
     "test": "mocha $(find specs -name '*.spec.*') --require ts-node/register --timeout 500000",
     "test:runner": "mocha $(find specs -name '*.test.*') --require ts-node/register --timeout 500000",
-    "lint": "eslint --ext .ts ./",
+    "lint": "eslint --ext .ts ./ --fix",
     "tsc": "rm -rf ./built && tsc"
   },
   "repository": {
@@ -26,17 +26,17 @@
   "devDependencies": {
     "@types/mocha": "^9.1.1",
     "@types/node": "^20.11.24",
-    "@typescript-eslint/eslint-plugin": "^5.21.0",
-    "@typescript-eslint/parser": "^5.21.0",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
     "assertior": "^0.0.28",
-    "eslint": "^8.14.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-no-only-tests": "^2.6.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-sonarjs": "^0.13.0",
-    "eslint-plugin-unicorn": "^42.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-no-only-tests": "^3.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-sonarjs": "^0.24.0",
+    "eslint-plugin-unicorn": "^51.0.1",
     "mocha": "^10.0.0",
+    "prettier": "^3.2.5",
     "promod": "1.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
@@ -53,6 +53,7 @@
   ],
   "dependencies": {
     "dayjs": "^1.11.7",
+    "eslint": "^8.57.0",
     "node-fetch": "2.7.0",
     "sat-utils": "1.12.2",
     "yargs": "17.6.2"

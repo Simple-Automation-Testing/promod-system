@@ -36,7 +36,7 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
   let entryDataType = `Tentry${optionsSecondArgument}`;
 
   let flowBody = `${isActionVoid ? 'return' : `const { ${field} } =`} await ${
-    !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+    baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
   }${action}({ ${field}: data }${additionalArguments});${isActionVoid ? '' : `\n\treturn ${field};`}`;
 
   /**
@@ -54,7 +54,7 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
 
     flowBody = `for (const actionData of toArray(data)) {
       await ${
-        !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+        baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
       }${action}({ ${field}: actionData }${additionalArguments})
     }`;
   }
@@ -141,7 +141,7 @@ type ${typeName} = ${flowArgumentType}
 type ${typeName}Result = ${resultTypeClarification}
 ${firstLine}
   return await ${
-    !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+    baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
   }${action}(data${optionsSecondArgument ? ', opts' : ''});
 };\n`;
 }

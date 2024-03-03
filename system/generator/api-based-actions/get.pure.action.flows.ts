@@ -21,7 +21,7 @@ function getTemplatedCode({ name, flowResultType, optionsSecondArgument, action,
   const additionalArguments = optionsSecondArgument ? ', opts' : '';
 
   let flowBody = `${isActionVoid ? 'return' : `const { ${field} } =`} await ${
-    !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+    baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
   }${action}({ ${field}: data }${additionalArguments});${isActionVoid ? '' : `\n\treturn ${field};`}`;
 
   /**
@@ -37,13 +37,13 @@ function getTemplatedCode({ name, flowResultType, optionsSecondArgument, action,
   } else if (isRepeatingAllowed) {
     flowBody = `for (const actionData of toArray(data)) {
       await ${
-        !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+        baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
       }${action}({ ${field}: actionData }${additionalArguments})
     }`;
   }
 
   const isDeclaration = promod.actionsDeclaration === 'declaration';
-  const firstLine = isDeclaration ? `async function ${name}(data) {` : `const ${name} = async function(data) {`;
+  const firstLine = isDeclaration ? `async function ${name}(data${optionsSecondArgument}) {` : `const ${name} = async function(data${optionsSecondArgument}) {`;
 
   return `
 ${firstLine}
@@ -56,9 +56,9 @@ function createFlowTemplates(name, action, field, instance) {
 
   let optionsSecondArgument = '';
   if (actionWithWaitOpts.includes(action)) {
-    optionsSecondArgument = `, opts?: ${baseLibraryDescription.waitOptionsId}`;
+    optionsSecondArgument = `, opts?`;
   } else if (baseLibraryDescription.generalActionOptionsId) {
-    optionsSecondArgument = `, opts?: ${baseLibraryDescription.generalActionOptionsId}`;
+    optionsSecondArgument = `, opts?`;
   }
 
   return getTemplatedCode({ name, flowResultType, optionsSecondArgument, action, field });
@@ -82,12 +82,12 @@ function createFlowTemplateForPageElements(name, action) {
 
   const firstLine = isDeclaration
     ? `async function ${flowActionName}(data${optionsSecondArgument}) {`
-    : `const ${flowActionName} = async function(data) {`;
+    : `const ${flowActionName} = async function(data${optionsSecondArgument}) {`;
 
   return `
 ${firstLine}
   return await ${
-    !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+    baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
   }${action}(data${optionsSecondArgument ? ', opts' : ''});
 };\n`;
 }

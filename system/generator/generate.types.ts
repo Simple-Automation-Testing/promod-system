@@ -104,7 +104,8 @@ ${commonExport}
 
   fs.writeFileSync(
     `${pagePath.replace('.ts', '.get.actions.ts')}`,
-    `import { createPurePageStructure } from 'promod-system';
+    `import { resolve } from 'path';
+import { createPurePageStructure } from 'promod-system';
 import { isArray, isFunction } from 'sat-utils';
 
 function getPageActions(decorators = []) {
@@ -116,7 +117,7 @@ function getPageActions(decorators = []) {
    * this call will create pure common js file
    * with all available page action flows
    */
-  createPurePageStructure('./${path.basename(pagePath)}');
+  createPurePageStructure(resolve(__dirname, './${path.basename(pagePath)}'));
 
   /**
    * @info
@@ -133,7 +134,6 @@ function getPageActions(decorators = []) {
   },pageActions);
 }
 
-// @ts-expect-error
 getPageActions.id = '${camelize(asActorAndPage)}';
 
 export { getPageActions }

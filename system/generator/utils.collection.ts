@@ -5,11 +5,11 @@ const { baseLibraryDescription, baseElementsActionsDescription } = config.get();
 
 function getCollectionItemInstance(collectionInstance) {
   let collectionRoot;
-  if (!collectionInstance[baseLibraryDescription.rootLocatorId]) {
+  if (collectionInstance[baseLibraryDescription.rootLocatorId]) {
+    collectionRoot = collectionInstance[baseLibraryDescription.rootLocatorId] || 'a';
+  } else {
     console.error('baseLibraryDescription should have rootLocatorId, default locator will be "a"');
     collectionRoot = 'a';
-  } else {
-    collectionRoot = collectionInstance[baseLibraryDescription.rootLocatorId] || 'a';
   }
 
   if (!collectionInstance[baseLibraryDescription.collectionItemId]) {

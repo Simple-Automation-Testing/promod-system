@@ -20,9 +20,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const actionDeclarationRandomResults = `declare function ${randomData}<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions?: T${typeName}Entry): Promise<TobjectFromStringArray<T>>`;
 
   const actionDeclarationRandomData = `declare function ${severalValues}(${
-    _fields?.length
-      ? `_field?: T${typeName}EntryFields, quantity?: number,`
-      : 'quantity?: number,'
+    _fields?.length ? `_field?: T${typeName}EntryFields, quantity?: number,` : 'quantity?: number,'
   } descriptions?: T${typeName}Entry): Promise<string[]>`;
 
   const severalFields = fieldsType ? `${actionDeclarationRandomResults}\n` : '';

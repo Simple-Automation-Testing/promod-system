@@ -28,7 +28,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   type T${name} = ${__countResult}
   ${firstLine}
     const result = await ${
-      !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
+      baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
     }${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     return result.${result}
