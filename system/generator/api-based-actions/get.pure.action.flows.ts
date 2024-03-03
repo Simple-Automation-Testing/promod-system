@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicated-branches */
 /* eslint-disable sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
 import { camelize, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../../config/config';
@@ -70,6 +71,7 @@ function createFlowTemplateForPageElements(name, action) {
   const flowActionName = camelize(`${name} ${prettyFlowActionNamePart} PageElements`);
 
   let optionsSecondArgument = '';
+  // TODO need to update duplicated branches
   if (actionWithWaitOpts.includes(action)) {
     optionsSecondArgument = `, opts?`;
   } else if (baseLibraryDescription.generalActionOptionsId) {
@@ -79,7 +81,7 @@ function createFlowTemplateForPageElements(name, action) {
   const isDeclaration = promod.actionsDeclaration === 'declaration';
 
   const firstLine = isDeclaration
-    ? `async function ${flowActionName}(data) {`
+    ? `async function ${flowActionName}(data${optionsSecondArgument}) {`
     : `const ${flowActionName} = async function(data) {`;
 
   return `

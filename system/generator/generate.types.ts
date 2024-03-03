@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import * as path from 'path';
 import * as fs from 'fs';
-import { isString, isRegExp } from 'sat-utils';
+import { isString, isRegExp, camelize } from 'sat-utils';
 import { getBaseImport } from './get.base.import';
 import { getAllBaseElements } from './get.base';
 import { config } from '../config/config';
@@ -105,23 +105,36 @@ ${commonExport}
   fs.writeFileSync(
     `${pagePath.replace('.ts', '.get.actions.ts')}`,
     `import { createPurePageStructure } from 'promod-system';
+import { isArray, isFunction } from 'sat-utils';
 
-  function getPageActions() {
-    /**
-     * @info
-     * this call will create pure common js file
-     * with all available page action flows
-     */
-    createPurePageStructure('./${path.basename(pagePath)}');
-
-    /**
-     * @info
-     * requires all available page action flows and returns as a function result
-     */
-    const pageActions = require('./${path.basename(pagePath.replace('.ts', '.actions.pure.js'))}')
-
-    return pageActions;
+function getPageActions(decorators = []) {
+  if(!isArray(decorators)) {
+    throw new TypeError('decorators should be an array');
   }
+  /**
+   * @info
+   * this call will create pure common js file
+   * with all available page action flows
+   */
+  createPurePageStructure('./${path.basename(pagePath)}');
+
+  /**
+   * @info
+   * requires all available page action flows and returns as a function result
+   */
+  const pageActions = require('./${path.basename(pagePath.replace('.ts', '.actions.pure.js'))}')
+
+  return decorators.reduce((actFlows, decorator) => {
+    if(!isFunction(decorator)) {
+      throw new TypeError('decorator should be a function that returns actions object');
+    }
+
+    return decorator(actFlows);
+  },pageActions);
+}
+
+// @ts-expect-error
+getPageActions.id = '${camelize(asActorAndPage)}';
 
 export { getPageActions }
   `,
