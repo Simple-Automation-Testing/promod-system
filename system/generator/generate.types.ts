@@ -5,20 +5,19 @@ import { isString, isRegExp, camelize } from 'sat-utils';
 import { getBaseImport } from './get.base.import';
 import { getAllBaseElements } from './get.base';
 import { config } from '../config/config';
-import { getActionFlows } from './api-based-actions/get.action.flows';
+import { getActionFlowsTypes } from './api-based-actions/get.action.flows.types';
 import { getAllBaseActions } from './utils';
-import { getRandomResultsFlows } from './random-results-actions/get.random.results.flows';
-import { getCountFlows } from './random-results-actions/get.entities.count';
+import { getRandomResultsFlowsTypes } from './random-results-actions/get.random.results.flows.types';
+import { getCountFlowsTypes } from './random-results-actions/get.entities.count.types';
 
 const { PROMOD_S_GENERATE_DEFAULT_IMPORT, PROMOD_S_GENERATE_ACTIONS_TYPE } = process.env;
 
-const flowExpressionMatcher = /(?<=const ).*(?= = async)/gim;
 const flowDeclarationMatcher = /(?<=function )[\w$]+/gim;
 
-function createPageStructure(pagePath: string) {
-  const { pathToBase, baseLibraryDescription, promod = {}, collectionDescription } = config.get();
+const { pathToBase, baseLibraryDescription, collectionDescription } = config.get();
 
-  const flowMatcher = promod.actionsDeclaration === 'declaration' ? flowDeclarationMatcher : flowExpressionMatcher;
+function createPageActionTypes(pagePath: string) {
+  const flowMatcher = flowDeclarationMatcher;
 
   const frameworkPath = process.cwd();
   const pageRelativePath = path.basename(pagePath);
@@ -33,7 +32,6 @@ function createPageStructure(pagePath: string) {
       .join('') || './';
 
   let getPage: () => any;
-  let pageBaseLine;
   const pageModule = require(pagePath);
 
   if (baseLibraryDescription.getPageInstance) {
@@ -44,8 +42,6 @@ function createPageStructure(pagePath: string) {
         `Page "getPageInstance" method was not found. Search pattern is '${baseLibraryDescription.getPageInstance}', file path '${pagePath}'`,
       );
     }
-
-    pageBaseLine = `import { ${baseLibraryDescription.getPageInstance} } from './${pageRelativeTsPath}';`;
   } else {
     const PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
       if (isString(baseLibraryDescription.pageId)) {
@@ -61,22 +57,15 @@ function createPageStructure(pagePath: string) {
       throw new Error(`Page Class was not found. Search pattern is '${baseLibraryDescription.pageId}'`);
     }
 
-    pageBaseLine = `import { ${PageClass.prototype.constructor.name} } from './${pageRelativeTsPath}';
-
-const page = new ${PageClass.prototype.constructor.name}();`;
-
     getPage = () => new PageClass();
   }
 
   const pageInstance = getPage();
 
-  const globalImport = `import { toArray, getRandomArrayItem } from 'sat-utils';
-import type { TresultBasedOnArgument, TobjectFromStringArray } from 'promod-system'
-import {
+  const globalImport = `import type { TresultBasedOnArgument, TobjectFromStringArray } from 'promod-system'
+import type {
     ${getBaseImport(getAllBaseElements(pageInstance))}
   } from '${pathToLibFolder}${pathToBase}';
-
-${pageBaseLine}
 
 `;
 
@@ -87,10 +76,12 @@ ${pageBaseLine}
 
   const actions = getAllBaseActions().filter(action => !Object.values(collectionDescription).includes(action));
 
-  const interactionFlowsTemplate = actions.map(pageAction => getActionFlows(asActorAndPage, pageInstance, pageAction));
-  const randomResultsFlowsTemplate = getRandomResultsFlows(asActorAndPage, pageInstance);
+  const interactionFlowsTemplate = actions.map(pageAction =>
+    getActionFlowsTypes(asActorAndPage, pageInstance, pageAction),
+  );
+  const randomResultsFlowsTemplate = getRandomResultsFlowsTypes(asActorAndPage, pageInstance);
 
-  const collectionEntities = getCountFlows(pageInstance, asActorAndPage);
+  const collectionEntities = getCountFlowsTypes(pageInstance, asActorAndPage);
 
   const body = `${globalImport}
 
@@ -103,8 +94,8 @@ ${collectionEntities}
 
   let defaultExport = '';
   let actionsType = '';
-  let commonExport = `export {
-    ${flows.join(',\n  ')},
+  let commonExport = `export type pageActionTypes = {
+    ${flows.map(flowType => `${flowType}: typeof ${flowType}`).join(',\n  ')},
   }`;
 
   if (PROMOD_S_GENERATE_DEFAULT_IMPORT) {
@@ -130,7 +121,7 @@ export type T${mainActions} = typeof ${mainActions};`;
   }
 
   fs.writeFileSync(
-    `${pagePath.replace('.ts', '.actions.ts')}`,
+    `${pagePath.replace('.ts', '.actions.types.ts')}`,
     `${body}
 ${defaultExport}
 ${actionsType}
@@ -139,4 +130,4 @@ ${commonExport}
   );
 }
 
-export { createPageStructure };
+export { createPageActionTypes };

@@ -1,8 +1,8 @@
 /* eslint-disable sonarjs/no-nested-template-literals, sonarjs/cognitive-complexity*/
 import { camelize, stringifyData, toArray } from 'sat-utils';
-import { config } from '../config/config';
-import { getCollectionsPathes } from './check.that.action.exists';
-import { getResult, getActionsList, getName, getFieldsEnumList } from './utils.random';
+import { config } from '../../config/config';
+import { getCollectionsPathes } from '../check.that.action.exists';
+import { getResult, getActionsList, getName, getFieldsEnumList } from '../utils.random';
 
 const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();
 

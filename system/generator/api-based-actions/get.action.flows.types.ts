@@ -1,17 +1,16 @@
 /* eslint-disable sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
 import { isObject, camelize, isArray, isNotEmptyArray } from 'sat-utils';
-import { config } from '../config/config';
-import { getElementsTypes, getFragmentTypes } from './get.instance.elements.type';
-import { checkThatInstanceHasActionItems } from './check.that.action.exists';
-import { checkThatElementHasAction, isBaseElement } from './get.base';
-import { getInstanceInteractionFields } from './utils';
+import { config } from '../../config/config';
+import { getElementsTypes, getFragmentTypes } from '../get.instance.elements.type';
+import { checkThatInstanceHasActionItems } from '../check.that.action.exists';
+import { checkThatElementHasAction, isBaseElement } from '../get.base';
+import { getInstanceInteractionFields } from '../utils';
 
 const noTransormTypes = new Set(['void', 'boolean']);
 
 const {
   repeatingActions = [],
   baseLibraryDescription = {},
-  promod,
   collectionActionTypes,
   prettyMethodName = {},
   actionWithWaitOpts,
@@ -31,13 +30,8 @@ function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType
 function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field }) {
   const isActionVoid = flowResultType === 'void';
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
-  const additionalArguments = optionsSecondArgument ? ', opts' : '';
 
   let entryDataType = `Tentry${optionsSecondArgument}`;
-
-  let flowBody = `${isActionVoid ? 'return' : `const { ${field} } =`} await ${
-    !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
-  }${action}({ ${field}: data }${additionalArguments});${isActionVoid ? '' : `\n\treturn ${field};`}`;
 
   /**
    * @info
@@ -51,12 +45,6 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
     );
   } else if (isRepeatingAllowed) {
     entryDataType = `Tentry | Tentry[]${optionsSecondArgument}`;
-
-    flowBody = `for (const actionData of toArray(data)) {
-      await ${
-        !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
-      }${action}({ ${field}: actionData }${additionalArguments})
-    }`;
   }
 
   let resultTypeClarification;
@@ -77,17 +65,12 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
     ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
     : `${typeName}Result`;
 
-  const isDeclaration = promod.actionsDeclaration === 'declaration';
-  const firstLine = isDeclaration
-    ? `async function ${name}<Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}> {`
-    : `const ${name} = async function<Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}> {`;
+  const actionDeclaration = `declare function ${name}<Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}>`;
 
   return `
 type ${typeName} = ${flowArgumentType}
 type ${typeName}Result = ${resultTypeClarification}
-${firstLine}
-    ${flowBody}
-  };`;
+${actionDeclaration};`;
 }
 
 function createFlowTemplates(name, action, field, instance) {
@@ -130,23 +113,15 @@ function createFlowTemplateForPageElements(name, action, instance) {
     ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
     : `${typeName}Result`;
 
-  const isDeclaration = promod.actionsDeclaration === 'declaration';
-
-  const firstLine = isDeclaration
-    ? `async function ${flowActionName}<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {`
-    : `const ${flowActionName} = async function<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {`;
+  const actionDeclaration = `declare function ${flowActionName}<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}>`;
 
   return `
 type ${typeName} = ${flowArgumentType}
 type ${typeName}Result = ${resultTypeClarification}
-${firstLine}
-  return await ${
-    !baseLibraryDescription.getPageInstance ? 'page.' : `${baseLibraryDescription.getPageInstance}().`
-  }${action}(data${optionsSecondArgument ? ', opts' : ''});
-};\n`;
+${actionDeclaration};\n`;
 }
 
-function getActionFlows(asActorAndPage: string, instance: object, action: string) {
+function getActionFlowsTypes(asActorAndPage: string, instance: object, action: string) {
   const interactionFields = getInstanceInteractionFields(instance);
 
   const pageElementActions = interactionFields.filter(field => checkThatElementHasAction(instance[field], action));
@@ -179,4 +154,4 @@ ${pageElementAction}
 `;
 }
 
-export { createFlowTemplates, getActionFlows };
+export { createFlowTemplates, getActionFlowsTypes };

@@ -1,8 +1,8 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
 import { camelize, stringifyData } from 'sat-utils';
-import { config } from '../config/config';
-import { getActionsList, getResult, getName } from './utils.random';
-import { getCollectionsPathes } from './check.that.action.exists';
+import { config } from '../../config/config';
+import { getActionsList, getResult, getName } from '../utils.random';
+import { getCollectionsPathes } from '../check.that.action.exists';
 
 const { baseLibraryDescription = {}, collectionDescription = {}, promod = {} } = config.get();
 
