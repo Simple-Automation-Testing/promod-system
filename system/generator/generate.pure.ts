@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import * as path from 'path';
 import * as fs from 'fs';
-import { isString, isRegExp, camelize } from 'sat-utils';
+import { isString, isRegExp } from 'sat-utils';
 import { config } from '../config/config';
 import { getPureActionFlows } from './api-based-actions/get.pure.action.flows';
 import { getAllBaseActions } from './utils';
@@ -65,7 +65,6 @@ ${pageBaseLine}
   const pageName = pageInstance[baseLibraryDescription.entityId];
 
   const asActorAndPage = `on ${pageName}`;
-  const mainActions = camelize(`${pageName} Actions`);
 
   const actions = getAllBaseActions().filter(action => !Object.values(collectionDescription).includes(action));
 

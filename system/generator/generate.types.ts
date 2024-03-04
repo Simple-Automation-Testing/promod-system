@@ -79,6 +79,8 @@ import type {
 
   const collectionEntities = getCountFlowsTypes(pageInstance, asActorAndPage);
 
+  const getActionsName = camelize(`get${pageName}Actions`);
+
   const body = `${globalImport}
 
 ${randomResultsFlowsTemplate}
@@ -89,7 +91,7 @@ ${collectionEntities}
 
   let defaultExport = '';
   let actionsType = '';
-  let commonExport = `export type TpageActionTypes = {
+  let commonExport = `export type T${getActionsName}Types = {
     ${flows.map(flowType => `${flowType}: typeof ${flowType}`).join(',\n  ')},
   }`;
 
@@ -109,13 +111,13 @@ import { existsSync } from 'fs';
 import { createPurePageStructure } from 'promod-system';
 import { isArray, isFunction } from 'sat-utils';
 
-function getPageActions(decorators = []) {
-  const pureActionsFilePath = resolve(__dirname, './${path.basename(pagePath)}'))
+function ${getActionsName}(decorators = []) {
+  const pureActionsFilePath = resolve(__dirname, './${path.basename(pagePath)}');
   if(!isArray(decorators)) {
     throw new TypeError('decorators should be an array');
   }
 
-  if(process.env.PROMOD_S_RESET_PURE_ACTIONS || !existsSync(pureActionsFilePath) {
+  if(process.env.PROMOD_S_RESET_PURE_ACTIONS || !existsSync(pureActionsFilePath)) {
     /**
      * @info
      * this call will create pure common js file
@@ -139,9 +141,9 @@ function getPageActions(decorators = []) {
   },pageActions);
 }
 
-getPageActions.id = '${camelize(asActorAndPage)}';
+${getActionsName}.id = '${camelize(asActorAndPage)}';
 
-export { getPageActions }
+export { ${getActionsName} }
   `,
   );
 }
