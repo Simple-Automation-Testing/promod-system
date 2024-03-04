@@ -111,13 +111,17 @@ import { existsSync } from 'fs';
 import { createPurePageStructure } from 'promod-system';
 import { isArray, isFunction } from 'sat-utils';
 
-function ${getActionsName}(decorators = []) {
-  const pureActionsFilePath = resolve(__dirname, './${path.basename(pagePath)}');
+function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: () => void) {
+  const pureActionsFilePath = resolve(__dirname, './${path.basename(pagePath).replace(path.extname(pagePath), '')}');
   if(!isArray(decorators)) {
     throw new TypeError('decorators should be an array');
   }
 
-  if(process.env.PROMOD_S_RESET_PURE_ACTIONS || !existsSync(pureActionsFilePath)) {
+  if(preSetUp) {
+    preSetUp()
+  }
+
+  if(process.env.PROMOD_S_RESET_PURE_ACTIONS || !existsSync('./${path.basename(pagePath.replace('.ts', '.actions.pure.js'))}')) {
     /**
      * @info
      * this call will create pure common js file
@@ -131,6 +135,10 @@ function ${getActionsName}(decorators = []) {
    * requires all available page action flows and returns as a function result
    */
   const pageActions = require('./${path.basename(pagePath.replace('.ts', '.actions.pure.js'))}')
+
+  if(postSetUp) {
+    postSetUp()
+  }
 
   return decorators.reduce((actFlows, decorator) => {
     if(!isFunction(decorator)) {

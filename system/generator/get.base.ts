@@ -1,4 +1,4 @@
-/* eslint-disable sonarjs/cognitive-complexity, no-console*/
+/* eslint-disable unicorn/prefer-ternary, sonarjs/cognitive-complexity, no-console*/
 import { isString } from 'sat-utils';
 import { config } from '../config/config';
 import { getCollectionItemInstance, isCollectionWithItemBaseElement } from './utils.collection';
@@ -22,7 +22,10 @@ function checkThatElementHasAction(elementConstructorName: string, action: strin
   if (baseElementsActionsDescription[elementConstructorName]) {
     return Boolean(baseElementsActionsDescription[elementConstructorName][action]);
   } else {
-    console.error(`${elementConstructorName} does not exist in 'baseElementsActionsDescription'`);
+    /**
+     * @logger here
+     */
+    // console.error(`${elementConstructorName} does not exist in 'baseElementsActionsDescription'`);
 
     return false;
   }

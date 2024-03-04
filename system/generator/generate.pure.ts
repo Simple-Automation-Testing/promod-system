@@ -90,8 +90,13 @@ ${collectionEntities}
     ${flows.join(',\n  ')},
   }`;
 
+  const writePath =
+    path.extname(pagePath) === ''
+      ? pagePath + '.actions.pure.js'
+      : pagePath.replace(path.extname(pagePath), '.actions.pure.js');
+
   fs.writeFileSync(
-    `${pagePath.replace('.ts', '.actions.pure.js')}`,
+    writePath,
     `${body}
 ${defaultExport}
 ${actionsType}
