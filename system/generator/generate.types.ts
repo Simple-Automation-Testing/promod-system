@@ -105,19 +105,24 @@ ${commonExport}
   fs.writeFileSync(
     `${pagePath.replace('.ts', '.get.actions.ts')}`,
     `import { resolve } from 'path';
+import { existsSync } from 'fs';
 import { createPurePageStructure } from 'promod-system';
 import { isArray, isFunction } from 'sat-utils';
 
 function getPageActions(decorators = []) {
+  const pureActionsFilePath = resolve(__dirname, './${path.basename(pagePath)}'))
   if(!isArray(decorators)) {
     throw new TypeError('decorators should be an array');
   }
-  /**
-   * @info
-   * this call will create pure common js file
-   * with all available page action flows
-   */
-  createPurePageStructure(resolve(__dirname, './${path.basename(pagePath)}'));
+
+  if(process.env.PROMOD_S_RESET_PURE_ACTIONS || !existsSync(pureActionsFilePath) {
+    /**
+     * @info
+     * this call will create pure common js file
+     * with all available page action flows
+     */
+    createPurePageStructure(pureActionsFilePath);
+  }
 
   /**
    * @info

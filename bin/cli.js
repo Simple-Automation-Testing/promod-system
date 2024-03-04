@@ -49,7 +49,10 @@ if (argv['generate-config']) {
   if (fs.existsSync(folderPath)) {
     getDirFilesList(folderPath)
       .filter(file => (argv.ignorePattern ? !file.includes(argv.ignorePattern) : true))
-      .filter(file => file.includes(argv.pattern))
+      .filter(file => {
+        console.log(file)
+        return file.includes(argv.pattern);
+      })
       .forEach(argv.types ? createPageActionTypes : createPageStructure);
   } else {
     throw new Error(`folder ${argv.folder} does not exist`);

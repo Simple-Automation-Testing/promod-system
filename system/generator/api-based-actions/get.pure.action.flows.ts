@@ -56,9 +56,9 @@ function createFlowTemplates(name, action, field, instance) {
 
   let optionsSecondArgument = '';
   if (actionWithWaitOpts.includes(action)) {
-    optionsSecondArgument = `, opts?`;
+    optionsSecondArgument = `, opts`;
   } else if (baseLibraryDescription.generalActionOptionsId) {
-    optionsSecondArgument = `, opts?`;
+    optionsSecondArgument = `, opts`;
   }
 
   return getTemplatedCode({ name, flowResultType, optionsSecondArgument, action, field });
@@ -73,9 +73,9 @@ function createFlowTemplateForPageElements(name, action) {
   let optionsSecondArgument = '';
   // TODO need to update duplicated branches
   if (actionWithWaitOpts.includes(action)) {
-    optionsSecondArgument = `, opts?`;
+    optionsSecondArgument = `, opts`;
   } else if (baseLibraryDescription.generalActionOptionsId) {
-    optionsSecondArgument = `, opts?`;
+    optionsSecondArgument = `, opts`;
   }
 
   const isDeclaration = promod.actionsDeclaration === 'declaration';
