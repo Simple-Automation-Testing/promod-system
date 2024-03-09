@@ -112,7 +112,7 @@ import { createPurePageStructure } from 'promod-system';
 import { isArray, isFunction } from 'sat-utils';
 
 function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: () => void) {
-  const pureActionsFilePath = resolve(__dirname, './${path.basename(pagePath).replace(path.extname(pagePath), '')}');
+  const pagePath = resolve(__dirname, './${path.basename(pagePath).replace(path.extname(pagePath), '')}');
   if(!isArray(decorators)) {
     throw new TypeError('decorators should be an array');
   }
@@ -127,7 +127,7 @@ function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: (
      * this call will create pure common js file
      * with all available page action flows
      */
-    createPurePageStructure(pureActionsFilePath);
+    createPurePageStructure(pagePath);
   }
 
   /**

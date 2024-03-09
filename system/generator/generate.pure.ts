@@ -48,7 +48,7 @@ function createPurePageStructure(pagePath: string) {
       throw new Error(`Page Class was not found. Search pattern is '${baseLibraryDescription.pageId}'`);
     }
 
-    pageBaseLine = `const { ${PageClass.prototype.constructor.name} } = require('./${pageRelativeTsPath}');
+    pageBaseLine = `const { ${PageClass.prototype.constructor.name} } = require('${pagePath}');
 
 const page = new ${PageClass.prototype.constructor.name}();`;
 
@@ -57,7 +57,8 @@ const page = new ${PageClass.prototype.constructor.name}();`;
 
   const pageInstance = getPage();
 
-  const globalImport = `const { toArray, getRandomArrayItem } = require('sat-utils');
+  const globalImport = `const { toArray, getRandomArrayItem,  } = require('sat-utils');
+
 
 ${pageBaseLine}
 `;
@@ -84,25 +85,13 @@ ${collectionEntities}
 `;
   const flows = body.match(flowMatcher) || [];
 
-  let defaultExport = '';
-  let actionsType = '';
   let commonExport = `module.exports = {
     ${flows.join(',\n  ')},
   }`;
 
-  const writePath =
-    path.extname(pagePath) === ''
-      ? pagePath + '.actions.pure.js'
-      : pagePath.replace(path.extname(pagePath), '.actions.pure.js');
-
-  fs.writeFileSync(
-    writePath,
-    `${body}
-${defaultExport}
-${actionsType}
+  return `${body}
 ${commonExport}
-`,
-  );
+`;
 }
 
 export { createPurePageStructure };
