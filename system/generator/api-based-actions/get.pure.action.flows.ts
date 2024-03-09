@@ -20,9 +20,7 @@ function getTemplatedCode({ name, flowResultType, optionsSecondArgument, action,
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
   const additionalArguments = optionsSecondArgument ? ', opts' : '';
 
-  let flowBody = `${isActionVoid ? 'return' : `const { ${field} } =`} await ${
-    baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
-  }${action}({ ${field}: data }${additionalArguments});${isActionVoid ? '' : `\n\treturn ${field};`}`;
+  let flowBody = `${isActionVoid ? 'return' : `const { ${field} } =`} await page.${action}({ ${field}: data }${additionalArguments});${isActionVoid ? '' : `\n\treturn ${field};`}`;
 
   /**
    * @info
@@ -36,14 +34,14 @@ function getTemplatedCode({ name, flowResultType, optionsSecondArgument, action,
     );
   } else if (isRepeatingAllowed) {
     flowBody = `for (const actionData of toArray(data)) {
-      await ${
-        baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
-      }${action}({ ${field}: actionData }${additionalArguments})
+      await page.${action}({ ${field}: actionData }${additionalArguments})
     }`;
   }
 
   const isDeclaration = promod.actionsDeclaration === 'declaration';
-  const firstLine = isDeclaration ? `async function ${name}(data${optionsSecondArgument}) {` : `const ${name} = async function(data${optionsSecondArgument}) {`;
+  const firstLine = isDeclaration
+    ? `async function ${name}(data${optionsSecondArgument}) {`
+    : `const ${name} = async function(data${optionsSecondArgument}) {`;
 
   return `
 ${firstLine}
@@ -86,9 +84,7 @@ function createFlowTemplateForPageElements(name, action) {
 
   return `
 ${firstLine}
-  return await ${
-    baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
-  }${action}(data${optionsSecondArgument ? ', opts' : ''});
+  return await page.${action}(data${optionsSecondArgument ? ', opts' : ''});
 };\n`;
 }
 

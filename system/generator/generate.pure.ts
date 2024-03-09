@@ -1,6 +1,4 @@
 /* eslint-disable sonarjs/cognitive-complexity */
-import * as path from 'path';
-import * as fs from 'fs';
 import { isString, isRegExp } from 'sat-utils';
 import { config } from '../config/config';
 import { getPureActionFlows } from './api-based-actions/get.pure.action.flows';
@@ -16,52 +14,23 @@ function createPurePageStructure(pagePath: string) {
 
   const flowMatcher = promod.actionsDeclaration === 'declaration' ? flowDeclarationMatcher : flowExpressionMatcher;
 
-  const pageRelativePath = path.isAbsolute(pagePath) ? path.basename(pagePath) : pagePath;
-  const pageRelativeTsPath = pageRelativePath.replace('.ts', '');
-
-  let getPage: () => any;
-  let pageBaseLine;
   const pageModule = require(pagePath);
 
-  if (baseLibraryDescription.getPageInstance) {
-    getPage = pageModule[baseLibraryDescription.getPageInstance];
-
-    if (!getPage) {
-      throw new Error(
-        `Page "getPageInstance" method was not found. Search pattern is '${baseLibraryDescription.getPageInstance}', file path '${pagePath}'`,
-      );
+  const PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
+    if (isString(baseLibraryDescription.pageId)) {
+      return name.includes(baseLibraryDescription.pageId);
+    } else if (isRegExp(baseLibraryDescription.pageId)) {
+      return name.match(baseLibraryDescription.pageId);
+    } else {
+      throw new TypeError('"pageId" should exist in "baseLibraryDescription", pageId should be a string or regexp');
     }
+  });
 
-    pageBaseLine = `const { ${baseLibraryDescription.getPageInstance} } = require('./${pageRelativeTsPath}');`;
-  } else {
-    const PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
-      if (isString(baseLibraryDescription.pageId)) {
-        return name.includes(baseLibraryDescription.pageId);
-      } else if (isRegExp(baseLibraryDescription.pageId)) {
-        return name.match(baseLibraryDescription.pageId);
-      } else {
-        throw new TypeError('"pageId" should exist in "baseLibraryDescription", pageId should be a string or regexp');
-      }
-    });
-
-    if (!PageClass) {
-      throw new Error(`Page Class was not found. Search pattern is '${baseLibraryDescription.pageId}'`);
-    }
-
-    pageBaseLine = `const { ${PageClass.prototype.constructor.name} } = require('${pagePath}');
-
-const page = new ${PageClass.prototype.constructor.name}();`;
-
-    getPage = () => new PageClass();
+  if (!PageClass) {
+    throw new Error(`Page Class was not found. Search pattern is '${baseLibraryDescription.pageId}'`);
   }
 
-  const pageInstance = getPage();
-
-  const globalImport = `const { toArray, getRandomArrayItem,  } = require('sat-utils');
-
-
-${pageBaseLine}
-`;
+  const pageInstance = new PageClass();
 
   const pageName = pageInstance[baseLibraryDescription.entityId];
 
@@ -76,18 +45,21 @@ ${pageBaseLine}
 
   const collectionEntities = getPureCountFlows(pageInstance, asActorAndPage);
 
-  const body = `${globalImport}
+  const actionsModule = `${randomResultsFlowsTemplate}
+  ${interactionFlowsTemplate.join('\n')}
+  ${collectionEntities}`;
+  const flows = actionsModule.match(flowMatcher) || [];
 
-${randomResultsFlowsTemplate}
-${interactionFlowsTemplate.join('\n')}
-${collectionEntities}
+  const body = `function getActions(page, {toArray, getRandomArrayItem}) {
 
-`;
-  const flows = body.match(flowMatcher) || [];
+  ${actionsModule}
 
-  let commonExport = `module.exports = {
+  return {
     ${flows.join(',\n  ')},
-  }`;
+  }
+}`;
+
+  let commonExport = `module.exports = getActions`;
 
   return `${body}
 ${commonExport}

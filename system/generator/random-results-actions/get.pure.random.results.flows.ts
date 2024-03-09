@@ -54,18 +54,14 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
         _fields?.length ? `_field = '${_fields[0]}', quantity = 2,` : 'quantity = 2,'
       } descriptions = {}) {`;
   const waiting = baseLibraryDescription.waitForVisibilityMethod
-    ? `await ${baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'}${
-        baseLibraryDescription.waitForVisibilityMethod
-      }(${waitingSignature}, { everyArrayItem: false })`
+    ? `await page.${baseLibraryDescription.waitForVisibilityMethod}(${waitingSignature}, { everyArrayItem: false })`
     : '';
 
   const severalFields = fieldsType
     ? `
     ${firstLine}
       ${waiting}
-      const result = await ${
-        baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
-      }${baseLibraryDescription.getDataMethod}(${randomDataActionSignature});
+      const result = await page.${baseLibraryDescription.getDataMethod}(${randomDataActionSignature});
 
       const flatResult = result.${result}
   return getRandomArrayItem(
@@ -88,9 +84,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   return `
   ${firstLineOneValue}
     ${waiting}
-    const result = await ${
-      baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
-    }${baseLibraryDescription.getDataMethod}(${actionSignature});
+    const result = await page.${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     const flatResult = result.${result}
 
@@ -102,9 +96,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
   ${firstLineSeveral}
     ${waiting}
-    const result = await ${
-      baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
-    }${baseLibraryDescription.getDataMethod}(${actionSignature});
+    const result = await page.${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     const flatResult = result.${result}
 

@@ -29,6 +29,7 @@ function createPageActionTypes(pagePath: string) {
       .join('') || './';
 
   let getPage: () => any;
+  let PageClass;
   const pageModule = require(pagePath);
 
   if (baseLibraryDescription.getPageInstance) {
@@ -40,7 +41,7 @@ function createPageActionTypes(pagePath: string) {
       );
     }
   } else {
-    const PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
+    PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
       if (isString(baseLibraryDescription.pageId)) {
         return name.includes(baseLibraryDescription.pageId);
       } else if (isRegExp(baseLibraryDescription.pageId)) {
@@ -104,15 +105,20 @@ ${commonExport}
 `,
   );
 
+  const getPageRequire = baseLibraryDescription.getPageInstance || PageClass.prototype.constructor.name;
+  const page = `${baseLibraryDescription.getPageInstance || 'new ' + PageClass.prototype.constructor.name}();`;
+
   fs.writeFileSync(
     `${pagePath.replace('.ts', '.get.actions.ts')}`,
     `import { resolve } from 'path';
-import { existsSync } from 'fs';
 import { createPurePageStructure } from 'promod-system';
-import { isArray, isFunction } from 'sat-utils';
+import { isArray, isFunction, getRandomArrayItem, toArray, getCommonJsModuleFromSourceString } from 'sat-utils';
 
 function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: () => void) {
   const pagePath = resolve(__dirname, './${path.basename(pagePath).replace(path.extname(pagePath), '')}');
+  const { ${getPageRequire} } = require(pagePath)
+  const page = ${page}
+
   if(!isArray(decorators)) {
     throw new TypeError('decorators should be an array');
   }
@@ -121,20 +127,7 @@ function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: (
     preSetUp()
   }
 
-  if(process.env.PROMOD_S_RESET_PURE_ACTIONS || !existsSync('./${path.basename(pagePath.replace('.ts', '.actions.pure.js'))}')) {
-    /**
-     * @info
-     * this call will create pure common js file
-     * with all available page action flows
-     */
-    createPurePageStructure(pagePath);
-  }
-
-  /**
-   * @info
-   * requires all available page action flows and returns as a function result
-   */
-  const pageActions = require('./${path.basename(pagePath.replace('.ts', '.actions.pure.js'))}')
+  const pageActionsGetter = getCommonJsModuleFromSourceString(createPurePageStructure(pagePath), './page.actions.js');
 
   if(postSetUp) {
     postSetUp()
@@ -146,7 +139,7 @@ function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: (
     }
 
     return decorator(actFlows);
-  },pageActions);
+  }, pageActionsGetter(page, { getRandomArrayItem, toArray }));
 }
 
 ${getActionsName}.id = '${camelize(asActorAndPage)}';

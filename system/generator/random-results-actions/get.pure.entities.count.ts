@@ -25,9 +25,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   // TODO add better types interactions
   return `
   ${firstLine}
-    const result = await ${
-      baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
-    }${baseLibraryDescription.getDataMethod}(${actionSignature});
+    const result = await page.${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     return result.${result}
   }`;
