@@ -2,7 +2,7 @@
 import { camelize, stringifyData, toArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getCollectionsPathes } from '../check.that.action.exists';
-import { getResult, getActionsList, getName } from '../utils.random';
+import { getResult, getActionsList, getName, getFieldsEnumList } from '../utils.random';
 
 const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();
 
@@ -35,7 +35,8 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
     }, {})`,
   );
   const contentResult = toArray(baseResultData).includes('text') ? '.text' : '';
-  const fieldsType = `${_fields?.length ? `exists` : ''}`;
+
+  const fieldsType = `${_fields?.length ? `type T${typeName}EntryFields = ${getFieldsEnumList(_fields)}` : ''}`;
 
   // TODO usage of the resultsType is required for future optimizations
   // const resultsType = `type T${typeName}Result = ${__countResult}`;
@@ -54,16 +55,20 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
         _fields?.length ? `_field = '${_fields[0]}', quantity = 2,` : 'quantity = 2,'
       } descriptions = {}) {`;
   const waiting = baseLibraryDescription.waitForVisibilityMethod
-    ? `await page.${baseLibraryDescription.waitForVisibilityMethod}(${waitingSignature}, { everyArrayItem: false })`
+    ? `await ${baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'}${
+        baseLibraryDescription.waitForVisibilityMethod
+      }(${waitingSignature}, { everyArrayItem: false })`
     : '';
 
   const severalFields = fieldsType
     ? `
-    ${firstLine}
-      ${waiting}
-      const result = await page.${baseLibraryDescription.getDataMethod}(${randomDataActionSignature});
+${firstLine}
+  ${waiting}
+  const result = await ${
+    baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
+  }${baseLibraryDescription.getDataMethod}(${randomDataActionSignature});
 
-      const flatResult = result.${result}
+  const flatResult = result.${result}
   return getRandomArrayItem(
     flatResult
       .map(item => _fields.reduce((requredData, k ) => {

@@ -59,6 +59,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
           ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,`
           : 'quantity: number = 2,'
       } descriptions: T${typeName}Entry = {}): Promise<string[]> {`;
+
   const waiting = baseLibraryDescription.waitForVisibilityMethod
     ? `await ${baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'}${
         baseLibraryDescription.waitForVisibilityMethod

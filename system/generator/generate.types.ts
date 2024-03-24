@@ -117,7 +117,6 @@ import { isArray, isFunction, getRandomArrayItem, toArray, getCommonJsModuleFrom
 function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: () => void) {
   const pagePath = resolve(__dirname, './${path.basename(pagePath).replace(path.extname(pagePath), '')}');
   const { ${getPageRequire} } = require(pagePath)
-  const page = ${page}
 
   if(!isArray(decorators)) {
     throw new TypeError('decorators should be an array');
@@ -139,7 +138,7 @@ function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: (
     }
 
     return decorator(actFlows);
-  }, pageActionsGetter(page, { getRandomArrayItem, toArray }));
+  }, pageActionsGetter(${page}, { getRandomArrayItem, toArray }));
 }
 
 ${getActionsName}.id = '${camelize(asActorAndPage)}';

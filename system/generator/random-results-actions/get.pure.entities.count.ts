@@ -6,7 +6,7 @@ import { getCollectionsPathes } from '../check.that.action.exists';
 
 const { baseLibraryDescription = {}, collectionDescription = {}, promod = {} } = config.get();
 
-function createTemplate(asActorAndPage, actionDescriptor) {
+function createTemplatePureTemplate(asActorAndPage, actionDescriptor, entryType = '', resultType = '') {
   const { action } = actionDescriptor || {};
 
   const result = getResult(action);
@@ -17,15 +17,23 @@ function createTemplate(asActorAndPage, actionDescriptor) {
     // TODO this approach should be improved
     `...descriptions, ${collectionDescription.action}: null`,
   );
+  if (entryType && !entryType.startsWith(':')) {
+    throw new Error('entryType should start with ":"');
+  }
+  if (resultType && !resultType.startsWith(':')) {
+    throw new Error('resultType should start with ":"');
+  }
 
   const isDeclaration = promod.actionsDeclaration === 'declaration';
   const firstLine = isDeclaration
-    ? `async function ${name}(descriptions = {}) {`
-    : `const ${name} = async function(descriptions = {}) {`;
+    ? `async function ${name}(descriptions${entryType} = {})${resultType} {`
+    : `const ${name} = async function(descriptions${entryType} = {})${resultType} {`;
   // TODO add better types interactions
   return `
   ${firstLine}
-    const result = await page.${baseLibraryDescription.getDataMethod}(${actionSignature});
+  const result = await ${
+    baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
+  }${baseLibraryDescription.getDataMethod}(${actionSignature});
 
     return result.${result}
   }`;
@@ -36,8 +44,8 @@ function getPureCountFlows(pageInstance, asActorAndPage) {
   const actions = getActionsList(data);
 
   return actions.reduce((flows, dataObject) => {
-    return `${flows}\n${createTemplate(asActorAndPage, dataObject)}`;
+    return `${flows}\n${createTemplatePureTemplate(asActorAndPage, dataObject)}`;
   }, '');
 }
 
-export { getPureCountFlows };
+export { getPureCountFlows, createTemplatePureTemplate };
