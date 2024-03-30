@@ -81,7 +81,6 @@ function findTypedObject(dataObj) {
 }
 
 function getKeyFormat(dataItem) {
-  const { collectionDescription } = config.get();
   for (const key of Object.keys(dataItem).filter(k => !descriptionKeys.includes(k))) {
     const isActionInside = safeJSONstringify(dataItem[key]).includes(collectionDescription.action);
     const isDescription = descriptionKeys.every(k => safeHasOwnPropery(dataItem[key], k));

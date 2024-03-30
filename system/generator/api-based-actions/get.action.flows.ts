@@ -118,6 +118,7 @@ function createFlowTemplateForPageElements(name, action, instance) {
   const flowActionName = camelize(`${name} ${prettyFlowActionNamePart} PageElements`);
 
   let optionsSecondArgument = '';
+
   if (actionWithWaitOpts.includes(action)) {
     optionsSecondArgument = `, opts?: ${baseLibraryDescription.waitOptionsId}`;
   } else if (baseLibraryDescription.generalActionOptionsId) {

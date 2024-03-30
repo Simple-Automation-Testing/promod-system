@@ -15,9 +15,9 @@ const { PROMOD_S_GENERATE_DEFAULT_IMPORT, PROMOD_S_GENERATE_ACTIONS_TYPE } = pro
 const flowExpressionMatcher = /(?<=const ).*(?= = async)/gim;
 const flowDeclarationMatcher = /(?<=function )[\w$]+/gim;
 
-function createPageStructure(pagePath: string) {
-  const { pathToBase, baseLibraryDescription, promod = {}, collectionDescription } = config.get();
+const { pathToBase, baseLibraryDescription, promod = {}, collectionDescription } = config.get();
 
+function createPageStructure(pagePath: string) {
   const flowMatcher = promod.actionsDeclaration === 'declaration' ? flowDeclarationMatcher : flowExpressionMatcher;
 
   const frameworkPath = process.cwd();

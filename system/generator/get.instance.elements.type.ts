@@ -10,6 +10,9 @@ import {
   isCollectionWithItemFragment,
 } from './utils.collection';
 
+const { resultActionsMap, baseLibraryDescription, baseCollectionActionsDescription, baseElementsActionsDescription } =
+  config.get();
+
 function getColletionActionType(collectionsItem, getTypes, collectionActionType, ...rest) {
   let [collectionActionDescriptor] = rest;
   return Object.keys(collectionActionType).reduce((typeString, actionKey, index, allActions) => {
@@ -35,7 +38,6 @@ function getColletionActionType(collectionsItem, getTypes, collectionActionType,
 
 function getCollectionTypes(instance, action, actionType, ...rest) {
   let [collectionActionDescriptor, wrap] = rest;
-  const { baseCollectionActionsDescription, baseElementsActionsDescription } = config.get();
 
   const collectionsItem = getCollectionItemInstance(instance);
 
@@ -73,9 +75,7 @@ function getCollectionTypes(instance, action, actionType, ...rest) {
   return types;
 }
 
-function getFragmentTypes(instance, action, actionType, ...rest) {
-  const { resultActionsMap, baseLibraryDescription } = config.get();
-
+function getFragmentTypes(instance, action: string, actionType: string, ...rest) {
   if (resultActionsMap[action] === 'void' && actionType === 'resultType') return 'void';
 
   if (instance.constructor.name === baseLibraryDescription.collectionId) {
@@ -135,9 +135,7 @@ function getFragmentTypes(instance, action, actionType, ...rest) {
   return createType([...fragmentElements, ...fragmentArrayItems, ...fragmentFragments], action);
 }
 
-function getElementsTypes(instance, action, actionType) {
-  const { resultActionsMap } = config.get();
-
+function getElementsTypes(instance, action: string, actionType: string): string {
   if (resultActionsMap[action] === 'void' && actionType === 'resultType') return 'void';
 
   const instanceElements = getInstanceInteractionFields(instance)

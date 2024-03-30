@@ -9,9 +9,9 @@ import { getPureCountFlows } from './random-results-actions/get.pure.entities.co
 const flowExpressionMatcher = /(?<=const ).*(?= = async)/gim;
 const flowDeclarationMatcher = /(?<=function )[\w$]+/gim;
 
-function createPurePageStructure(pagePath: string) {
-  const { baseLibraryDescription, promod = {}, collectionDescription } = config.get();
+const { baseLibraryDescription, promod = {}, collectionDescription } = config.get();
 
+function createPurePageStructure(pagePath: string) {
   const flowMatcher = promod.actionsDeclaration === 'declaration' ? flowDeclarationMatcher : flowExpressionMatcher;
 
   const pageModule = require(pagePath);

@@ -1,5 +1,4 @@
 /* eslint-disable sonarjs/cognitive-complexity, no-console*/
-
 // TODO how to handle collection in collection
 import { isNotEmptyObject } from 'sat-utils';
 import { config } from '../config/config';
@@ -12,9 +11,9 @@ import {
   isCollectionWithItemFragment,
 } from './utils.collection';
 
-function getCollectionItemTypes(collectionItemInstance) {
-  const { collectionRandomDataDescription } = config.get();
+const { collectionRandomDataDescription, baseLibraryDescription } = config.get();
 
+function getCollectionItemTypes(collectionItemInstance) {
   const getType = isBaseElement(collectionItemInstance) ? getElementType : getElementsTypes;
 
   const _fields = getInstanceInteractionFields(collectionItemInstance);
@@ -33,8 +32,6 @@ function getCollectionItemTypes(collectionItemInstance) {
 }
 
 function getPathesToCollections(childInstance, name) {
-  const { baseLibraryDescription } = config.get();
-
   function getPathToListIfExists(instance) {
     const pathes = {};
 
