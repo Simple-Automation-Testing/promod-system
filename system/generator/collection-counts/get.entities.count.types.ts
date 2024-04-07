@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
 import { camelize } from 'sat-utils';
+
 import { getActionsList, getName } from '../utils.random';
 import { getCollectionsPathes } from '../check.that.action.exists';
 
@@ -9,7 +10,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   const name = camelize(`${asActorAndPage} Get Collection From ${getName(action)}`);
 
   const actionDeclaration = `declare function ${name}(descriptions?: T${name}Entry): Promise<T${name}[]>;`;
-  // TODO add better types interactions
+
   return `
   type T${name}Entry = ${_type.get}
   type T${name} = ${__countResult}

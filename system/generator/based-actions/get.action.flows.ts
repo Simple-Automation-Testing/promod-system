@@ -80,7 +80,7 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
   const isDeclaration = promod.actionsDeclaration === 'declaration';
   const firstLine = isDeclaration
     ? `async function ${name}<Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}> {`
-    : `const ${name} = async function<Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}> {`;
+    : `const ${name} = async <Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}> => {`;
 
   return `
 type ${typeName} = ${flowArgumentType}
@@ -135,7 +135,7 @@ function createFlowTemplateForPageElements(name, action, instance) {
 
   const firstLine = isDeclaration
     ? `async function ${flowActionName}<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {`
-    : `const ${flowActionName} = async function<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {`;
+    : `const ${flowActionName} = async <Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> => {`;
 
   return `
 type ${typeName} = ${flowArgumentType}

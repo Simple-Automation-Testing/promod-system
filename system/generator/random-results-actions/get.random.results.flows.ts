@@ -46,7 +46,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
   const firstLine = isDeclaration
     ? `async function ${randomData}<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> {`
-    : `const ${randomData} = async function<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> {`;
+    : `const ${randomData} = async <T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> => {`;
 
   const firstLineSeveral = isDeclaration
     ? `async function ${severalValues}(${
@@ -54,11 +54,11 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
           ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,`
           : 'quantity: number = 2,'
       } descriptions: T${typeName}Entry = {}): Promise<string[]> {`
-    : `const ${severalValues} = async function(${
+    : `const ${severalValues} = async (${
         _fields?.length
           ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,`
           : 'quantity: number = 2,'
-      } descriptions: T${typeName}Entry = {}): Promise<string[]> {`;
+      } descriptions: T${typeName}Entry = {}): Promise<string[]>  => {`;
 
   const waiting = baseLibraryDescription.waitForVisibilityMethod
     ? `await ${baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'}${
@@ -90,9 +90,9 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
     ? `async function ${oneValue}(${
         _fields?.length ? `_field: T${typeName}EntryFields, ` : ''
       } descriptions: T${typeName}Entry = {}): Promise<string> {`
-    : `const ${oneValue} = async function(${
+    : `const ${oneValue} = async (${
         _fields?.length ? `_field: T${typeName}EntryFields, ` : ''
-      } descriptions: T${typeName}Entry = {}): Promise<string> {`;
+      } descriptions: T${typeName}Entry = {}): Promise<string> => {`;
 
   return `
   ${fieldsType}

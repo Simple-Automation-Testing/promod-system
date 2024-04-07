@@ -15,7 +15,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const severalValues = camelize(`${asActorAndPage} get several random field values from ${getName(action)}`);
   const randomData = camelize(`${asActorAndPage} get random data from ${getName(action)}`);
 
-  const actionFields = `${_fields?.length ? `{ [_field]: null }` : 'null'}`;
+  const actionFields = `${_fields?.length ? '{ [_field]: null }' : 'null'}`;
 
   const actionSignature = stringifyData(action).replace(
     `${collectionDescription.action}: null`,
@@ -45,15 +45,15 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
   const firstLine = isDeclaration
     ? `async function ${randomData}(_fields, descriptions = {}) {`
-    : `const ${randomData} = async function(_fields, descriptions = {}) {`;
+    : `const ${randomData} = async (_fields, descriptions = {}) => {`;
 
   const firstLineSeveral = isDeclaration
     ? `async function ${severalValues}(${
         _fields?.length ? `_field = '${_fields[0]}', quantity = 2,` : 'quantity = 2,'
       } descriptions = {}) {`
-    : `const ${severalValues} = async function(${
+    : `const ${severalValues} = async (${
         _fields?.length ? `_field = '${_fields[0]}', quantity = 2,` : 'quantity = 2,'
-      } descriptions = {}) {`;
+      } descriptions = {}) => {`;
   const waiting = baseLibraryDescription.waitForVisibilityMethod
     ? `await ${baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'}${
         baseLibraryDescription.waitForVisibilityMethod
@@ -61,7 +61,10 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
     : '';
 
   const severalFields = fieldsType
-    ? `
+    ? /**
+       * @info if fieldsType exists we have a function that generates get data as an oblejct with several fields
+       */
+      `
 ${firstLine}
   ${waiting}
   const result = await ${
@@ -78,13 +81,16 @@ ${firstLine}
       }, {}))
   );
 };\n`
-    : '';
+    : /**
+       * @info if fieldsType does not exist we have empty line there
+       */
+      '';
 
   const firstLineOneValue = isDeclaration
     ? `async function ${oneValue}(${
         _fields?.length ? `_field: T${typeName}EntryFields, ` : ''
       } descriptions: T${typeName}Entry = {}){`
-    : `const ${oneValue} = async function(${_fields?.length ? `_field, ` : ''} descriptions = {}){`;
+    : `const ${oneValue} = async (${_fields?.length ? `_field, ` : ''} descriptions = {}) => {`;
 
   return `
   ${firstLineOneValue}

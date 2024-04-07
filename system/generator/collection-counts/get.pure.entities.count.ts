@@ -1,5 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
 import { camelize, stringifyData } from 'sat-utils';
+//
 import { config } from '../../config/config';
 import { getActionsList, getResult, getName } from '../utils.random';
 import { getCollectionsPathes } from '../check.that.action.exists';
@@ -27,7 +28,7 @@ function createTemplatePureTemplate(asActorAndPage, actionDescriptor, entryType 
   const isDeclaration = promod.actionsDeclaration === 'declaration';
   const firstLine = isDeclaration
     ? `async function ${name}(descriptions${entryType} = {})${resultType} {`
-    : `const ${name} = async function(descriptions${entryType} = {})${resultType} {`;
+    : `const ${name} = async (descriptions${entryType} = {})${resultType} => {`;
   // TODO add better types interactions
   return `
   ${firstLine}

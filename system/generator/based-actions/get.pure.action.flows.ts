@@ -41,7 +41,7 @@ function getTemplatedCode({ name, flowResultType, optionsSecondArgument, action,
   const isDeclaration = promod.actionsDeclaration === 'declaration';
   const firstLine = isDeclaration
     ? `async function ${name}(data${optionsSecondArgument}) {`
-    : `const ${name} = async function(data${optionsSecondArgument}) {`;
+    : `const ${name} = async (data${optionsSecondArgument}) => {`;
 
   return `
 ${firstLine}
@@ -80,7 +80,7 @@ function createFlowTemplateForPageElements(name, action) {
 
   const firstLine = isDeclaration
     ? `async function ${flowActionName}(data${optionsSecondArgument}) {`
-    : `const ${flowActionName} = async function(data${optionsSecondArgument}) {`;
+    : `const ${flowActionName} = async (data${optionsSecondArgument}) => {`;
 
   return `
 ${firstLine}

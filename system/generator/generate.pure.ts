@@ -1,10 +1,10 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import { isString, isRegExp } from 'sat-utils';
 import { config } from '../config/config';
-import { getPureActionFlows } from './api-based-actions/get.pure.action.flows';
+import { getPureActionFlows } from './based-actions/get.pure.action.flows';
 import { getAllBaseActions } from './utils';
 import { getPureRandomResultsFlows } from './random-results-actions/get.pure.random.results.flows';
-import { getPureCountFlows } from './random-results-actions/get.pure.entities.count';
+import { getPureCountFlows } from './collection-counts/get.pure.entities.count';
 
 const flowExpressionMatcher = /(?<=const ).*(?= = async)/gim;
 const flowDeclarationMatcher = /(?<=function )[\w$]+/gim;

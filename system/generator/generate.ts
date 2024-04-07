@@ -5,10 +5,10 @@ import { isString, isRegExp, camelize } from 'sat-utils';
 import { getBaseImport } from './get.base.import';
 import { getAllBaseElements } from './get.base';
 import { config } from '../config/config';
-import { getActionFlows } from './api-based-actions/get.action.flows';
+import { getActionFlows } from './based-actions/get.action.flows';
 import { getAllBaseActions } from './utils';
 import { getRandomResultsFlows } from './random-results-actions/get.random.results.flows';
-import { getCountFlows } from './random-results-actions/get.entities.count';
+import { getCountFlows } from './collection-counts/get.entities.count';
 
 const { PROMOD_S_GENERATE_DEFAULT_IMPORT, PROMOD_S_GENERATE_ACTIONS_TYPE } = process.env;
 

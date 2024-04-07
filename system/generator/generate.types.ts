@@ -5,10 +5,10 @@ import { isString, isRegExp, camelize } from 'sat-utils';
 import { getBaseImport } from './get.base.import';
 import { getAllBaseElements } from './get.base';
 import { config } from '../config/config';
-import { getActionFlowsTypes } from './api-based-actions/get.action.flows.types';
+import { getActionFlowsTypes } from './based-actions/get.action.flows.types';
 import { getAllBaseActions } from './utils';
 import { getRandomResultsFlowsTypes } from './random-results-actions/get.random.results.flows.types';
-import { getCountFlowsTypes } from './random-results-actions/get.entities.count.types';
+import { getCountFlowsTypes } from './collection-counts/get.entities.count.types';
 
 const flowDeclarationMatcher = /(?<=function )[\w$]+/gim;
 
@@ -138,7 +138,7 @@ function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: (
     }
 
     return decorator(actFlows);
-  }, pageActionsGetter(${page}, { getRandomArrayItem, toArray }));
+  }, pageActionsGetter(${page.replace(';', '')}, { getRandomArrayItem, toArray }));
 }
 
 ${getActionsName}.id = '${camelize(asActorAndPage)}';
