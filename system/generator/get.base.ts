@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/prefer-ternary, sonarjs/cognitive-complexity, no-console*/
 import { isString } from 'sat-utils';
 import { config } from '../config/config';
+
 import { getCollectionItemInstance, isCollectionWithItemBaseElement } from './utils.collection';
 import { getInstanceInteractionFields } from './utils';
 
@@ -19,16 +20,9 @@ function checkThatElementHasAction(elementConstructorName: string, action: strin
     elementConstructorName = (elementConstructorName as any as object)?.constructor?.name;
   }
 
-  if (baseElementsActionsDescription[elementConstructorName]) {
-    return Boolean(baseElementsActionsDescription[elementConstructorName][action]);
-  } else {
-    /**
-     * @logger here
-     */
-    // console.error(`${elementConstructorName} does not exist in 'baseElementsActionsDescription'`);
-
-    return false;
-  }
+  return (
+    isBaseElement(elementConstructorName) && Boolean(baseElementsActionsDescription[elementConstructorName][action])
+  );
 }
 
 function getElementType(instance, action: string, actionType: string) {
@@ -52,7 +46,7 @@ function getElementActionType(instance, action: string, actionType: string) {
 }
 
 function getAllBaseElements(instance, baseElements = []) {
-  if (instance.constructor.name === baseLibraryDescription.collectionId) {
+  if (instance?.constructor?.name === baseLibraryDescription.collectionId) {
     baseElements.push(baseLibraryDescription.collectionId);
 
     if (isCollectionWithItemBaseElement(instance)) {
@@ -67,6 +61,7 @@ function getAllBaseElements(instance, baseElements = []) {
   }
 
   const interactionFields = getInstanceInteractionFields(instance);
+
   interactionFields.forEach(fragmentChildFieldName => {
     const childConstructorName = instance[fragmentChildFieldName].constructor.name;
 

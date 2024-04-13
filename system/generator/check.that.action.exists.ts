@@ -23,11 +23,14 @@ function wrap(itemType) {
 }
 
 function getCollectionsPathes(instance) {
+  // TODO this needs to be getted from the config
   const { action, ...collectionReducedType } = baseCollectionActionsDescription['get']['entryType'];
   if (isCollectionWithItemBaseElement(instance)) {
     return {
       [collectionDescription.action]: null,
+      // TODO this needs to be getted from the config
       __countResult: getElementType(getCollectionItemInstance(instance), 'get', 'resultType'),
+      // TODO this needs to be getted from the config
       _type: getCollectionTypes(instance, 'get', 'entryType', collectionReducedType, wrap),
       _fields: getInstanceInteractionFields(getCollectionItemInstance(instance)),
     };
