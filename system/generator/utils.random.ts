@@ -14,7 +14,7 @@ import { config } from '../config/config';
 
 // TODO refactor
 const descriptionKeys = ['__countResult', '_type', '_fields'];
-const { collectionRandomDataDescription, collectionDescription } = config.get();
+const { collectionRandomDataDescription, collectionDescription = { action: '_action' } } = config.get();
 
 function isCollectionDescription(data) {
   return isNotEmptyObject(data) && Object.keys(collectionRandomDataDescription).some(key => key in data);
@@ -194,6 +194,51 @@ function getResult(data, flat?) {
   }, '');
 }
 
+function getResultMappedResult(result, data, flat?) {
+  const firstKey = Object.keys(data)[0];
+
+  if (
+    firstKey === collectionDescription.action &&
+    safeJSONstringify(data[firstKey]).includes(collectionDescription.action)
+  ) {
+    return result.flatMap(item => getResultMappedResult(item, data[firstKey], true));
+  }
+
+  if (
+    firstKey === collectionDescription.action &&
+    !safeJSONstringify(data[firstKey]).includes(collectionDescription.action) &&
+    flat
+  ) {
+    return result.map(item => item);
+  }
+
+  if (
+    firstKey === collectionDescription.action &&
+    !safeJSONstringify(data[firstKey]).includes(collectionDescription.action) &&
+    !flat
+  ) {
+    return result;
+  }
+
+  if (firstKey !== collectionDescription.action) {
+    const res = result[firstKey];
+    if (data[firstKey] === null) {
+      return res;
+    }
+    return getResultMappedResult(res, data[firstKey], true);
+  }
+}
+
+function addDescriptions(descriptions, action) {
+  const firstKey = Object.keys(action)[0];
+
+  if (firstKey === collectionDescription.action && action[firstKey] === null) {
+    return { ...descriptions, [collectionDescription.action]: null };
+  }
+
+  return { [firstKey]: addDescriptions(descriptions, action[firstKey]) };
+}
+
 function getName(data) {
   return Object.keys(data).reduce((pattern, key) => {
     if (key === collectionDescription.action) {
@@ -217,8 +262,10 @@ export {
   findTypedObject,
   getActionsList,
   getResult,
+  getResultMappedResult,
   getName,
   getFieldsEnumList,
   getSanitizeDataKeys,
   getKeyFormat,
+  addDescriptions,
 };

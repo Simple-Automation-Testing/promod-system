@@ -15,22 +15,34 @@ function createPurePageStructure(pagePath: string) {
   const flowMatcher = promod.actionsDeclaration === 'declaration' ? flowDeclarationMatcher : flowExpressionMatcher;
 
   const pageModule = require(pagePath);
+  let pageInstance;
 
-  const PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
-    if (isString(baseLibraryDescription.pageId)) {
-      return name.includes(baseLibraryDescription.pageId);
-    } else if (isRegExp(baseLibraryDescription.pageId)) {
-      return name.match(baseLibraryDescription.pageId);
-    } else {
-      throw new TypeError('"pageId" should exist in "baseLibraryDescription", pageId should be a string or regexp');
+  if (baseLibraryDescription.getPageInstance) {
+    const getPage = pageModule[baseLibraryDescription.getPageInstance];
+
+    if (!getPage) {
+      throw new Error(
+        `Page "getPageInstance" method was not found. Search pattern is '${baseLibraryDescription.getPageInstance}', file path '${pagePath}'`,
+      );
     }
-  });
+    pageInstance = getPage();
+  } else {
+    const PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
+      if (isString(baseLibraryDescription.pageId)) {
+        return name.includes(baseLibraryDescription.pageId);
+      } else if (isRegExp(baseLibraryDescription.pageId)) {
+        return name.match(baseLibraryDescription.pageId);
+      } else {
+        throw new TypeError('"pageId" should exist in "baseLibraryDescription", pageId should be a string or regexp');
+      }
+    });
 
-  if (!PageClass) {
-    throw new Error(`Page Class was not found. Search pattern is '${baseLibraryDescription.pageId}'`);
+    if (!PageClass) {
+      throw new Error(`Page Class was not found. Search pattern is '${baseLibraryDescription.pageId}'`);
+    }
+
+    pageInstance = new PageClass();
   }
-
-  const pageInstance = new PageClass();
 
   const pageName = pageInstance[baseLibraryDescription.entityId];
 
