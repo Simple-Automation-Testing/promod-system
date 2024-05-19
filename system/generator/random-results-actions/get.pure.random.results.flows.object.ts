@@ -1,133 +1,132 @@
 /* eslint-disable sonarjs/no-nested-template-literals, sonarjs/cognitive-complexity*/
-import { camelize, stringifyData, toArray } from 'sat-utils';
+import { camelize, toArray, getRandomArrayItem } from 'sat-utils';
 import { config } from '../../config/config';
 import { getCollectionsPathes } from '../check.that.action.exists';
-import { getResult, getActionsList, getName, getFieldsEnumList } from '../utils.random';
+import { getResultMappedResult, getActionsList, getName, addDescriptions } from '../utils.random';
 
-const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();
+const { baseLibraryDescription = {}, baseResultData = [] } = config.get();
 
-function createFlowTemplates(asActorAndPage, actionDescriptor) {
+function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
   const { action, /* __countResult, */ _fields } = actionDescriptor || {};
 
-  const result = getResult(action);
-  const typeName = camelize(`${asActorAndPage} get random Data and Field Values from ${getName(action)}`);
+  // TODO this should be refactored and reused
+  const randomData = camelize(`${asActorAndPage} get random data from ${getName(action)}`);
   const oneValue = camelize(`${asActorAndPage} get random field value from ${getName(action)}`);
   const severalValues = camelize(`${asActorAndPage} get several random field values from ${getName(action)}`);
-  const randomData = camelize(`${asActorAndPage} get random data from ${getName(action)}`);
 
-  const actionFields = `${_fields?.length ? '{ [_field]: null }' : 'null'}`;
+  const actions = {};
 
-  const actionSignature = stringifyData(action).replace(
-    `${collectionDescription.action}: null`,
-    // TODO this approach should be improved
-    `...descriptions, ${collectionDescription.action}: ${actionFields}`,
-  );
-  const waitingSignature = actionSignature.replace(
-    `...descriptions, ${collectionDescription.action}: ${actionFields}`,
-    `...descriptions, length: '>0'`,
-  );
-  const randomDataActionSignature = actionSignature.replace(
-    `...descriptions, ${collectionDescription.action}: ${actionFields}`,
-    `...descriptions, ${collectionDescription.action}: _fields.reduce((act, k) => {
-      act[k] = null;
+  if (_fields?.length) {
+    actions[randomData] = async (_field = _fields[0], descriptions = {}) => {
+      await page[baseLibraryDescription.waitForVisibilityMethod](
+        addDescriptions({ length: '>0', ...descriptions }, action),
+      );
 
-      return act
-    }, {})`,
-  );
-  const contentResult = toArray(baseResultData).includes('text') ? '.text' : '';
+      const result = await page[baseLibraryDescription.getDataMethod](
+        addDescriptions(
+          descriptions,
+          action,
+          _field.reduce((act, k) => {
+            act[k] = null;
 
-  const fieldsType = `${_fields?.length ? `type T${typeName}EntryFields = ${getFieldsEnumList(_fields)}` : ''}`;
+            return act;
+          }, {}),
+        ),
+      );
+      const flatResult = getResultMappedResult(result, action);
 
-  // TODO usage of the resultsType is required for future optimizations
-  // const resultsType = `type T${typeName}Result = ${__countResult}`;
+      return getRandomArrayItem(
+        flatResult.map(item =>
+          _field.reduce((requredData, k) => {
+            requredData[k] = toArray(baseResultData).includes('text') ? item[k].text : item[k];
 
-  const isDeclaration = promod.actionsDeclaration === 'declaration';
-
-  const firstLine = isDeclaration
-    ? `async function ${randomData}(_fields, descriptions = {}) {`
-    : `const ${randomData} = async (_fields, descriptions = {}) => {`;
-
-  const firstLineSeveral = isDeclaration
-    ? `async function ${severalValues}(${
-        _fields?.length ? `_field = '${_fields[0]}', quantity = 2,` : 'quantity = 2,'
-      } descriptions = {}) {`
-    : `const ${severalValues} = async (${
-        _fields?.length ? `_field = '${_fields[0]}', quantity = 2,` : 'quantity = 2,'
-      } descriptions = {}) => {`;
-  const waiting = baseLibraryDescription.waitForVisibilityMethod
-    ? `await ${baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'}${
-        baseLibraryDescription.waitForVisibilityMethod
-      }(${waitingSignature}, { everyArrayItem: false })`
-    : '';
-
-  const severalFields = fieldsType
-    ? /**
-       * @info if fieldsType exists we have a function that generates get data as an oblejct with several fields
-       */
-      `
-${firstLine}
-  ${waiting}
-  const result = await ${
-    baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
-  }${baseLibraryDescription.getDataMethod}(${randomDataActionSignature});
-
-  const flatResult = result.${result}
-  return getRandomArrayItem(
-    flatResult
-      .map(item => _fields.reduce((requredData, k ) => {
-        requredData[k] = item[k]${contentResult}
-
-        return requredData
-      }, {}))
-  );
-};\n`
-    : /**
-       * @info if fieldsType does not exist we have empty line there
-       */
-      '';
-
-  const firstLineOneValue = isDeclaration
-    ? `async function ${oneValue}(${
-        _fields?.length ? `_field: T${typeName}EntryFields, ` : ''
-      } descriptions: T${typeName}Entry = {}){`
-    : `const ${oneValue} = async (${_fields?.length ? `_field, ` : ''} descriptions = {}) => {`;
-
-  return `
-  ${firstLineOneValue}
-    ${waiting}
-    const result = await page.${baseLibraryDescription.getDataMethod}(${actionSignature});
-
-    const flatResult = result.${result}
-
-    return getRandomArrayItem(
-      flatResult
-        .map(item => item${_fields?.length ? '[_field]' : ''}${contentResult}),
-    );
+            return requredData;
+          }, {}),
+        ),
+      );
+    };
   }
 
-  ${firstLineSeveral}
-    ${waiting}
-    const result = await page.${baseLibraryDescription.getDataMethod}(${actionSignature});
+  actions[oneValue] = _fields?.length
+    ? async (_field, descriptions = {}) => {
+        await page[baseLibraryDescription.waitForVisibilityMethod](addDescriptions(descriptions, action), {
+          everyArrayItem: false,
+        });
 
-    const flatResult = result.${result}
+        const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));
+        const flatResult = getResultMappedResult(result, action);
 
-    return getRandomArrayItem(
-      flatResult
-        .map(item => item${_fields?.length ? '[_field]' : ''}${contentResult}),
-      quantity,
-    );
-  }
-  ${severalFields}
-`;
+        return getRandomArrayItem(
+          flatResult.map(item => (toArray(baseResultData).includes('text') ? item[_field].text : item[_field])),
+        );
+      }
+    : async (descriptions = {}) => {
+        await page[baseLibraryDescription.waitForVisibilityMethod](addDescriptions(descriptions, action), {
+          everyArrayItem: false,
+        });
+
+        const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));
+        const flatResult = getResultMappedResult(result, action);
+
+        return getRandomArrayItem(
+          flatResult.map(item => (toArray(baseResultData).includes('text') ? item.text : item)),
+        );
+      };
+
+  actions[severalValues] = _fields?.length
+    ? async (_field = _fields[0], quantity = 2, descriptions = {}) => {
+        await page[baseLibraryDescription.waitForVisibilityMethod](
+          addDescriptions({ length: '>0', ...descriptions }, action),
+        );
+
+        const result = await page[baseLibraryDescription.getDataMethod](
+          addDescriptions(
+            descriptions,
+            action,
+            _field.reduce((act, k) => {
+              act[k] = null;
+
+              return act;
+            }, {}),
+          ),
+        );
+        const flatResult = getResultMappedResult(result, action);
+
+        return getRandomArrayItem(
+          flatResult.map(item =>
+            _field.reduce((requredData, k) => {
+              requredData[k] = toArray(baseResultData).includes('text') ? item[k].text : item[k];
+
+              return requredData;
+            }),
+          ),
+          quantity,
+        );
+      }
+    : async (quantity = 2, descriptions = {}) => {
+        await page[baseLibraryDescription.waitForVisibilityMethod](
+          addDescriptions({ length: '>0', ...descriptions }, action),
+        );
+
+        const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));
+        const flatResult = getResultMappedResult(result, action);
+
+        return getRandomArrayItem(
+          flatResult.map(item => (toArray(baseResultData).includes('text') ? item.text : item)),
+          quantity,
+        );
+      };
+
+  return actions;
 }
 
-function getPureRandomResultsFlows(asActorAndPage, pageInstance) {
+function getPureRandomResultsFlowsObject(asActorAndPage, pageInstance) {
   const data = getCollectionsPathes(pageInstance);
 
   const actions = getActionsList(data);
 
   return actions.reduce((flows, dataObject) => {
-    const data = createFlowTemplates(asActorAndPage, dataObject);
+    const data = createFlowTemplates(asActorAndPage, dataObject, pageInstance);
 
     flows = { ...flows, ...data };
 
@@ -135,4 +134,4 @@ function getPureRandomResultsFlows(asActorAndPage, pageInstance) {
   }, {});
 }
 
-export { getPureRandomResultsFlows };
+export { getPureRandomResultsFlowsObject };

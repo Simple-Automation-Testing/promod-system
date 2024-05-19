@@ -4,7 +4,7 @@ import { config } from '../config/config';
 import { getPureActionFlows } from './based-actions/get.pure.action.flows';
 import { getAllBaseActions } from './utils';
 import { getPureRandomResultsFlows } from './random-results-actions/get.pure.random.results.flows';
-import { getPureCountFlows } from './collection-counts/get.pure.entities.count.object';
+import { getPureCountFlows } from './collection-counts/get.pure.entities.count';
 
 const flowExpressionMatcher = /(?<=const ).*(?= = async)/gim;
 const flowDeclarationMatcher = /(?<=function )[\w$]+/gim;

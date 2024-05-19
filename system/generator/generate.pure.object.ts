@@ -1,19 +1,14 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import { isString, isRegExp } from 'sat-utils';
 import { config } from '../config/config';
-import { getPureActionFlows } from './based-actions/get.pure.action.flows';
 import { getAllBaseActions } from './utils';
-import { getPureRandomResultsFlows } from './random-results-actions/get.pure.random.results.flows';
-import { getPureCountFlows } from './collection-counts/get.pure.entities.count.object';
+import { getPureActionFlowsObject } from './based-actions/get.pure.action.flows.object';
+import { getPureRandomResultsFlowsObject } from './random-results-actions/get.pure.random.results.flows.object';
+import { getPureCountFlowsObject } from './collection-counts/get.pure.entities.count.object';
 
-const flowExpressionMatcher = /(?<=const ).*(?= = async)/gim;
-const flowDeclarationMatcher = /(?<=function )[\w$]+/gim;
+const { baseLibraryDescription, collectionDescription } = config.get();
 
-const { baseLibraryDescription, promod = {}, collectionDescription } = config.get();
-
-function createPurePageStructure(pagePath: string) {
-  const flowMatcher = promod.actionsDeclaration === 'declaration' ? flowDeclarationMatcher : flowExpressionMatcher;
-
+function createPurePageActions(pagePath: string) {
   const pageModule = require(pagePath);
   let pageInstance;
 
@@ -50,32 +45,17 @@ function createPurePageStructure(pagePath: string) {
 
   const actions = getAllBaseActions().filter(action => !Object.values(collectionDescription).includes(action));
 
-  const interactionFlowsTemplate = actions.map(pageAction =>
-    getPureActionFlows(asActorAndPage, pageInstance, pageAction),
+  const interactionFlows = actions.map(pageAction =>
+    getPureActionFlowsObject(asActorAndPage, pageInstance, pageAction),
   );
-  const randomResultsFlowsTemplate = getPureRandomResultsFlows(asActorAndPage, pageInstance);
+  const randomResultsFlows = getPureRandomResultsFlowsObject(asActorAndPage, pageInstance);
 
-  const collectionEntities = getPureCountFlows(pageInstance, asActorAndPage);
+  const collectionEntities = getPureCountFlowsObject(pageInstance, asActorAndPage);
 
-  const actionsModule = `${randomResultsFlowsTemplate}
-  ${interactionFlowsTemplate.join('\n')}
-  ${collectionEntities}`;
-  const flows = actionsModule.match(flowMatcher) || [];
-
-  const body = `function getActions(page, {toArray, getRandomArrayItem}) {
-
-  ${actionsModule}
-
-  return {
-    ${flows.join(',\n  ')},
-  }
-}`;
-
-  let commonExport = `module.exports = getActions`;
-
-  return `${body}
-${commonExport}
-`;
+  return interactionFlows.reduce((actions, baseActionFlows) => ({ ...actions, ...baseActionFlows }), {
+    ...collectionEntities,
+    ...randomResultsFlows,
+  });
 }
 
-export { createPurePageStructure };
+export { createPurePageActions };

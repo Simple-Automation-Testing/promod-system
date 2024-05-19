@@ -1,4 +1,4 @@
-/* eslint-disable sonarjs/no-duplicated-branches, sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
+/* eslint-disable unicorn/prefer-set-has, sonarjs/no-duplicated-branches, sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
 import { camelize, isNotEmptyArray, toArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getFragmentTypes } from '../get.instance.elements.type';
@@ -12,6 +12,8 @@ function getTemplatedCode({ name, nameElements, flowResultType, action, field, p
   const isActionVoid = flowResultType === 'void';
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
 
+  // TODO ASAP
+  // need to fix return data issue for condition waiting
   const fnFragments =
     isRepeatingAllowed || isActionVoid
       ? async (data, opts) => {
@@ -28,6 +30,7 @@ function getTemplatedCode({ name, nameElements, flowResultType, action, field, p
   const actions = {
     [name]: fnFragments,
   };
+
   if (nameElements) {
     const fnElements =
       isRepeatingAllowed || isActionVoid
@@ -46,10 +49,10 @@ function getTemplatedCode({ name, nameElements, flowResultType, action, field, p
   return actions;
 }
 
-function createFlowTemplates(name, action, field, instance, nameElements) {
+function createFlowTemplates({ name, action, field, page, instance, nameElements }) {
   const flowResultType = getFragmentTypes(instance, action, 'resultType');
 
-  return getTemplatedCode({ name, nameElements, flowResultType, action, field, page: instance });
+  return getTemplatedCode({ name, nameElements, flowResultType, action, field, page });
 }
 
 function getPureActionFlowsObject(asActorAndPage: string, instance: object, action: string) {
@@ -68,13 +71,16 @@ function getPureActionFlowsObject(asActorAndPage: string, instance: object, acti
 
     const name = camelize(`${asActorAndPage} ${prettyFlowActionNamePart} ${instanceFieldIdentifier}`);
 
-    const actions = createFlowTemplates(
+    const actions = createFlowTemplates({
       name,
       action,
-      fragmentFieldName,
-      instance[fragmentFieldName],
-      pageElementActions.length ? camelize(`${name} ${prettyFlowActionNamePart} PageElements`) : null,
-    );
+      field: fragmentFieldName,
+      instance: instance[fragmentFieldName],
+      page: instance,
+      nameElements: pageElementActions.includes(fragmentFieldName)
+        ? camelize(`${name} ${prettyFlowActionNamePart} PageElements`)
+        : null,
+    });
 
     template = { ...template, ...actions };
 

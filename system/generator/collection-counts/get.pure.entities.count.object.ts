@@ -28,7 +28,7 @@ function createTemplatePureTemplate(asActorAndPage, actionDescriptor, page, entr
   };
 }
 
-function getPureCountFlows(pageInstance, asActorAndPage) {
+function getPureCountFlowsObject(pageInstance, asActorAndPage) {
   const data = getCollectionsPathes(pageInstance);
   const actions = getActionsList(data);
 
@@ -41,4 +41,4 @@ function getPureCountFlows(pageInstance, asActorAndPage) {
   }, {});
 }
 
-export { getPureCountFlows, createTemplatePureTemplate };
+export { getPureCountFlowsObject };

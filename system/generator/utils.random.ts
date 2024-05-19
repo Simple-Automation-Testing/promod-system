@@ -229,11 +229,11 @@ function getResultMappedResult(result, data, flat?) {
   }
 }
 
-function addDescriptions(descriptions, action) {
+function addDescriptions(descriptions, action, actionData = null) {
   const firstKey = Object.keys(action)[0];
 
   if (firstKey === collectionDescription.action && action[firstKey] === null) {
-    return { ...descriptions, [collectionDescription.action]: null };
+    return { ...descriptions, [collectionDescription.action]: actionData };
   }
 
   return { [firstKey]: addDescriptions(descriptions, action[firstKey]) };

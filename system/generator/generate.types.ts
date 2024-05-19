@@ -106,13 +106,12 @@ ${commonExport}
   );
 
   const getPageRequire = baseLibraryDescription.getPageInstance || PageClass.prototype.constructor.name;
-  const page = `${baseLibraryDescription.getPageInstance || 'new ' + PageClass.prototype.constructor.name}();`;
 
   fs.writeFileSync(
     `${pagePath.replace('.ts', '.get.actions.ts')}`,
     `import { resolve } from 'path';
-import { createPurePageStructure } from 'promod-system';
-import { isArray, isFunction, getRandomArrayItem, toArray, getCommonJsModuleFromSourceString } from 'sat-utils';
+import { createPurePageActions } from 'promod-system';
+import { isArray, isFunction, getRandomArrayItem, toArray } from 'sat-utils';
 
 function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: () => void) {
   const pagePath = resolve(__dirname, './${path.basename(pagePath).replace(path.extname(pagePath), '')}');
@@ -126,7 +125,7 @@ function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: (
     preSetUp()
   }
 
-  const pageActionsGetter = getCommonJsModuleFromSourceString(createPurePageStructure(pagePath), './page.actions.js');
+  const pageActions = createPurePageActions(pagePath)
 
   if(postSetUp) {
     postSetUp()
@@ -138,7 +137,7 @@ function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: (
     }
 
     return decorator(actFlows);
-  }, pageActionsGetter(${page.replace(';', '')}, { getRandomArrayItem, toArray }));
+  }, pageActions);
 }
 
 ${getActionsName}.id = '${camelize(asActorAndPage)}';

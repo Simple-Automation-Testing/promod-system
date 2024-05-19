@@ -11,6 +11,8 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
   const result = getResult(action);
   const typeName = camelize(`${asActorAndPage} get random Data and Field Values from ${getName(action)}`);
+
+  // TODO this should be refactored and reused
   const oneValue = camelize(`${asActorAndPage} get random field value from ${getName(action)}`);
   const severalValues = camelize(`${asActorAndPage} get several random field values from ${getName(action)}`);
   const randomData = camelize(`${asActorAndPage} get random data from ${getName(action)}`);
@@ -54,6 +56,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
     : `const ${severalValues} = async (${
         _fields?.length ? `_field = '${_fields[0]}', quantity = 2,` : 'quantity = 2,'
       } descriptions = {}) => {`;
+
   const waiting = baseLibraryDescription.waitForVisibilityMethod
     ? `await ${baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'}${
         baseLibraryDescription.waitForVisibilityMethod
@@ -87,9 +90,7 @@ ${firstLine}
       '';
 
   const firstLineOneValue = isDeclaration
-    ? `async function ${oneValue}(${
-        _fields?.length ? `_field: T${typeName}EntryFields, ` : ''
-      } descriptions: T${typeName}Entry = {}){`
+    ? `async function ${oneValue}(${_fields?.length ? `_field, ` : ''} descriptions = {}){`
     : `const ${oneValue} = async (${_fields?.length ? `_field, ` : ''} descriptions = {}) => {`;
 
   return `
