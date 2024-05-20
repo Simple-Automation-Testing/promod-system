@@ -12,20 +12,23 @@ function getTemplatedCode({ name, nameElements, flowResultType, action, field, p
   const isActionVoid = flowResultType === 'void';
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
 
-  // TODO ASAP
-  // need to fix return data issue for condition waiting
-  const fnFragments =
-    isRepeatingAllowed || isActionVoid
-      ? async (data, opts) => {
-          for (const actionData of toArray(data)) {
-            await page[action]({ [field]: actionData }, opts);
-          }
-        }
-      : async (data, opts) => {
-          const { [field]: res } = await page[action]({ [field]: data }, opts);
-
-          return res;
-        };
+  let fnFragments;
+  if (isActionVoid) {
+    fnFragments = async (data, opts) => {
+      return await page[action]({ [field]: data }, opts);
+    };
+  } else if (isRepeatingAllowed) {
+    fnFragments = async (data, opts) => {
+      for (const actionData of toArray(data)) {
+        await page[action]({ [field]: actionData }, opts);
+      }
+    };
+  } else {
+    fnFragments = async (data, opts) => {
+      const { [field]: res } = await page[action]({ [field]: data }, opts);
+      return res;
+    };
+  }
 
   const actions = {
     [name]: fnFragments,
