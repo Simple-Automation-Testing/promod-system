@@ -105,17 +105,14 @@ ${commonExport}
 `,
   );
 
-  const getPageRequire = baseLibraryDescription.getPageInstance || PageClass.prototype.constructor.name;
-
   fs.writeFileSync(
     `${pagePath.replace('.ts', '.get.actions.ts')}`,
     `import { resolve } from 'path';
 import { createPurePageActions } from 'promod-system';
-import { isArray, isFunction, getRandomArrayItem, toArray } from 'sat-utils';
+import { isArray, isFunction } from 'sat-utils';
 
 function ${getActionsName}(decorators = [], preSetUp?: () => void, postSetUp?: () => void) {
   const pagePath = resolve(__dirname, './${path.basename(pagePath).replace(path.extname(pagePath), '')}');
-  const { ${getPageRequire} } = require(pagePath)
 
   if(!isArray(decorators)) {
     throw new TypeError('decorators should be an array');

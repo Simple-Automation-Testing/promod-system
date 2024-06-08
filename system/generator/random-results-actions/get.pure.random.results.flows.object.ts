@@ -45,77 +45,61 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
         ),
       );
     };
+
+    actions[oneValue] = async (_field, descriptions = {}) => {
+      await page[baseLibraryDescription.waitForVisibilityMethod](addDescriptions(descriptions, action), {
+        everyArrayItem: false,
+      });
+
+      const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));
+      const flatResult = getResultMappedResult(result, action);
+
+      return getRandomArrayItem(
+        flatResult.map(item => (toArray(baseResultData).includes('text') ? item[_field].text : item[_field])),
+      );
+    };
+
+    actions[severalValues] = async (_field = _fields[0], quantity = 2, descriptions = {}) => {
+      await page[baseLibraryDescription.waitForVisibilityMethod](
+        addDescriptions({ length: '>0', ...descriptions }, action),
+      );
+
+      const result = await page[baseLibraryDescription.getDataMethod](
+        addDescriptions(descriptions, action, { _field: null }),
+      );
+      const flatResult = getResultMappedResult(result, action);
+
+      return getRandomArrayItem(
+        flatResult.map(item => (toArray(baseResultData).includes('text') ? item[_field].text : item[_field])),
+        quantity,
+      );
+    };
+  } else {
+    actions[oneValue] = async (descriptions = {}) => {
+      await page[baseLibraryDescription.waitForVisibilityMethod](addDescriptions(descriptions, action), {
+        everyArrayItem: false,
+      });
+
+      const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));
+      const flatResult = getResultMappedResult(result, action);
+
+      return getRandomArrayItem(flatResult.map(item => (toArray(baseResultData).includes('text') ? item.text : item)));
+    };
+
+    actions[severalValues] = async (quantity = 2, descriptions = {}) => {
+      await page[baseLibraryDescription.waitForVisibilityMethod](
+        addDescriptions({ length: '>0', ...descriptions }, action),
+      );
+
+      const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));
+      const flatResult = getResultMappedResult(result, action);
+
+      return getRandomArrayItem(
+        flatResult.map(item => (toArray(baseResultData).includes('text') ? item.text : item)),
+        quantity,
+      );
+    };
   }
-
-  actions[oneValue] = _fields?.length
-    ? async (_field, descriptions = {}) => {
-        await page[baseLibraryDescription.waitForVisibilityMethod](addDescriptions(descriptions, action), {
-          everyArrayItem: false,
-        });
-
-        const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));
-        const flatResult = getResultMappedResult(result, action);
-
-        return getRandomArrayItem(
-          flatResult.map(item => (toArray(baseResultData).includes('text') ? item[_field].text : item[_field])),
-        );
-      }
-    : async (descriptions = {}) => {
-        await page[baseLibraryDescription.waitForVisibilityMethod](addDescriptions(descriptions, action), {
-          everyArrayItem: false,
-        });
-
-        const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));
-        const flatResult = getResultMappedResult(result, action);
-
-        return getRandomArrayItem(
-          flatResult.map(item => (toArray(baseResultData).includes('text') ? item.text : item)),
-        );
-      };
-
-  actions[severalValues] = _fields?.length
-    ? async (_field = _fields[0], quantity = 2, descriptions = {}) => {
-        await page[baseLibraryDescription.waitForVisibilityMethod](
-          addDescriptions({ length: '>0', ...descriptions }, action),
-        );
-
-        const result = await page[baseLibraryDescription.getDataMethod](
-          addDescriptions(
-            descriptions,
-            action,
-            _field.reduce((act, k) => {
-              act[k] = null;
-
-              return act;
-            }, {}),
-          ),
-        );
-        const flatResult = getResultMappedResult(result, action);
-
-        return getRandomArrayItem(
-          flatResult.map(item =>
-            _field.reduce((requredData, k) => {
-              requredData[k] = toArray(baseResultData).includes('text') ? item[k].text : item[k];
-
-              return requredData;
-            }),
-          ),
-          quantity,
-        );
-      }
-    : async (quantity = 2, descriptions = {}) => {
-        await page[baseLibraryDescription.waitForVisibilityMethod](
-          addDescriptions({ length: '>0', ...descriptions }, action),
-        );
-
-        const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));
-        const flatResult = getResultMappedResult(result, action);
-
-        return getRandomArrayItem(
-          flatResult.map(item => (toArray(baseResultData).includes('text') ? item.text : item)),
-          quantity,
-        );
-      };
 
   return actions;
 }
