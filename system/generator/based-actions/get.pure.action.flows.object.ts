@@ -13,15 +13,16 @@ function getTemplatedCode({ name, nameElements, flowResultType, action, field, p
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
 
   let fnFragments;
-  if (isActionVoid) {
-    fnFragments = async (data, opts) => {
-      return await page[action]({ [field]: data }, opts);
-    };
-  } else if (isRepeatingAllowed) {
+
+  if (isRepeatingAllowed) {
     fnFragments = async (data, opts) => {
       for (const actionData of toArray(data)) {
         await page[action]({ [field]: actionData }, opts);
       }
+    };
+  } else if (isActionVoid) {
+    fnFragments = async (data, opts) => {
+      return await page[action]({ [field]: data }, opts);
     };
   } else {
     fnFragments = async (data, opts) => {
@@ -80,9 +81,8 @@ function getPureActionFlowsObject(asActorAndPage: string, instance: object, acti
       field: fragmentFieldName,
       instance: instance[fragmentFieldName],
       page: instance,
-      nameElements: pageElementActions.includes(fragmentFieldName)
-        ? camelize(`${name} ${prettyFlowActionNamePart} PageElements`)
-        : null,
+      // TODO this needs to be optimized
+      nameElements: pageElementActions.length ? camelize(`${name} ${prettyFlowActionNamePart} PageElements`) : null,
     });
 
     template = { ...template, ...actions };
