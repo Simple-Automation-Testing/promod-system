@@ -68,9 +68,9 @@ function getPureActionFlowsObject(asActorAndPage: string, instance: object, acti
     .filter(field => !isBaseElement(instance[field]))
     .filter(field => checkThatInstanceHasActionItems(instance[field], action));
 
-  return pageFragmentsActions.reduce((template, fragmentFieldName) => {
-    const prettyFlowActionNamePart = prettyMethodName[action] || action;
+  const prettyFlowActionNamePart = prettyMethodName[action] || action;
 
+  return pageFragmentsActions.reduce((template, fragmentFieldName) => {
     const instanceFieldIdentifier = instance[fragmentFieldName][baseLibraryDescription.entityId];
 
     const name = camelize(`${asActorAndPage} ${prettyFlowActionNamePart} ${instanceFieldIdentifier}`);
@@ -82,7 +82,9 @@ function getPureActionFlowsObject(asActorAndPage: string, instance: object, acti
       instance: instance[fragmentFieldName],
       page: instance,
       // TODO this needs to be optimized
-      nameElements: pageElementActions.length ? camelize(`${name} ${prettyFlowActionNamePart} PageElements`) : null,
+      nameElements: pageElementActions.length
+        ? camelize(`${asActorAndPage} ${prettyFlowActionNamePart} PageElements`)
+        : null,
     });
 
     template = { ...template, ...actions };
