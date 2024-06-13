@@ -3,35 +3,27 @@ import { isObject, isString, getType } from 'sat-utils';
 
 const baseLibraryDescriptionExpectedKeys = [
   'entityId',
-  'rootLocatorId',
   'pageId',
   'fragmentId',
   'collectionId',
-  'collectionItemId',
-  'collectionRootElementsId',
   'waitOptionsId',
   'collectionActionId',
   'collectionCheckId',
   'getDataMethod',
   'getVisibilityMethod',
-  'getBaseElementFromCollectionByIndex',
 ];
 /**
  * @example {object} baseLibraryDescription
  * {
  * 		entityId: 'identifier',
- * 		rootLocatorId: 'rootLocator',
  * 		pageId: 'Page',
  * 		fragmentId: 'Fragment',
  * 		collectionId: 'Collection',
- * 		collectionItemId: 'InstanceType',
- * 		collectionRootElementsId: 'rootElements',
  * 		waitOptionsId: 'IWaitOpts',
  * 		collectionActionId: 'ICollectionAction',
  * 		collectionCheckId: 'ICollectionCheck',
  * 		getDataMethod: 'get',
  * 		getVisibilityMethod: 'isDisplayed',
- * 		getBaseElementFromCollectionByIndex: 'get'
  * }
  */
 

@@ -2,9 +2,7 @@
 import { camelize, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getFragmentTypes } from '../get.instance.elements.type';
-import { checkThatInstanceHasActionItems } from '../check.that.action.exists';
-import { checkThatElementHasAction, isBaseElement } from '../get.base';
-import { getInstanceInteractionFields } from '../utils';
+import { getInstanceFragmentAndElementFields } from '../utils';
 
 const {
   actionWithWaitOpts,
@@ -88,19 +86,13 @@ ${firstLine}
 }
 
 function getPureActionFlows(asActorAndPage: string, instance: object, action: string) {
-  const interactionFields = getInstanceInteractionFields(instance);
+  const { elementFields, fragmentFields } = getInstanceFragmentAndElementFields(instance, action);
 
-  const pageElementActions = interactionFields.filter(field => checkThatElementHasAction(instance[field], action));
-
-  const pageFragmentsActions = interactionFields
-    .filter(field => !isBaseElement(instance[field]))
-    .filter(field => checkThatInstanceHasActionItems(instance[field], action));
-
-  const pageElementAction = pageElementActions.length ? createFlowTemplateForPageElements(asActorAndPage, action) : '';
+  const pageElementAction = elementFields.length ? createFlowTemplateForPageElements(asActorAndPage, action) : '';
 
   return `
 /** ====================== ${action} ================== */
-${pageFragmentsActions.reduce(
+${fragmentFields.reduce(
   (template, fragmentFieldName) => {
     const prettyFlowActionNamePart = prettyMethodName[action] || action;
 

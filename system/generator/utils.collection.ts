@@ -4,48 +4,15 @@ import { config } from '../config/config';
 const { baseLibraryDescription, baseElementsActionsDescription } = config.get();
 
 function getCollectionItemInstance(collectionInstance) {
-  let collectionRoot;
-  if (collectionInstance[baseLibraryDescription.rootLocatorId]) {
-    collectionRoot = collectionInstance[baseLibraryDescription.rootLocatorId] || 'a';
-  } else {
-    console.error('baseLibraryDescription should have rootLocatorId, default locator will be "a"');
-    collectionRoot = 'a';
+  if (!baseLibraryDescription.getCollectionItemInstance) {
+    throw new Error('"getCollectionItemInstance" is not defined in baseLibraryDescription');
   }
-
-  if (!collectionInstance[baseLibraryDescription.collectionItemId]) {
-    throw new TypeError(`baseLibraryDescription should have collectionItemId, i.e
-// collection class
-class Collection {
-  constructor(locator, collectionName, rootElements, InstanceType) {
-    this.rootLocator = locator;
-    this.identifier = collectionName;
-    this.rootElements = rootElements;
-    this.CollectionItemClass = CollectionItemClass;
+  if (collectionInstance[baseLibraryDescription.getCollectionItemInstance]) {
+    throw new Error(
+      `collection should have "${baseLibraryDescription.getCollectionItemInstance}" method that returns collection item instance`,
+    );
   }
-}
-// promod.system.config.js
-const baseLibraryDescription = {
-  // ...rest description
-  collectionItemId: 'CollectionItemClass'
-}
-`);
-  }
-
-  const instance = new collectionInstance[baseLibraryDescription.collectionItemId](
-    collectionRoot,
-    collectionInstance[baseLibraryDescription.entityId],
-    collectionInstance[baseLibraryDescription.collectionRootElementsId][
-      baseLibraryDescription.getBaseElementFromCollectionByIndex
-    ](0),
-  );
-
-  instance[baseLibraryDescription.entityId] = collectionInstance[baseLibraryDescription.entityId];
-  instance[baseLibraryDescription.rootLocatorId] = collectionInstance[baseLibraryDescription.rootLocatorId];
-  instance[baseLibraryDescription.collectionRootElementsId] =
-    collectionInstance[baseLibraryDescription.collectionRootElementsId][
-      baseLibraryDescription.getBaseElementFromCollectionByIndex
-    ](0);
-  return instance;
+  return collectionInstance[baseLibraryDescription.getCollectionItemInstance]();
 }
 
 function isCollectionInstance(instance) {

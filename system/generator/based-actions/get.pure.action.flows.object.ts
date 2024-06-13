@@ -2,9 +2,7 @@
 import { camelize, isNotEmptyArray, toArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getFragmentTypes } from '../get.instance.elements.type';
-import { checkThatInstanceHasActionItems } from '../check.that.action.exists';
-import { checkThatElementHasAction, isBaseElement } from '../get.base';
-import { getInstanceInteractionFields } from '../utils';
+import { getInstanceFragmentAndElementFields } from '../utils';
 
 const { repeatingActions = [], baseLibraryDescription = {}, prettyMethodName = {} } = config.get();
 
@@ -60,17 +58,10 @@ function createFlowTemplates({ name, action, field, page, instance, nameElements
 }
 
 function getPureActionFlowsObject(asActorAndPage: string, instance: object, action: string) {
-  const interactionFields = getInstanceInteractionFields(instance);
-
-  const pageElementActions = interactionFields.filter(field => checkThatElementHasAction(instance[field], action));
-
-  const pageFragmentsActions = interactionFields
-    .filter(field => !isBaseElement(instance[field]))
-    .filter(field => checkThatInstanceHasActionItems(instance[field], action));
-
+  const { elementFields, fragmentFields } = getInstanceFragmentAndElementFields(instance, action);
   const prettyFlowActionNamePart = prettyMethodName[action] || action;
 
-  return pageFragmentsActions.reduce((template, fragmentFieldName) => {
+  return fragmentFields.reduce((template, fragmentFieldName) => {
     const instanceFieldIdentifier = instance[fragmentFieldName][baseLibraryDescription.entityId];
 
     const name = camelize(`${asActorAndPage} ${prettyFlowActionNamePart} ${instanceFieldIdentifier}`);
@@ -82,7 +73,7 @@ function getPureActionFlowsObject(asActorAndPage: string, instance: object, acti
       instance: instance[fragmentFieldName],
       page: instance,
       // TODO this needs to be optimized
-      nameElements: pageElementActions.length
+      nameElements: elementFields.length
         ? camelize(`${asActorAndPage} ${prettyFlowActionNamePart} PageElements`)
         : null,
     });
