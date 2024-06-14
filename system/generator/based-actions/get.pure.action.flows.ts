@@ -86,13 +86,13 @@ ${firstLine}
 }
 
 function getPureActionFlows(asActorAndPage: string, instance: object, action: string) {
-  const { elementFields, fragmentFields } = getInstanceFragmentAndElementFields(instance, action);
+  const { elementFields, fragmentFields, collectionsFields } = getInstanceFragmentAndElementFields(instance, action);
 
   const pageElementAction = elementFields.length ? createFlowTemplateForPageElements(asActorAndPage, action) : '';
 
   return `
 /** ====================== ${action} ================== */
-${fragmentFields.reduce(
+${[...fragmentFields, ...collectionsFields].reduce(
   (template, fragmentFieldName) => {
     const prettyFlowActionNamePart = prettyMethodName[action] || action;
 

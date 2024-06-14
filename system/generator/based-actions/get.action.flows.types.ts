@@ -120,7 +120,7 @@ ${actionDeclaration};\n`;
 }
 
 function getActionFlowsTypes(asActorAndPage: string, instance: object, action: string) {
-  const { elementFields, fragmentFields } = getInstanceFragmentAndElementFields(instance, action);
+  const { elementFields, fragmentFields, collectionsFields } = getInstanceFragmentAndElementFields(instance, action);
 
   const pageElementAction = elementFields.length
     ? createFlowTemplateForPageElements(asActorAndPage, action, instance)
@@ -128,7 +128,7 @@ function getActionFlowsTypes(asActorAndPage: string, instance: object, action: s
 
   return `
 /** ====================== ${action} ================== */
-${fragmentFields.reduce(
+${[...fragmentFields, ...collectionsFields].reduce(
   (template, fragmentFieldName) => {
     const prettyFlowActionNamePart = prettyMethodName[action] || action;
 

@@ -54,10 +54,10 @@ function createFlowTemplates({ name, action, field, page, instance, nameElements
 }
 
 function getPureActionFlowsObject(asActorAndPage: string, instance: object, action: string) {
-  const { elementFields, fragmentFields } = getInstanceFragmentAndElementFields(instance, action);
+  const { elementFields, fragmentFields, collectionsFields } = getInstanceFragmentAndElementFields(instance, action);
   const prettyFlowActionNamePart = prettyMethodName[action] || action;
 
-  return fragmentFields.reduce((template, fragmentFieldName) => {
+  return [...fragmentFields, ...collectionsFields].reduce((template, fragmentFieldName) => {
     const instanceFieldIdentifier = instance[fragmentFieldName][baseLibraryDescription.entityId];
 
     const name = camelize(`${asActorAndPage} ${prettyFlowActionNamePart} ${instanceFieldIdentifier}`);
