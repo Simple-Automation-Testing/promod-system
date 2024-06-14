@@ -6,7 +6,9 @@ import { getInstanceFragmentAndElementFields } from '../utils';
 
 const { repeatingActions = [], baseLibraryDescription = {}, prettyMethodName = {} } = config.get();
 
-function getTemplatedCode({ name, nameElements, flowResultType, action, field, page }) {
+function createFlowTemplates({ name, action, field, page, instance, nameElements }) {
+  const flowResultType = getFragmentTypes(instance, action, 'resultType');
+
   const isActionVoid = flowResultType === 'void';
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
 
@@ -49,12 +51,6 @@ function getTemplatedCode({ name, nameElements, flowResultType, action, field, p
   }
 
   return actions;
-}
-
-function createFlowTemplates({ name, action, field, page, instance, nameElements }) {
-  const flowResultType = getFragmentTypes(instance, action, 'resultType');
-
-  return getTemplatedCode({ name, nameElements, flowResultType, action, field, page });
 }
 
 function getPureActionFlowsObject(asActorAndPage: string, instance: object, action: string) {

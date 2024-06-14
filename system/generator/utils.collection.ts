@@ -7,7 +7,7 @@ function getCollectionItemInstance(collectionInstance) {
   if (!baseLibraryDescription.getCollectionItemInstance) {
     throw new Error('"getCollectionItemInstance" is not defined in baseLibraryDescription');
   }
-  if (collectionInstance[baseLibraryDescription.getCollectionItemInstance]) {
+  if (!collectionInstance[baseLibraryDescription.getCollectionItemInstance]) {
     throw new Error(
       `collection should have "${baseLibraryDescription.getCollectionItemInstance}" method that returns collection item instance`,
     );

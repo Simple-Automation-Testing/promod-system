@@ -2,13 +2,9 @@
 import { createType } from './create.type';
 import { config } from '../config/config';
 import { checkThatInstanceHasActionItems } from './check.that.action.exists';
-import { checkThatElementHasAction, isBaseElement, getElementActionType, getElementType } from './get.base';
-import { getInstanceInteractionFields } from './utils';
-import {
-  getCollectionItemInstance,
-  isCollectionWithItemBaseElement,
-  isCollectionWithItemFragment,
-} from './utils.collection';
+import { checkThatElementHasAction, getElementActionType, getElementType } from './get.base';
+import { getInstanceInteractionFields, getInstanceFragmentAndElementFields } from './utils';
+import { getCollectionItemInstance } from './utils.collection';
 
 const { resultActionsMap, baseLibraryDescription, baseCollectionActionsDescription, baseElementsActionsDescription } =
   config.get();
@@ -84,53 +80,22 @@ function getFragmentTypes(instance, action: string, actionType: string, ...rest)
     return createType(types, action);
   }
 
-  const instanceOwnKeys = getInstanceInteractionFields(instance);
+  const { fragmentFields, elementFields, collectionsFields } = getInstanceFragmentAndElementFields(instance, action);
 
-  const fragmentElements = instanceOwnKeys
-    .filter(itemFiledName => {
-      // logger here
-      return isBaseElement(instance[itemFiledName]) && checkThatElementHasAction(instance[itemFiledName], action);
-    })
-    .map(itemFiledName => ({
-      [itemFiledName]: { [action]: getElementType(instance[itemFiledName], action, actionType) },
-    }));
+  const fragmentElements = elementFields.map(itemFiledName => ({
+    [itemFiledName]: { [action]: getElementType(instance[itemFiledName], action, actionType) },
+  }));
 
-  const fragmentFragments = instanceOwnKeys
-    .filter(itemFiledName => {
-      // logger here
-      return (
-        instance[itemFiledName].constructor.name.includes(baseLibraryDescription.fragmentId) &&
-        checkThatInstanceHasActionItems(instance[itemFiledName], action)
-      );
-    })
-    .map(itemFiledName => {
-      // logger here
-      return {
-        [itemFiledName]: {
-          [action]: getFragmentTypes(instance[itemFiledName], action, actionType, ...rest),
-        },
-      };
-    });
+  const fragmentFragments = fragmentFields.map(itemFiledName => ({
+    [itemFiledName]: { [action]: getFragmentTypes(instance[itemFiledName], action, actionType, ...rest) },
+  }));
 
-  const fragmentArrayItems = instanceOwnKeys
-    .filter(itemFiledName => instance[itemFiledName].constructor.name.includes(baseLibraryDescription.collectionId))
-    .filter(itemFiledName => {
-      // logger here
-      return (
-        (isCollectionWithItemFragment(instance[itemFiledName]) &&
-          checkThatInstanceHasActionItems(getCollectionItemInstance(instance[itemFiledName]), action)) ||
-        (isCollectionWithItemBaseElement(instance[itemFiledName]) &&
-          checkThatElementHasAction(getCollectionItemInstance(instance[itemFiledName]), action))
-      );
-    })
-    .map(itemFiledName => {
-      // logger here
-      return {
-        [itemFiledName]: {
-          [action]: createType(getCollectionTypes(instance[itemFiledName], action, actionType, ...rest), action),
-        },
-      };
-    });
+  // TODO add possibility do run as collections
+  const fragmentArrayItems = collectionsFields.map(itemFiledName => ({
+    [itemFiledName]: {
+      [action]: createType(getCollectionTypes(instance[itemFiledName], action, actionType, ...rest), action),
+    },
+  }));
 
   return createType([...fragmentElements, ...fragmentArrayItems, ...fragmentFragments], action);
 }

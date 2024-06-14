@@ -2,6 +2,7 @@
 import { config } from '../config/config';
 import { checkThatElementHasAction, isBaseElement } from './get.base';
 import { checkThatInstanceHasActionItems } from './check.that.action.exists';
+import { isCollectionInstance } from './utils.collection';
 
 const { baseElementsActionsDescription, baseLibraryDescription } = config.get();
 
@@ -81,11 +82,18 @@ function getInstanceFragmentAndElementFields(instance, action: string) {
 
   const elementFields = interactionFields.filter(field => checkThatElementHasAction(instance[field], action));
 
-  const fragmentFields = interactionFields
-    .filter(field => !isBaseElement(instance[field]))
-    .filter(field => checkThatInstanceHasActionItems(instance[field], action));
+  const fragmentFields = interactionFields.filter(
+    field =>
+      !isBaseElement(instance[field]) &&
+      !isCollectionInstance(instance[field]) &&
+      checkThatInstanceHasActionItems(instance[field], action),
+  );
 
-  return { elementFields, fragmentFields };
+  const collectionsFields = interactionFields.filter(
+    field => isCollectionInstance(instance[field]) && checkThatInstanceHasActionItems(instance[field], action),
+  );
+
+  return { elementFields, fragmentFields, collectionsFields };
 }
 
 export { getAllBaseActions, getInstanceInteractionFields, getInstanceFragmentAndElementFields };
