@@ -236,7 +236,7 @@ function addDescriptions(descriptions, action, actionData = null) {
     return { ...descriptions, [collectionDescription.action]: actionData };
   }
 
-  return { [firstKey]: addDescriptions(descriptions, action[firstKey]) };
+  return { [firstKey]: addDescriptions(descriptions, action[firstKey], actionData) };
 }
 
 function getName(data) {

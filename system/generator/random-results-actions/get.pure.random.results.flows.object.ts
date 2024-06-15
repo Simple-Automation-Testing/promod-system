@@ -17,7 +17,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
   const actions = {};
 
   if (_fields?.length) {
-    actions[randomData] = async (_field = _fields[0], descriptions = {}) => {
+    actions[randomData] = async (_field = [_fields[0]], descriptions = {}) => {
       await page[baseLibraryDescription.waitForVisibilityMethod](
         addDescriptions({ length: '>0', ...descriptions }, action),
       );
@@ -51,7 +51,9 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
         everyArrayItem: false,
       });
 
-      const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));
+      const result = await page[baseLibraryDescription.getDataMethod](
+        addDescriptions(descriptions, action, { [_field]: null }),
+      );
       const flatResult = getResultMappedResult(result, action);
 
       return getRandomArrayItem(
@@ -61,11 +63,11 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
 
     actions[severalValues] = async (_field = _fields[0], quantity = 2, descriptions = {}) => {
       await page[baseLibraryDescription.waitForVisibilityMethod](
-        addDescriptions({ length: '>0', ...descriptions }, action),
+        addDescriptions({ length: '>0', ...descriptions }, action, { [_field]: null }),
       );
 
       const result = await page[baseLibraryDescription.getDataMethod](
-        addDescriptions(descriptions, action, { _field: null }),
+        addDescriptions(descriptions, action, { [_field]: null }),
       );
       const flatResult = getResultMappedResult(result, action);
 
