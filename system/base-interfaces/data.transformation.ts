@@ -95,11 +95,10 @@ function getCollectionRecomposedData(recomposedData, component) {
   const { length, [collectionDescription.comparison]: ignoreComparison, ...rest } = recomposedData;
 
   for (const key of Object.keys(rest)) {
-    if (
-      isCollectionInstance(component && component[key]) &&
-      !collectionActionProps.has(key) &&
-      !safeHasOwnPropery(rest[key], collectionDescription.action)
-    ) {
+    if (isCollectionInstance(component && component[key]) && !collectionActionProps.has(key)) {
+      const actionDescription = safeHasOwnPropery(rest[key], collectionDescription.action)
+        ? rest[key][collectionDescription.action]
+        : undefined;
       const itemsArrayChild = getCollectionElementInstance(component && component[key], baseLibraryDescription);
       const {
         _outOfDescription,
@@ -110,22 +109,30 @@ function getCollectionRecomposedData(recomposedData, component) {
       if (isEmptyObject(_outOfDescription) && isNotEmptyArray(ignoreComparison)) {
         rest[key] = {
           ...data,
-          [collectionDescription.action]: getCollectionRecomposedData(ignoreComparison[0], itemsArrayChild),
+          [collectionDescription.action]: isUndefined(actionDescription)
+            ? getCollectionRecomposedData(ignoreComparison[0], itemsArrayChild)
+            : actionDescription,
         };
       } else if (isEmptyObject(_outOfDescription) && isNotEmptyObject(ignoreComparison)) {
         rest[key] = {
           ...data,
-          [collectionDescription.action]: getCollectionRecomposedData(ignoreComparison, itemsArrayChild),
+          [collectionDescription.action]: isUndefined(actionDescription)
+            ? getCollectionRecomposedData(ignoreComparison, itemsArrayChild)
+            : actionDescription,
         };
       } else if (isNotEmptyArray(_outOfDescription)) {
         rest[key] = {
           ...data,
-          [collectionDescription.action]: getCollectionRecomposedData(_outOfDescription[0], itemsArrayChild),
+          [collectionDescription.action]: isUndefined(actionDescription)
+            ? getCollectionRecomposedData(_outOfDescription[0], itemsArrayChild)
+            : actionDescription,
         };
       } else {
         rest[key] = {
           ...data,
-          [collectionDescription.action]: getCollectionRecomposedData(_outOfDescription, itemsArrayChild),
+          [collectionDescription.action]: isUndefined(actionDescription)
+            ? getCollectionRecomposedData(_outOfDescription, itemsArrayChild)
+            : actionDescription,
         };
       }
     } else if (isObject(rest[key]) && !collectionActionProps.has(key)) {

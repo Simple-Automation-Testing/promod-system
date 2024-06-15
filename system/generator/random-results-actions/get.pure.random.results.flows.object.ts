@@ -47,9 +47,12 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
     };
 
     actions[oneValue] = async (_field, descriptions = {}) => {
-      await page[baseLibraryDescription.waitForVisibilityMethod](addDescriptions(descriptions, action), {
-        everyArrayItem: false,
-      });
+      await page[baseLibraryDescription.waitForVisibilityMethod](
+        addDescriptions({ ...descriptions, length: '>0' }, action),
+        {
+          everyArrayItem: false,
+        },
+      );
 
       const result = await page[baseLibraryDescription.getDataMethod](
         addDescriptions(descriptions, action, { [_field]: null }),
