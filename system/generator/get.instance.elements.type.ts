@@ -74,7 +74,7 @@ function getCollectionTypes(instance, action, actionType, ...rest) {
 function getFragmentTypes(instance, action: string, actionType: string, ...rest) {
   if (resultActionsMap[action] === 'void' && actionType === 'resultType') return 'void';
 
-  if (instance.constructor.name === baseLibraryDescription.collectionId) {
+  if (instance?.constructor?.name === baseLibraryDescription.collectionId) {
     const types = getCollectionTypes(instance, action, actionType, ...rest);
 
     return createType(types, action);
