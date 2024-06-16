@@ -8,9 +8,8 @@ export * from './test-runner';
 
 export * from './generator/generate.pure';
 export * from './generator/generate.pure.object';
-export * from './test-rail-report';
 
 export { getInstanceInteractionFields } from './generator/utils';
 
 // types
-export type { TobjectFromStringArray, TresultBasedOnArgument, TChainableActions, IsEq } from './generator/types';
+export type { TobjectFromStringArray, TresultBasedOnArgument, TChainableActions, TisEq } from './generator/types';

@@ -25,7 +25,7 @@ import { config } from '../config';
 const { warn, log } = console;
 
 const {
-  collectionDescription,
+  collectionDescription = {},
   actionFormatter = (action: string, ..._rest) => {
     warn('actionFormatter is not defined in promod.system.config.js, it is required for better messages');
 

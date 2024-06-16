@@ -39,7 +39,7 @@ async function waitForAttributeIncludes(
 
       return elementAttribute.includes(attributeValue);
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -67,7 +67,7 @@ async function waitForAttributeEquals(
 
       return elementAttribute === attributeValue;
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -88,7 +88,7 @@ async function waitForTextIncludes(element, text: string, opts: IWaitConditionOp
 
       return elementText.includes(text);
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -108,7 +108,7 @@ async function waitForText(element, opts: IWaitConditionOpts = {}) {
 
       return elementText.length;
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -129,7 +129,7 @@ async function waitForTextEquals(element, text: string, opts: IWaitConditionOpts
 
       return elementText.includes(text);
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -151,7 +151,7 @@ async function waitForDisplayed(element, isDisplayed: boolean, opts: IWaitCondit
 
       return isDisplayed === isElementItemDisplayed;
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -173,7 +173,7 @@ async function waitForPresented(element, isPresented: boolean, opts: IWaitCondit
 
       return isPresented === isElementItemPresented;
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -195,7 +195,7 @@ async function waitForEnabled(element, isEnabled: boolean, opts: IWaitConditionO
 
       return isEnabled === isElementItemEnabled;
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -216,7 +216,7 @@ async function waitForElementsCountEquals(elements, count: number, opts: IWaitCo
 
       return currentElementsCount === count;
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -238,7 +238,7 @@ async function waitForElementsCountNotEquals(elements, count: number, opts: IWai
 
       return currentElementsCount !== count;
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -260,7 +260,7 @@ async function waitForElementsCountIsInRange(elements, range: string, opts: IWai
 
       return execNumberExpression(range, currentElementsCount);
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -287,7 +287,7 @@ async function waitForEveryElementTextIncludes(elements, text: string, opts: IWa
       }
       return true;
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 
@@ -314,7 +314,7 @@ async function waitForEveryElementTextEquals(elements, text: string, opts: IWait
       }
       return true;
     },
-    { ...opts, message: opts.message ? opts.message : createErrorMessage },
+    { ...opts, message: opts.message || createErrorMessage },
   );
 }
 

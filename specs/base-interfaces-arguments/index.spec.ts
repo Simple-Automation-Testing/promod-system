@@ -40,7 +40,7 @@ config.updateConfigField('prettyMethodName', {
 });
 config.updateConfigField('baseResultData', ['text', 'color']);
 
-describe.only('getActionArgumentsMessagePart', function () {
+describe('getActionArgumentsMessagePart', function () {
   it('test', function () {
     const data = {
       items: {
