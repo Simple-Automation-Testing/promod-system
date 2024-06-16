@@ -8,6 +8,7 @@ export * from './test-runner';
 
 export * from './generator/generate.pure';
 export * from './generator/generate.pure.object';
+export * from './generator/validators';
 
 export { getInstanceInteractionFields } from './generator/utils';
 
