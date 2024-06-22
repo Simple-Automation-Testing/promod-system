@@ -93,30 +93,18 @@ function checkThatInstanceHasActionItems(instance, action: string) {
 
   const interactionFields = getInstanceInteractionFields(instance);
 
-  let result = false;
-  for (const fragmentChildFieldName of interactionFields) {
-    const childConstructorName = instance[fragmentChildFieldName]?.constructor?.name;
+  return interactionFields.some(field => {
+    const fieldConstructorName = instance[field].constructor.name;
+    if (fieldConstructorName.includes(baseLibraryDescription.fragmentId)) {
+      return checkThatInstanceHasActionItems(instance[field], action);
+    } else if (isCollectionWithItemFragment(instance[field]) || isCollectionWithItemBaseElement(instance[field])) {
+      const collectionInstance = getCollectionItemInstance(instance[field]);
 
-    if (childConstructorName.includes(baseLibraryDescription.fragmentId)) {
-      result = checkThatInstanceHasActionItems(instance[fragmentChildFieldName], action);
-
-      if (result) return result;
-    } else if (
-      isCollectionWithItemFragment(instance[fragmentChildFieldName]) ||
-      isCollectionWithItemBaseElement(instance[fragmentChildFieldName])
-    ) {
-      const collectionInstance = getCollectionItemInstance(instance[fragmentChildFieldName]);
-
-      const result = checkThatInstanceHasActionItems(collectionInstance, action);
-
-      if (result) return result;
-    } else if (baseElementsActionsDescription[childConstructorName]) {
-      result = checkThatElementHasAction(childConstructorName, action);
-      if (result) return result;
+      return checkThatInstanceHasActionItems(collectionInstance, action);
+    } else if (baseElementsActionsDescription[fieldConstructorName]) {
+      return checkThatElementHasAction(fieldConstructorName, action);
     }
-  }
-
-  return result;
+  });
 }
 
 export { checkThatInstanceHasActionItems, getCollectionsPathes };
