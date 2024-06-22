@@ -33,9 +33,21 @@ function isCollectionWithItemFragment(instance) {
   );
 }
 
+function getCollectionType(instance) {
+  if (!isCollectionInstance(instance)) {
+    return { fragment: false, element: false };
+  }
+
+  return {
+    fragment: isCollectionWithItemFragment(instance),
+    element: isCollectionWithItemBaseElement(instance),
+  };
+}
+
 export {
   getCollectionItemInstance,
   isCollectionWithItemBaseElement,
   isCollectionWithItemFragment,
   isCollectionInstance,
+  getCollectionType,
 };

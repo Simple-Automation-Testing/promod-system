@@ -12,6 +12,7 @@ import {
 import { promodLogger } from '../logger';
 import { getCollectionRecomposedData } from './data.transformation';
 import { getInstanceInteractionFields } from '../generator/utils';
+import { isBaseElement } from '../generator/get.base';
 
 import type { TbaseLibraryDescriptionMap, TcollectionActionDescriptionMap } from './types';
 
@@ -366,7 +367,10 @@ class PromodSystemStructure<TrootElement = any> {
   }
 
   private getStructureActionFields() {
-    const properties = getInstanceInteractionFields(this, { elements: true });
+    // TODO refactor this method
+    const properties = getInstanceInteractionFields(this)
+      .filter(field => isBaseElement(this[field]))
+      .reduce((acc, field) => (acc[field] = null || acc), {});
 
     if (isEmptyObject(properties)) {
       throw new Error(`${this.identifier}: This structure doesn't have action element props`);

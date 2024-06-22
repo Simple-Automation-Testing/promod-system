@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/prefer-set-has, sonarjs/no-duplicated-branches, sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
 import { camelize, isNotEmptyArray, toArray } from 'sat-utils';
 import { config } from '../../config/config';
-import { getInstanceFragmentAndElementFields } from '../utils';
+import { getActionInstanceFields } from '../utils';
 
 const { repeatingActions = [], resultActionsMap, baseLibraryDescription = {}, prettyMethodName = {} } = config.get();
 
@@ -51,7 +51,7 @@ function createFlowTemplates({ name, action, field, page }) {
 }
 
 function getPureActionFlowsObject(asActorAndPage: string, instance: object, action: string) {
-  const { elementFields, fragmentFields, collectionsFields } = getInstanceFragmentAndElementFields(instance, action);
+  const { elementFields, fragmentFields, collectionsFields } = getActionInstanceFields(instance, action);
   const prettyFlowActionNamePart = prettyMethodName[action] || action;
 
   return [...fragmentFields, ...collectionsFields].reduce(

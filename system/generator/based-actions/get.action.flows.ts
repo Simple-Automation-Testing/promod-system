@@ -2,7 +2,7 @@
 import { isObject, camelize, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getElementsTypes, getFragmentTypes } from '../get.instance.elements.type';
-import { getInstanceFragmentAndElementFields } from '../utils';
+import { getActionInstanceFields } from '../utils';
 
 const noTransormTypes = new Set(['void', 'boolean']);
 
@@ -146,7 +146,7 @@ ${firstLine}
 }
 
 function getActionFlows(asActorAndPage: string, instance: object, action: string) {
-  const { elementFields, fragmentFields, collectionsFields } = getInstanceFragmentAndElementFields(instance, action);
+  const { elementFields, fragmentFields, collectionsFields } = getActionInstanceFields(instance, action);
 
   const pageElementAction = elementFields.length
     ? createFlowTemplateForPageElements(asActorAndPage, action, instance)

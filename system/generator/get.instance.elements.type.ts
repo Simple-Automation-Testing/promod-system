@@ -3,32 +3,23 @@ import { createType } from './create.type';
 import { config } from '../config/config';
 import { checkThatInstanceHasActionItems } from './check.that.action.exists';
 import { checkThatElementHasAction, getElementActionType, getElementType } from './get.base';
-import { getInstanceInteractionFields, getInstanceFragmentAndElementFields } from './utils';
-import { getCollectionItemInstance } from './utils.collection';
+import { getInstanceInteractionFields, getActionInstanceFields } from './utils';
+import { getCollectionItemInstance, isCollectionInstance } from './utils.collection';
 
-const { resultActionsMap, baseLibraryDescription, baseCollectionActionsDescription, baseElementsActionsDescription } =
-  config.get();
+const { resultActionsMap, baseCollectionActionsDescription, baseElementsActionsDescription } = config.get();
 
 function getColletionActionType(collectionsItem, getTypes, collectionActionType, ...rest) {
   let [collectionActionDescriptor] = rest;
+
   return Object.keys(collectionActionType).reduce((typeString, actionKey, index, allActions) => {
     const actionDescriptor = collectionActionType[actionKey] as { action: string; actionType: string };
 
-    if (allActions.length - 1 === index) {
-      return (typeString += `${getTypes(
-        collectionsItem,
-        actionDescriptor.action,
-        actionDescriptor.actionType,
-        collectionActionDescriptor,
-      )}`);
-    }
-
-    return (typeString += `${getTypes(
+    return `${typeString}${getTypes(
       collectionsItem,
       actionDescriptor.action,
       actionDescriptor.actionType,
       collectionActionDescriptor,
-    )},`);
+    )}${allActions.length - 1 === index ? '' : ','}`;
   }, '');
 }
 
@@ -68,19 +59,20 @@ function getCollectionTypes(instance, action, actionType, ...rest) {
   }
 
   types[action] = colletionItemType;
+
   return types;
 }
 
 function getFragmentTypes(instance, action: string, actionType: string, ...rest) {
   if (resultActionsMap[action] === 'void' && actionType === 'resultType') return 'void';
 
-  if (instance?.constructor?.name === baseLibraryDescription.collectionId) {
+  if (isCollectionInstance(instance)) {
     const types = getCollectionTypes(instance, action, actionType, ...rest);
 
     return createType(types, action);
   }
 
-  const { fragmentFields, elementFields, collectionsFields } = getInstanceFragmentAndElementFields(instance, action);
+  const { fragmentFields, elementFields, collectionsFields } = getActionInstanceFields(instance, action);
 
   const fragmentElements = elementFields.map(itemFiledName => ({
     [itemFiledName]: { [action]: getElementType(instance[itemFiledName], action, actionType) },

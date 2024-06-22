@@ -9,6 +9,8 @@ import {
   getCollectionItemInstance,
   isCollectionWithItemBaseElement,
   isCollectionWithItemFragment,
+  getCollectionType,
+  isCollectionInstance,
 } from './utils.collection';
 
 const {
@@ -41,41 +43,30 @@ function getCollectionsPathes(instance) {
   }
 
   const interactionFields = getInstanceInteractionFields(instance);
-
-  const result = {};
-
-  for (const fragmentChildFieldName of interactionFields) {
-    const childConstructorName = instance[fragmentChildFieldName].constructor.name;
+  // TODO document this
+  return interactionFields.reduce((result, field) => {
+    const childConstructorName = instance[field].constructor.name;
 
     if (childConstructorName.includes(baseLibraryDescription.fragmentId)) {
-      const nestedItem = getCollectionsPathes(instance[fragmentChildFieldName]);
+      const nestedItem = getCollectionsPathes(instance[field]);
       if (safeJSONstringify(nestedItem).includes(collectionDescription.action)) {
-        result[fragmentChildFieldName] = nestedItem;
+        result[field] = nestedItem;
       }
-    } else if (isCollectionWithItemFragment(instance[fragmentChildFieldName])) {
-      const collectionInstance = getCollectionItemInstance(instance[fragmentChildFieldName]);
-      result[fragmentChildFieldName] = {
-        [collectionDescription.action]: getCollectionsPathes(collectionInstance),
+    } else if (isCollectionInstance(instance[field])) {
+      const { fragment } = getCollectionType(instance[field]);
+      const collectionInstance = getCollectionItemInstance(instance[field]);
 
-        __countResult: getFragmentTypes(collectionInstance, 'get', 'resultType'),
-        _type: getCollectionTypes(instance[fragmentChildFieldName], 'get', 'entryType', collectionReducedType, wrap),
+      result[field] = {
+        [collectionDescription.action]: fragment ? getCollectionsPathes(collectionInstance) : null,
+
+        __countResult: (fragment ? getFragmentTypes : getElementType)(collectionInstance, 'get', 'resultType'),
+        _type: getCollectionTypes(instance[field], 'get', 'entryType', collectionReducedType, wrap),
         _fields: getInstanceInteractionFields(collectionInstance),
       };
-    } else if (isCollectionWithItemBaseElement(instance[fragmentChildFieldName])) {
-      const collectionInstance = getCollectionItemInstance(instance[fragmentChildFieldName]);
-      result[fragmentChildFieldName] = {
-        [collectionDescription.action]: null,
-
-        __countResult: getElementType(collectionInstance, 'get', 'resultType'),
-        _type: getCollectionTypes(instance[fragmentChildFieldName], 'get', 'entryType', collectionReducedType, wrap),
-        _fields: getInstanceInteractionFields(collectionInstance),
-      };
-    } else if (baseElementsActionsDescription[childConstructorName]) {
-      // noop
     }
-  }
 
-  return result;
+    return result;
+  }, {});
 }
 
 function checkThatInstanceHasActionItems(instance, action: string) {
