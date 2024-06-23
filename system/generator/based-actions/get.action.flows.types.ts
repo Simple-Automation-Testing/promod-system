@@ -1,8 +1,9 @@
 /* eslint-disable sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
 import { isObject, camelize, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../../config/config';
-import { getElementsTypes, getFragmentTypes } from '../get.instance.elements.type';
 import { getActionInstanceFields } from '../utils';
+
+import { getFlowRestArguments, getFlowTypes } from './common';
 
 const noTransormTypes = new Set(['void', 'boolean']);
 
@@ -72,18 +73,9 @@ ${actionDeclaration};`;
 }
 
 function createFlowTemplates(name, action, field, instance) {
-  const { actionWithWaitOpts, baseLibraryDescription } = config.get();
+  const { flowArgumentType, flowResultType, typeName } = getFlowTypes(instance, action, field);
 
-  const flowArgumentType = getFragmentTypes(instance, action, 'entryType');
-  const flowResultType = getFragmentTypes(instance, action, 'resultType');
-  const typeName = `T${camelize(`${field} ${action}`)}`;
-
-  let optionsSecondArgument = '';
-  if (actionWithWaitOpts.includes(action)) {
-    optionsSecondArgument = `, opts?: ${baseLibraryDescription.waitOptionsId}`;
-  } else if (baseLibraryDescription.generalActionOptionsId) {
-    optionsSecondArgument = `, opts?: ${baseLibraryDescription.generalActionOptionsId}`;
-  }
+  const optionsSecondArgument = getFlowRestArguments(action);
 
   return getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field });
 }
@@ -92,18 +84,11 @@ function createFlowTemplates(name, action, field, instance) {
 function createFlowTemplateForPageElements(name, action, instance) {
   const prettyFlowActionNamePart = prettyMethodName[action] || action;
 
-  const flowArgumentType = getElementsTypes(instance, action, 'entryType');
-  const flowResultType = getElementsTypes(instance, action, 'resultType');
-  const typeName = `T${camelize(`${name} ${action}`)}`;
+  const { flowArgumentType, flowResultType, typeName } = getFlowTypes(instance, action, name, true);
 
   const flowActionName = camelize(`${name} ${prettyFlowActionNamePart} PageElements`);
 
-  let optionsSecondArgument = '';
-  if (actionWithWaitOpts.includes(action)) {
-    optionsSecondArgument = `, opts?: ${baseLibraryDescription.waitOptionsId}`;
-  } else if (baseLibraryDescription.generalActionOptionsId) {
-    optionsSecondArgument = `, opts?: ${baseLibraryDescription.generalActionOptionsId}`;
-  }
+  const optionsSecondArgument = getFlowRestArguments(action);
 
   // TODO waiters returns boolean if error was not thrown
   const resultTypeClarification = flowResultType === 'void' && optionsSecondArgument ? 'boolean' : flowResultType;

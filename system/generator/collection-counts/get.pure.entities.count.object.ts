@@ -3,7 +3,7 @@ import { camelize } from 'sat-utils';
 //
 import { config } from '../../config/config';
 import { getActionsList, getResultMappedResult, addDescriptions, getName } from '../utils.random';
-import { getCollectionsPathes } from '../check.that.action.exists';
+import { getCollectionsPathes } from '../create.type';
 
 const { baseLibraryDescription = {} } = config.get();
 

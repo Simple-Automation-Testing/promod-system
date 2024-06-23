@@ -1,7 +1,8 @@
 /* eslint-disable sonarjs/no-nested-template-literals, sonarjs/cognitive-complexity*/
 import { camelize, toArray, getRandomArrayItem } from 'sat-utils';
+
 import { config } from '../../config/config';
-import { getCollectionsPathes } from '../check.that.action.exists';
+import { getCollectionsPathes } from '../create.type';
 import { getResultMappedResult, getActionsList, getName, addDescriptions } from '../utils.random';
 
 const { baseLibraryDescription = {}, baseResultData = [] } = config.get();

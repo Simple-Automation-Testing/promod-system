@@ -11,13 +11,13 @@ function createFlowTemplateForPageElements({ action, page, nameElements }) {
   const actions = {};
 
   actions[nameElements] = isRepeatingAllowed
-    ? async (data, opts) => {
+    ? async (data, ...rest) => {
         for (const actionData of toArray(data)) {
-          await page[action](actionData, opts);
+          await page[action](actionData, ...rest);
         }
       }
-    : async (data, opts) => {
-        return await page[action](data, opts);
+    : async (data, ...rest) => {
+        return await page[action](data, ...rest);
       };
 
   return actions;

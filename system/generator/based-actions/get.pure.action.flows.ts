@@ -1,7 +1,8 @@
 /* eslint-disable sonarjs/no-duplicated-branches, sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
 import { camelize, isArray, isNotEmptyArray } from 'sat-utils';
+
 import { config } from '../../config/config';
-import { getFragmentTypes } from '../get.instance.elements.type';
+import { getFragmentTypes } from '../create.type';
 import { getActionInstanceFields } from '../utils';
 
 const {

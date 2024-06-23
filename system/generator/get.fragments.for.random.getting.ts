@@ -1,8 +1,10 @@
 /* eslint-disable sonarjs/cognitive-complexity, no-console*/
 // TODO how to handle collection in collection
 import { isNotEmptyObject } from 'sat-utils';
+
 import { config } from '../config/config';
-import { getElementsTypes } from './get.instance.elements.type';
+
+import { getElementsTypes } from './create.type';
 import { getInstanceInteractionFields } from './utils';
 import { checkThatElementHasAction, getElementType, isBaseElement, getFragmentBaseElementsFields } from './get.base';
 import {

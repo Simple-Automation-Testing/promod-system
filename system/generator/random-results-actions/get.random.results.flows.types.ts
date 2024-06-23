@@ -1,6 +1,7 @@
 /* eslint-disable sonarjs/no-nested-template-literals, sonarjs/cognitive-complexity*/
 import { camelize } from 'sat-utils';
-import { getCollectionsPathes } from '../check.that.action.exists';
+
+import { getCollectionsPathes } from '../create.type';
 import { getActionsList, getName, getFieldsEnumList } from '../utils.random';
 
 function createFlowTemplates(asActorAndPage, actionDescriptor) {

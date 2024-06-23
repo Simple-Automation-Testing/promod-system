@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
 import { camelize } from 'sat-utils';
 import { getActionsList, getName } from '../utils.random';
-import { getCollectionsPathes } from '../check.that.action.exists';
+import { getCollectionsPathes } from '../create.type';
 import { createTemplatePureTemplate } from './get.pure.entities.count';
 
 function createTemplate(asActorAndPage, actionDescriptor) {

@@ -2,7 +2,7 @@
 import { camelize } from 'sat-utils';
 
 import { getActionsList, getName } from '../utils.random';
-import { getCollectionsPathes } from '../check.that.action.exists';
+import { getCollectionsPathes } from '../create.type';
 
 function createTemplate(asActorAndPage, actionDescriptor) {
   const { action, __countResult, _type } = actionDescriptor || {};
