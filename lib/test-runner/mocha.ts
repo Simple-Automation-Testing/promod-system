@@ -10,17 +10,19 @@ type TtestOpts = {
 };
 
 export type TreporterInstance<Topts = TtestOpts> = {
-  startCase: (testCaseTitle: string) => void;
+  startCase: (testCaseTitle: string) => void | Promise<void>;
 
-  addCaseProperties: (opts: Topts) => void;
+  logTestBody: (testBody: string | ((...args: any[]) => any | Promise<any>)) => void | Promise<void>;
+
+  addCaseProperties: (opts: Topts) => void | Promise<void>;
   addStep?: (stepData: string, stepArguments?: any, stepResult?: any) => void | Promise<void>;
   finishStep?: (...args) => void | Promise<void>;
 
-  addCustomData?: (...args) => void;
-  log?: (...args) => void;
+  addCustomData?: (...args) => void | Promise<void>;
+  log?: (...args) => void | Promise<void>;
 
-  finishSuccessCase: (testCaseTitle: string) => void;
-  finishFailedCase: (testCaseTitle: string, error: Error) => void;
+  finishSuccessCase: (testCaseTitle: string) => void | Promise<void>;
+  finishFailedCase: (testCaseTitle: string, error: Error) => void | Promise<void>;
 };
 
 type TtestBody<Tfixtures> = (fixtures?: Tfixtures) => Promise<void> | any;
@@ -48,6 +50,8 @@ const reportersManager = {
   addReporter: (...args) => ({}),
   startCase: (...args) => ({}),
   addCaseProperties: (...args) => ({}),
+  logTestBody: (...args) => ({}),
+
   addStep:
     (...args): Promise<(...args) => void | Promise<void>> | ((...args) => void | Promise<void>) =>
     (...args) => {
@@ -73,6 +77,19 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       },
       reset: () => {
         activeReporters.splice(0, activeReporters.length);
+      },
+      logTestBody: async (testBody: string | ((...args: any[]) => any | Promise<any>)) => {
+        for (const reporter of activeReporters) {
+          try {
+            if (reporter.logTestBody) {
+              await reporter.logTestBody(testBody);
+            }
+          } catch (error) {
+            if (PROMOD_S_SHORE_REPORTER_ERRORS) {
+              warn(error);
+            }
+          }
+        }
       },
       startCase: async (testCaseTitle: string) => {
         for (const reporter of activeReporters) {
@@ -231,6 +248,7 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
             error(`${reporter} should be an object of function that returns reporter object`);
           }
         });
+        await reportersManager.logTestBody(fn.toString());
         await reportersManager.startCase(testName);
         await reportersManager.addCaseProperties(opts);
 
