@@ -10,19 +10,19 @@ type TtestOpts = {
 };
 
 export type TreporterInstance<Topts = TtestOpts> = {
-  startCase: (testCaseTitle: string) => void | Promise<void>;
+  startCase?: (testCaseTitle: string) => void | Promise<void>;
 
-  logTestBody: (testBody: string | ((...args: any[]) => any | Promise<any>)) => void | Promise<void>;
+  logTestBody?: (testBody: string | ((...args: any[]) => any | Promise<any>)) => void | Promise<void>;
 
-  addCaseProperties: (opts: Topts) => void | Promise<void>;
+  addCaseProperties?: (opts: Topts) => void | Promise<void>;
   addStep?: (stepData: string, stepArguments?: any, stepResult?: any) => void | Promise<void>;
   finishStep?: (...args) => void | Promise<void>;
 
   addCustomData?: (...args) => void | Promise<void>;
   log?: (...args) => void | Promise<void>;
 
-  finishSuccessCase: (testCaseTitle: string) => void | Promise<void>;
-  finishFailedCase: (testCaseTitle: string, error: Error) => void | Promise<void>;
+  finishSuccessCase?: (testCaseTitle: string) => void | Promise<void>;
+  finishFailedCase?: (testCaseTitle: string, error: Error) => void | Promise<void>;
 };
 
 type TtestBody<Tfixtures> = (fixtures?: Tfixtures) => Promise<void> | any;

@@ -6,7 +6,7 @@ import { config } from '../config/config';
 
 import { getElementsTypes } from './create.type';
 import { getInstanceInteractionFields } from './utils';
-import { checkThatElementHasAction, getElementType, isBaseElement, getFragmentBaseElementsFields } from './get.base';
+import { checkThatElementHasAction, getElementType, isBaseElementInstance, getFragmentBaseElementsFields } from './get.base';
 import {
   getCollectionItemInstance,
   isCollectionWithItemBaseElement,
@@ -16,7 +16,7 @@ import {
 const { collectionRandomDataDescription, baseLibraryDescription } = config.get();
 
 function getCollectionItemTypes(collectionItemInstance) {
-  const getType = isBaseElement(collectionItemInstance) ? getElementType : getElementsTypes;
+  const getType = isBaseElementInstance(collectionItemInstance) ? getElementType : getElementsTypes;
 
   const _fields = getInstanceInteractionFields(collectionItemInstance);
 

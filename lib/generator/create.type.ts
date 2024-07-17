@@ -4,9 +4,9 @@ import { safeJSONstringify } from 'sat-utils';
 import { config } from '../config/config';
 
 import { checkThatInstanceHasActionItems } from './check.that.action.exists';
-import { checkThatElementHasAction, getElementActionType, getElementType } from './get.base';
+import { checkThatElementHasAction, getElementActionType, getElementType, isCollectionInstance } from './get.base';
 import { getInstanceInteractionFields, getActionInstanceFields } from './utils';
-import { getCollectionItemInstance, isCollectionInstance } from './utils.collection';
+import { getCollectionItemInstance } from './utils.collection';
 import { isCollectionWithItemBaseElement, isCollectionWithItemFragment, getCollectionType } from './utils.collection';
 
 const {

@@ -1,8 +1,7 @@
 /* eslint-disable unicorn/no-object-as-default-parameter */
 import { config } from '../config/config';
-import { checkThatElementHasAction, isBaseElement } from './get.base';
+import { checkThatElementHasAction, isBaseElementInstance, isCollectionInstance } from './get.base';
 import { checkThatInstanceHasActionItems } from './check.that.action.exists';
-import { isCollectionInstance } from './utils.collection';
 
 const { baseElementsActionsDescription, baseLibraryDescription } = config.get();
 
@@ -38,7 +37,7 @@ function getActionInstanceFields(instance, action: string) {
 
   const fragmentFields = interactionFields.filter(
     field =>
-      !isBaseElement(instance[field]) &&
+      !isBaseElementInstance(instance[field]) &&
       !isCollectionInstance(instance[field]) &&
       checkThatInstanceHasActionItems(instance[field], action),
   );

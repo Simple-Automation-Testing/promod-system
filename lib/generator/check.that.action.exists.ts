@@ -1,6 +1,6 @@
 /* eslint-disable complexity, sonarjs/cognitive-complexity, no-console*/
 import { config } from '../config/config';
-import { checkThatElementHasAction, isBaseElement } from './get.base';
+import { checkThatElementHasAction, isBaseElementInstance } from './get.base';
 import { getInstanceInteractionFields } from './utils';
 import {
   getCollectionItemInstance,
@@ -19,7 +19,7 @@ function checkThatInstanceHasActionItems(instance, action: string) {
     return checkThatInstanceHasActionItems(getCollectionItemInstance(instance), action);
   }
 
-  if (isBaseElement(instance)) {
+  if (isBaseElementInstance(instance)) {
     return checkThatElementHasAction(instance, action);
   }
 

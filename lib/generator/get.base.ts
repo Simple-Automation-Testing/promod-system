@@ -7,22 +7,33 @@ import { getInstanceInteractionFields } from './utils';
 
 const { baseElementsActionsDescription, baseLibraryDescription } = config.get();
 
-function isBaseElement(elementConstructorName: string) {
-  if (!isString(elementConstructorName)) {
-    elementConstructorName = (elementConstructorName as any as object)?.constructor?.name;
+function isBaseElementInstance(constructorName: string) {
+  if (!isString(constructorName)) {
+    constructorName = (constructorName as any as object)?.constructor?.name;
   }
-
-  return Boolean(baseElementsActionsDescription[elementConstructorName]);
+  return Boolean(baseElementsActionsDescription[constructorName]);
 }
 
-function checkThatElementHasAction(elementConstructorName: string, action: string) {
-  if (!isString(elementConstructorName)) {
-    elementConstructorName = (elementConstructorName as any as object)?.constructor?.name;
+function isCollectionInstance(constructorName) {
+  if (!isString(constructorName)) {
+    constructorName = (constructorName as any as object)?.constructor?.name;
+  }
+  return constructorName?.includes(baseLibraryDescription.collectionId);
+}
+
+function isFragmentInstance(constructorName) {
+  if (!isString(constructorName)) {
+    constructorName = (constructorName as any as object)?.constructor?.name;
+  }
+  return constructorName?.includes(baseLibraryDescription.fragmentId);
+}
+
+function checkThatElementHasAction(constructorName: string, action: string) {
+  if (!isString(constructorName)) {
+    constructorName = (constructorName as any as object)?.constructor?.name;
   }
 
-  return (
-    isBaseElement(elementConstructorName) && Boolean(baseElementsActionsDescription[elementConstructorName][action])
-  );
+  return isBaseElementInstance(constructorName) && Boolean(baseElementsActionsDescription[constructorName][action]);
 }
 
 function getElementType(instance, action: string, actionType: string) {
@@ -83,14 +94,16 @@ function getAllBaseElements(instance, baseElements = []) {
 function getFragmentBaseElementsFields(instance) {
   const interationFields = getInstanceInteractionFields(instance);
 
-  return interationFields.filter(field => isBaseElement(instance[field]));
+  return interationFields.filter(field => isBaseElementInstance(instance[field]));
 }
 
 export {
-  isBaseElement,
+  isBaseElementInstance,
+  isCollectionInstance,
   getAllBaseElements,
   checkThatElementHasAction,
   getElementType,
   getElementActionType,
   getFragmentBaseElementsFields,
+  isFragmentInstance,
 };

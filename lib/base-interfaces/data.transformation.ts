@@ -11,7 +11,7 @@ import {
 } from 'sat-utils';
 import { config } from '../config';
 import { getCollectionElementInstance, getCollectionActionData } from './utils';
-import { isCollectionInstance } from '../generator/utils.collection';
+import { isCollectionInstance } from '../generator/get.base';
 
 import { promodLogger } from '../logger';
 

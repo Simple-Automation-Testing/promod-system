@@ -12,7 +12,7 @@ import {
 import { promodLogger } from '../logger';
 import { getCollectionRecomposedData } from './data.transformation';
 import { getInstanceInteractionFields } from '../generator/utils';
-import { isBaseElement } from '../generator/get.base';
+import { isBaseElementInstance } from '../generator/get.base';
 
 import type { TbaseLibraryDescriptionMap, TcollectionActionDescriptionMap } from './types';
 
@@ -369,7 +369,7 @@ class PromodSystemStructure<TrootElement = any> {
   private getStructureActionFields() {
     // TODO refactor this method
     const properties = getInstanceInteractionFields(this)
-      .filter(field => isBaseElement(this[field]))
+      .filter(field => isBaseElementInstance(this[field]))
       .reduce((acc, field) => (acc[field] = null || acc), {});
 
     if (isEmptyObject(properties)) {

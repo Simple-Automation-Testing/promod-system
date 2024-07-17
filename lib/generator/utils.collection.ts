@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { config } from '../config/config';
+import { isCollectionInstance } from './get.base';
 
 const { baseLibraryDescription, baseElementsActionsDescription } = config.get();
 
@@ -13,10 +14,6 @@ function getCollectionItemInstance(collectionInstance) {
     );
   }
   return collectionInstance[baseLibraryDescription.getCollectionItemInstance]();
-}
-
-function isCollectionInstance(instance) {
-  return instance?.constructor?.name?.includes(baseLibraryDescription.collectionId);
 }
 
 function isCollectionWithItemBaseElement(instance) {
@@ -44,10 +41,4 @@ function getCollectionType(instance) {
   };
 }
 
-export {
-  getCollectionItemInstance,
-  isCollectionWithItemBaseElement,
-  isCollectionWithItemFragment,
-  isCollectionInstance,
-  getCollectionType,
-};
+export { getCollectionItemInstance, isCollectionWithItemBaseElement, isCollectionWithItemFragment, getCollectionType };
