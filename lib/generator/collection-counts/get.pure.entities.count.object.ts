@@ -21,19 +21,29 @@ function createTemplateObjectTemplate(asActorAndPage, actionDescriptor, page, ..
       return getResultMappedResult(result, action);
     },
     [waitCollectionFrom]: async (state, waitingCheckOpts = { isEql: true }, descriptions = {}) => {
+      const mergedOpts = {
+        everyArrayItem: true,
+        allowEmptyArray: false,
+        isEql: true,
+        timeout: 15_000,
+        interval: 2500,
+        callEveryCycle: () => ({}),
+        message: (t, e) => `Required state was not achived during ${t} ms, error: ${e}`,
+        ...waitingCheckOpts,
+      };
       await waitForCondition(
         async () => {
           const actionResult = await actions[getCollectionFrom](descriptions);
 
-          const { message, result } = compareToPattern(actionResult, state, { customCheck: true, ...waitingCheckOpts });
+          const { message, result } = compareToPattern(actionResult, state, { customCheck: true, ...mergedOpts });
 
-          if (result !== waitingCheckOpts.isEql) {
+          if (result !== mergedOpts.isEql) {
             throw new Error(message);
           }
 
           return true;
         },
-        { message: (t, e) => `Required state was not achived during ${t} ms, error: ${e}`, ...waitingCheckOpts },
+        { message: (t, e) => `Required state was not achived during ${t} ms, error: ${e}`, ...mergedOpts },
       );
     },
   };
