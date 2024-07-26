@@ -11,7 +11,9 @@ function createTemplatePureTemplate(asActorAndPage, actionDescriptor, entryType 
   const { action } = actionDescriptor || {};
 
   const result = getResult(action);
-  const name = camelize(`${asActorAndPage} Get Collection From ${getName(action)}`);
+
+  const getCollectionFrom = camelize(`${asActorAndPage} Get Collection From ${getName(action)}`);
+  const waitCollectionFrom = camelize(`${asActorAndPage} Wait Content For Collection ${getName(action)}`);
 
   const actionSignature = stringifyData(action).replace(
     `${collectionDescription.action}: null`,
@@ -26,12 +28,17 @@ function createTemplatePureTemplate(asActorAndPage, actionDescriptor, entryType 
   }
 
   const isDeclaration = promod.actionsDeclaration === 'declaration';
-  const firstLine = isDeclaration
-    ? `async function ${name}(descriptions${entryType} = {})${resultType} {`
-    : `const ${name} = async (descriptions${entryType} = {})${resultType} => {`;
+  const firstLineGetCollection = isDeclaration
+    ? `async function ${getCollectionFrom}(descriptions${entryType} = {})${resultType} {`
+    : `const ${getCollectionFrom} = async (descriptions${entryType} = {})${resultType} => {`;
+
+  const firstLineWaitCollection = isDeclaration
+    ? `async function ${waitCollectionFrom}(descriptions${entryType} = {})${resultType} {`
+    : `const ${waitCollectionFrom} = async (descriptions${entryType} = {})${resultType} => {`;
+
   // TODO add better types interactions
   return `
-  ${firstLine}
+  ${firstLineGetCollection}
   const result = await ${
     baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
   }${baseLibraryDescription.getDataMethod}(${actionSignature});

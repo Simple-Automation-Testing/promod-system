@@ -1,6 +1,6 @@
 {
   "name": "promod-system",
-  "version": "3.1.0",
+  "version": "3.2.0-beta",
   "description": "Library promod condition waitings",
   "main": "./built/index.js",
   "bin": "./bin/cli.js",
@@ -39,7 +39,14 @@
     "prettier": "^3.2.5",
     "promod": "1.4.2",
     "ts-node": "^10.9.2",
+    "eslint": "^8.57.0",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.7",
+    "node-fetch": "2.7.0",
+    "sat-utils": "1.14.0",
+    "yargs": "17.6.2"
   },
   "keywords": [
     "promod",
@@ -50,12 +57,5 @@
     "automation testing",
     "automation framework",
     "wait for conditions"
-  ],
-  "dependencies": {
-    "dayjs": "^1.11.7",
-    "eslint": "^8.57.0",
-    "node-fetch": "2.7.0",
-    "sat-utils": "1.14.0",
-    "yargs": "17.6.2"
-  }
+  ]
 }

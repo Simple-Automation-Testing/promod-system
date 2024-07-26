@@ -8,7 +8,7 @@ import { getResult, getActionsList, getName, getFieldsEnumList } from '../utils.
 const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();
 
 function createFlowTemplates(asActorAndPage, actionDescriptor) {
-  const { action, /* __countResult, */ _type, _fields } = actionDescriptor || {};
+  const { action, /* _countResult, */ _type, _fields } = actionDescriptor || {};
 
   const result = getResult(action);
   const typeName = camelize(`${asActorAndPage} get random Data and Field Values from ${getName(action)}`);
@@ -41,7 +41,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
   const descriptionsType = `type T${typeName}Entry = ${_type.get}`;
   // TODO usage of the resultsType is required for future optimizations
-  // const resultsType = `type T${typeName}Result = ${__countResult}`;
+  // const resultsType = `type T${typeName}Result = ${_countResult}`;
 
   const isDeclaration = promod.actionsDeclaration === 'declaration';
 

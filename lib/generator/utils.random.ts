@@ -13,7 +13,7 @@ import {
 import { config } from '../config/config';
 
 // TODO refactor
-const descriptionKeys = ['__countResult', '_type', '_fields'];
+const descriptionKeys = ['_countResult', '_type', '_fields', '_check'];
 const { collectionRandomDataDescription, collectionDescription = { action: '_action' } } = config.get();
 
 function isCollectionDescription(data) {
@@ -86,16 +86,16 @@ function getKeyFormat(dataItem) {
     const isDescription = descriptionKeys.every(k => safeHasOwnPropery(dataItem[key], k));
 
     if (key === collectionDescription.action && (isNull(dataItem[key]) || !isActionInside)) {
-      const { __countResult, _type, _fields } = dataItem;
+      const { _countResult, _type, _fields, _check } = dataItem;
 
-      return { [collectionDescription.action]: null, __countResult, _type, _fields };
+      return { [collectionDescription.action]: null, _countResult, _type, _fields, _check };
     } else if (isObject(dataItem[key]) && !isActionInside && isDescription) {
-      const { __countResult, _type, _fields } = dataItem[key];
+      const { _countResult, _type, _fields, _check } = dataItem[key];
 
-      return { [key]: { [collectionDescription.action]: null }, __countResult, _type, _fields };
+      return { [key]: { [collectionDescription.action]: null }, _countResult, _type, _fields, _check };
     } else if (isNotEmptyObject(dataItem[key]) && isActionInside) {
-      const { __countResult, _type, _fields, ...rest } = getKeyFormat(dataItem[key]);
-      return { [key]: rest, __countResult, _type, _fields };
+      const { _countResult, _type, _fields, _check, ...rest } = getKeyFormat(dataItem[key]);
+      return { [key]: rest, _countResult, _type, _fields, _check };
     }
   }
 
@@ -150,12 +150,12 @@ function getActionsList(data) {
     for (const key of Object.keys(data).filter(k =>
       safeJSONstringify(data[k]).includes(`"${collectionDescription.action}"`),
     )) {
-      const { __countResult, _type, _fields, ...result } = getKeyFormat(data[key]);
+      const { _countResult, _type, _fields, _check, ...result } = getKeyFormat(data[key]);
       const action = { [key]: result };
 
       data = removeKeys(data, getSanitizeDataKeys(action));
 
-      actions.push({ action, __countResult, _type, _fields });
+      actions.push({ action, _countResult, _type, _check, _fields });
     }
   }
 

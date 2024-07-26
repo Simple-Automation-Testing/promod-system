@@ -150,7 +150,8 @@ function getCollectionsPathes(instance) {
     return {
       [collectionDescription.action]: null,
       // TODO this needs to be getted from the config
-      __countResult: getElementType(getCollectionItemInstance(instance), 'get', 'resultType'),
+      _countResult: getElementType(getCollectionItemInstance(instance), 'get', 'resultType'),
+      _check: getElementType(getCollectionItemInstance(instance), 'waitForContentState', 'entryType'),
       // TODO this needs to be getted from the config
       _type: getCollectionTypes(instance, 'get', 'entryType', collectionReducedType, wrap),
       _fields: getInstanceInteractionFields(getCollectionItemInstance(instance)),
@@ -178,7 +179,8 @@ function getCollectionsPathes(instance) {
       result[field] = {
         [collectionDescription.action]: fragment ? getCollectionsPathes(collectionInstance) : null,
 
-        __countResult: (fragment ? getFragmentTypes : getElementType)(collectionInstance, 'get', 'resultType'),
+        _countResult: (fragment ? getFragmentTypes : getElementType)(collectionInstance, 'get', 'resultType'),
+        _check: (fragment ? getFragmentTypes : getElementType)(collectionInstance, 'waitForContentState', 'entryType'),
         _type: getCollectionTypes(instance[field], 'get', 'entryType', collectionReducedType, wrap),
         _fields: getInstanceInteractionFields(collectionInstance),
       };

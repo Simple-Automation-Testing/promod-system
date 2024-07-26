@@ -8,7 +8,7 @@ import { getResultMappedResult, getActionsList, getName, addDescriptions } from 
 const { baseLibraryDescription = {}, baseResultData = [] } = config.get();
 
 function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
-  const { action, /* __countResult, */ _fields } = actionDescriptor || {};
+  const { action, /* _countResult, */ _fields } = actionDescriptor || {};
 
   // TODO this should be refactored and reused
   const randomData = camelize(`${asActorAndPage} get random data from ${getName(action)}`);
