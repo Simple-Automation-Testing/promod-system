@@ -1,6 +1,6 @@
 import { ElementTest } from '../base/element';
 import { StructureAsFragment, StructureAsPage } from '../base/structure';
-import { PromodSystemCollection } from '../../../system/base-interfaces/collection';
+import { PromodSystemCollection } from '../../../lib/base-interfaces/collection';
 
 import type { PromodElementsType } from 'promod/built/interface';
 

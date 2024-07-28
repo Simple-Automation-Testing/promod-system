@@ -1,5 +1,5 @@
-import { getActionArgumentsMessagePart } from '../../system/base-interfaces-arguments';
-import { config } from '../../system/config';
+import { getActionArgumentsMessagePart } from '../../lib/base-interfaces-arguments';
+import { config } from '../../lib/config';
 
 config.updateConfigField('collectionDescription', {
   action: '_action',

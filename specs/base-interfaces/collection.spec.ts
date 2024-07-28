@@ -1,5 +1,5 @@
 import { expect } from 'assertior';
-import { PromodSystemCollection } from '../../system/base-interfaces';
+import { PromodSystemCollection } from '../../lib/base-interfaces';
 import { ElementTest } from '../setup/base/element';
 import { actionFile } from '../.misc/setup';
 

@@ -1,5 +1,5 @@
 import { equal } from 'node:assert';
-import { getPreparedRunner } from '../../system/test-runner/mocha';
+import { getPreparedRunner } from '../../lib/test-runner/mocha';
 
 const { test, suite, updateCaseName, updateSuiteName } = getPreparedRunner();
 

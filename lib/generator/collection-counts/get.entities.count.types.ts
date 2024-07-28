@@ -6,7 +6,7 @@ import { config } from '../../config/config';
 import { getActionsList, getName } from '../utils.random';
 import { getCollectionsPathes } from '../create.type';
 
-const { baseLibraryDescription = {} } = config.get();
+const { baseLibraryDescription = {}, collectionActionTypes = {} } = config.get();
 
 function createTemplate(asActorAndPage, actionDescriptor) {
   const { action, _countResult, _type, _check } = actionDescriptor || {};
@@ -15,12 +15,12 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   const waitCollectionFrom = camelize(`${asActorAndPage} Wait Content For Collection ${getName(action)}`);
 
   const getActionDeclaration = `declare function ${getCollectionFrom}(descriptions?: T${getCollectionFrom}Entry): Promise<T${getCollectionFrom}[]>;`;
-  const waitActionDeclaration = `declare function ${waitCollectionFrom}(state: T${getCollectionFrom}Check | T${getCollectionFrom}Check[], waitingCheckOpts?: ${baseLibraryDescription.waitOptionsId}, descriptions?: T${getCollectionFrom}Entry): Promise<void>;`;
+  const waitActionDeclaration = `declare function ${waitCollectionFrom}(state: T${getCollectionFrom}Check, waitingCheckOpts?: ${baseLibraryDescription.waitOptionsId}, descriptions?: T${getCollectionFrom}Entry): Promise<void>;`;
 
   return `
   type T${getCollectionFrom}Entry = ${_type.get}
   type T${getCollectionFrom} = ${_countResult}
-  type T${getCollectionFrom}Check = ${_check}
+  type T${getCollectionFrom}Check = ${collectionActionTypes.compare}<${_check}>
   ${getActionDeclaration}
   ${waitActionDeclaration}
     `;

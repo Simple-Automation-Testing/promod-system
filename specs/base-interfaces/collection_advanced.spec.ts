@@ -1,6 +1,6 @@
 import { compareToPattern } from 'sat-utils';
 import { expect } from 'assertior';
-import { PromodSystemCollection } from '../../system/base-interfaces';
+import { PromodSystemCollection } from '../../lib/base-interfaces';
 import { ElementTest } from '../setup/base/element';
 import { StructureAsFragment } from '../setup/base/structure';
 import { collection } from '../.misc/setup';

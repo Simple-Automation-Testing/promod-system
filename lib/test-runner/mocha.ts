@@ -312,7 +312,15 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       }
     }
 
-    global.it(testName, testBodyWrapper(testName, fn, opts));
+    // @ts-expect-error
+    if ((opts as TrequiredOpts)?.isRunnable && opts.isRunnable(testName, opts as TrequiredOpts)) {
+      global.it(testName, testBodyWrapper(testName, fn, opts));
+      // @ts-expect-error
+    } else if ((opts as TrequiredOpts)?.isRunnable && !opts.isRunnable(testName, opts as TrequiredOpts)) {
+      global.it.skip(testName, testBodyWrapper(testName, fn, opts));
+    } else {
+      global.it(testName, testBodyWrapper(testName, fn, opts));
+    }
   }
 
   /**
@@ -467,6 +475,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
     });
   }
 
+  /**
+   * @deprecated
+   */
   suite.if = function suiteIf(condition: () => boolean, suiteName: string, cb: TdescribeBody<Tfixtures>) {
     if (condition()) {
       suite(suiteName, cb);

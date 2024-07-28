@@ -1,5 +1,5 @@
 import { equal } from 'node:assert';
-import { getPreparedRunner } from '../../system/test-runner/mocha';
+import { getPreparedRunner } from '../../lib/test-runner/mocha';
 
 const { afterAll, test, beforeAll, afterEach, suite, beforeEach } = getPreparedRunner();
 
@@ -30,7 +30,7 @@ suite('example sync', function () {
     throw new Error('This is a debug test');
   });
 
-  test.debug(250, 'second call', () => {
+  test('second call', () => {
     throw new Error('This is a debug test');
   });
 });

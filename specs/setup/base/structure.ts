@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-identical-functions */
 import { waitForCondition } from 'sat-utils';
-import { PromodSystemStructure } from '../../../system/base-interfaces/structure';
-import { PromodSystemCollection } from '../../../system/base-interfaces/collection';
+import { PromodSystemStructure } from '../../../lib/base-interfaces/structure';
+import { PromodSystemCollection } from '../../../lib/base-interfaces/collection';
 
 import type { PromodElementType, PromodElementsType } from 'promod/built/interface';
 import { $ } from '../engine';
