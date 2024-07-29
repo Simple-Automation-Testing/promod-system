@@ -15,8 +15,8 @@ function createTemplateObjectTemplate(asActorAndPage, actionDescriptor, page, ..
   const waitCollectionFrom = camelize(`${asActorAndPage} Wait Content For Collection ${getName(action)}`);
 
   const actions = {
-    [getCollectionFrom]: async (descriptions = {}) => {
-      const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));
+    [getCollectionFrom]: async (descriptions = {}, opts?) => {
+      const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action), opts);
 
       return getResultMappedResult(result, action);
     },
@@ -33,7 +33,7 @@ function createTemplateObjectTemplate(asActorAndPage, actionDescriptor, page, ..
       };
       await waitForCondition(
         async () => {
-          const actionResult = await actions[getCollectionFrom](descriptions);
+          const actionResult = await actions[getCollectionFrom](descriptions, mergedOpts);
 
           const { message, result } = compareToPattern(actionResult, state, { customCheck: true, ...mergedOpts });
 
