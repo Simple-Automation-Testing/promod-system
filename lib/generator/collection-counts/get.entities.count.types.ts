@@ -20,7 +20,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   return `
   type T${getCollectionFrom}Entry = ${_type.get}
   type T${getCollectionFrom} = ${_countResult}
-  type T${getCollectionFrom}Check = ${collectionActionTypes.compare}<${_check}>
+  type T${getCollectionFrom}Check = ${collectionActionTypes.compare}<${_check}, ${_check}>
   ${getActionDeclaration}
   ${waitActionDeclaration}
     `;

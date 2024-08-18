@@ -43,10 +43,22 @@ function createTemplateObjectTemplate(asActorAndPage, actionDescriptor, page, ..
 
           return true;
         },
-        { message: (t, e) => `Required state was not achived during ${t} ms, error: ${e}`, ...mergedOpts },
+        { ...mergedOpts },
       );
     },
   };
+
+  Object.defineProperty(actions[getCollectionFrom], 'name', {
+    value: getCollectionFrom,
+    writable: true,
+    configurable: true,
+  });
+
+  Object.defineProperty(actions[waitCollectionFrom], 'name', {
+    value: waitCollectionFrom,
+    writable: true,
+    configurable: true,
+  });
 
   return actions;
 }

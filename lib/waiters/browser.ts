@@ -28,7 +28,7 @@ async function waitForCookies(
   }
 
   const expectedCookies = toArray(cookieObj);
-  opts.message = opts.message ? opts.message : () => `Current browser page does not have required cookies`;
+  opts.message = opts.message || (() => `Current browser page does not have required cookies`);
 
   return waitForCondition(async () => {
     const browserPageCookies = await browser[browserAction.getCookies]();
@@ -55,7 +55,7 @@ async function waitForCookiesDoNoExist(
   }
 
   const expectedCookies = toArray(cookieObj);
-  opts.message = opts.message ? opts.message : () => `Current browser page does not have required cookies`;
+  opts.message = opts.message || (() => `Current browser page does not have required cookies`);
 
   return waitForCondition(async () => {
     const browserPageCookies = await browser[browserAction.getCookies]();
@@ -80,9 +80,7 @@ async function waitForTabTitleEqual(browser, title: string, opts: IWaitCondition
   let browserPageTitle;
   const getBrowserPageTitle = () => browserPageTitle;
 
-  opts.message = opts.message
-    ? opts.message
-    : () => `Current browser window title ${getBrowserPageTitle()} should equal ${title}`;
+  opts.message = opts.message || (() => `Current browser window title ${getBrowserPageTitle()} should equal ${title}`);
 
   return waitForCondition(async () => {
     browserPageTitle = await browser[browserAction.getTitle]();
@@ -105,9 +103,8 @@ async function waitForTabTitleIncludes(browser, title: string, opts: IWaitCondit
   let browserPageTitle;
   const getBrowserPageTitle = () => browserPageTitle;
 
-  opts.message = opts.message
-    ? opts.message
-    : () => `Current browser window title ${getBrowserPageTitle()} should include ${title}`;
+  opts.message =
+    opts.message || (() => `Current browser window title ${getBrowserPageTitle()} should include ${title}`);
 
   return waitForCondition(async () => {
     browserPageTitle = await browser[browserAction.getTitle]();
@@ -130,9 +127,7 @@ async function waitForUrlIncludes(browser, url: string, opts: IWaitConditionOpts
   let browserPageUrl;
   const getBrowserPageUrl = () => browserPageUrl;
 
-  opts.message = opts.message
-    ? opts.message
-    : () => `Current browser window url ${getBrowserPageUrl()} should include ${url}`;
+  opts.message = opts.message || (() => `Current browser window url ${getBrowserPageUrl()} should include ${url}`);
 
   return waitForCondition(async () => {
     browserPageUrl = await browser[browserAction.getCurrentUrl]();
@@ -155,9 +150,7 @@ async function waitForUrlNotIncludes(browser, url: string, opts: IWaitConditionO
   let browserPageUrl;
   const getBrowserPageUrl = () => browserPageUrl;
 
-  opts.message = opts.message
-    ? opts.message
-    : () => `Current browser window url ${getBrowserPageUrl()} should not include ${url}`;
+  opts.message = opts.message || (() => `Current browser window url ${getBrowserPageUrl()} should not include ${url}`);
 
   return waitForCondition(async () => {
     browserPageUrl = await browser[browserAction.getCurrentUrl]();
@@ -180,9 +173,7 @@ async function waitForUrlEquals(browser, url: string, opts: IWaitConditionOpts =
   let browserPageUrl;
   const getBrowserPageUrl = () => browserPageUrl;
 
-  opts.message = opts.message
-    ? opts.message
-    : () => `Current browser window url ${getBrowserPageUrl()} should equal to ${url}`;
+  opts.message = opts.message || (() => `Current browser window url ${getBrowserPageUrl()} should equal to ${url}`);
 
   return waitForCondition(async () => {
     browserPageUrl = await browser[browserAction.getCurrentUrl]();
@@ -205,9 +196,7 @@ async function waitForUrlNotEquals(browser, url: string, opts: IWaitConditionOpt
   let browserPageUrl;
   const getBrowserPageUrl = () => browserPageUrl;
 
-  opts.message = opts.message
-    ? opts.message
-    : () => `Current browser window url ${getBrowserPageUrl()} should not equal ${url}`;
+  opts.message = opts.message || (() => `Current browser window url ${getBrowserPageUrl()} should not equal ${url}`);
 
   return waitForCondition(async () => {
     browserPageUrl = await browser[browserAction.getCurrentUrl]();
@@ -230,9 +219,8 @@ async function waitForTabsQuantity(browser, quantity: number, opts: IWaitConditi
   let browserTabsQuantity;
   const getBrowserTabsQuantity = () => browserTabsQuantity;
 
-  opts.message = opts.message
-    ? opts.message
-    : () => `Current browser tabs quantity ${getBrowserTabsQuantity()} should equal ${quantity}`;
+  opts.message =
+    opts.message || (() => `Current browser tabs quantity ${getBrowserTabsQuantity()} should equal ${quantity}`);
 
   return waitForCondition(async () => {
     // eslint-disable-next-line unicorn/no-await-expression-member
