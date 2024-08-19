@@ -12,7 +12,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   return `
   type T${getCollectionFrom}Entry = ${_type.get}
   type T${getCollectionFrom} = ${_countResult}
-  ${createTemplatePureTemplate(asActorAndPage, actionDescriptor, `: T${name}Entry`, `: Promise<T${name}[]>`)}
+  ${createTemplatePureTemplate(asActorAndPage, actionDescriptor, `: T${getCollectionFrom}Entry`, `: Promise<T${getCollectionFrom}[]>`)}
   `;
 }
 

@@ -2,7 +2,7 @@
 import { isNotEmptyArray, toArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getActionInstanceFields } from '../utils';
-import { getPageActionMethodNames } from '../namings';
+import { getPageActionMethodNames, redefineActionsMethodName } from '../namings';
 
 const { repeatingActions = [], resultActionsMap, baseLibraryDescription = {}, prettyMethodName = {} } = config.get();
 
@@ -21,7 +21,7 @@ function createFlowTemplateForPageElements({ action, page, nameElements }) {
         return await page[action](data, ...rest);
       };
 
-  return actions;
+  return redefineActionsMethodName(actions);
 }
 
 function createFlowTemplates({ name, action, field, page }) {
@@ -48,7 +48,7 @@ function createFlowTemplates({ name, action, field, page }) {
     };
   }
 
-  return actions;
+  return redefineActionsMethodName(actions);
 }
 
 function getPureActionFlowsObject(asActorAndPage: string, instance: object, action: string) {

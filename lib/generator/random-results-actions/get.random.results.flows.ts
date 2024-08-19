@@ -4,6 +4,7 @@ import { camelize, stringifyData, toArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getCollectionsPathes } from '../create.type';
 import { getResult, getActionsList, getName, getFieldsEnumList } from '../utils.random';
+import { getPageRandomGettersMethodNames } from '../namings';
 
 const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();
 
@@ -11,10 +12,10 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const { action, /* _countResult, */ _type, _fields } = actionDescriptor || {};
 
   const result = getResult(action);
+
   const typeName = camelize(`${asActorAndPage} get random Data and Field Values from ${getName(action)}`);
-  const oneValue = camelize(`${asActorAndPage} get random field value from ${getName(action)}`);
-  const severalValues = camelize(`${asActorAndPage} get several random field values from ${getName(action)}`);
-  const randomData = camelize(`${asActorAndPage} get random data from ${getName(action)}`);
+  const { getRandomDataActionName, getOneValueActionName, getSeveralValuesActionName } =
+    getPageRandomGettersMethodNames(asActorAndPage, action);
 
   const actionFields = `${_fields?.length ? `{ [_field]: null }` : 'null'}`;
 
@@ -46,16 +47,16 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const isDeclaration = promod.actionsDeclaration === 'declaration';
 
   const firstLine = isDeclaration
-    ? `async function ${randomData}<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> {`
-    : `const ${randomData} = async <T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> => {`;
+    ? `async function ${getRandomDataActionName}<T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> {`
+    : `const ${getRandomDataActionName} = async <T extends ReadonlyArray<T${typeName}EntryFields>>(_fields: T, descriptions: T${typeName}Entry = {}): Promise<TobjectFromStringArray<T>> => {`;
 
   const firstLineSeveral = isDeclaration
-    ? `async function ${severalValues}(${
+    ? `async function ${getSeveralValuesActionName}(${
         _fields?.length
           ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,`
           : 'quantity: number = 2,'
       } descriptions: T${typeName}Entry = {}): Promise<string[]> {`
-    : `const ${severalValues} = async (${
+    : `const ${getSeveralValuesActionName} = async (${
         _fields?.length
           ? `_field: T${typeName}EntryFields = '${_fields[0]}', quantity: number = 2,`
           : 'quantity: number = 2,'
@@ -88,10 +89,10 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
     : '';
 
   const firstLineOneValue = isDeclaration
-    ? `async function ${oneValue}(${
+    ? `async function ${getOneValueActionName}(${
         _fields?.length ? `_field: T${typeName}EntryFields, ` : ''
       } descriptions: T${typeName}Entry = {}): Promise<string> {`
-    : `const ${oneValue} = async (${
+    : `const ${getOneValueActionName} = async (${
         _fields?.length ? `_field: T${typeName}EntryFields, ` : ''
       } descriptions: T${typeName}Entry = {}): Promise<string> => {`;
 

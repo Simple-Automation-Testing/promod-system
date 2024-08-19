@@ -4,6 +4,7 @@ import { camelize, stringifyData, toArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getCollectionsPathes } from '../create.type';
 import { getResult, getActionsList, getName, getFieldsEnumList } from '../utils.random';
+import { getPageRandomGettersMethodNames } from '../namings';
 
 const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();
 
@@ -13,10 +14,8 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const result = getResult(action);
   const typeName = camelize(`${asActorAndPage} get random Data and Field Values from ${getName(action)}`);
 
-  // TODO this should be refactored and reused
-  const oneValue = camelize(`${asActorAndPage} get random field value from ${getName(action)}`);
-  const severalValues = camelize(`${asActorAndPage} get several random field values from ${getName(action)}`);
-  const randomData = camelize(`${asActorAndPage} get random data from ${getName(action)}`);
+  const { getRandomDataActionName, getOneValueActionName, getSeveralValuesActionName } =
+    getPageRandomGettersMethodNames(asActorAndPage, action);
 
   const actionFields = `${_fields?.length ? '{ [_field]: null }' : 'null'}`;
 
@@ -47,14 +46,14 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const isDeclaration = promod.actionsDeclaration === 'declaration';
 
   const firstLine = isDeclaration
-    ? `async function ${randomData}(_fields, descriptions = {}) {`
-    : `const ${randomData} = async (_fields, descriptions = {}) => {`;
+    ? `async function ${getRandomDataActionName}(_fields, descriptions = {}) {`
+    : `const ${getRandomDataActionName} = async (_fields, descriptions = {}) => {`;
 
   const firstLineSeveral = isDeclaration
-    ? `async function ${severalValues}(${
+    ? `async function ${getSeveralValuesActionName}(${
         _fields?.length ? `_field = '${_fields[0]}', quantity = 2,` : 'quantity = 2,'
       } descriptions = {}) {`
-    : `const ${severalValues} = async (${
+    : `const ${getSeveralValuesActionName} = async (${
         _fields?.length ? `_field = '${_fields[0]}', quantity = 2,` : 'quantity = 2,'
       } descriptions = {}) => {`;
 
@@ -91,8 +90,8 @@ ${firstLine}
       '';
 
   const firstLineOneValue = isDeclaration
-    ? `async function ${oneValue}(${_fields?.length ? `_field, ` : ''} descriptions = {}){`
-    : `const ${oneValue} = async (${_fields?.length ? `_field, ` : ''} descriptions = {}) => {`;
+    ? `async function ${getOneValueActionName}(${_fields?.length ? `_field, ` : ''} descriptions = {}){`
+    : `const ${getOneValueActionName} = async (${_fields?.length ? `_field, ` : ''} descriptions = {}) => {`;
 
   return `
   ${firstLineOneValue}

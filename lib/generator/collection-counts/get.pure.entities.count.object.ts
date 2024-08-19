@@ -4,7 +4,7 @@ import { waitForCondition, compareToPattern } from 'sat-utils';
 import { config } from '../../config/config';
 import { getActionsList, getResultMappedResult, addDescriptions } from '../utils.random';
 import { getCollectionsPathes } from '../create.type';
-import { getCollectionMethodNames } from '../namings';
+import { getCollectionMethodNames, redefineActionsMethodName } from '../namings';
 
 const { baseLibraryDescription = {} } = config.get();
 
@@ -47,19 +47,7 @@ function createTemplateObjectTemplate(asActorAndPage, actionDescriptor, page, ..
     },
   };
 
-  Object.defineProperty(actions[getCollectionFrom], 'name', {
-    value: getCollectionFrom,
-    writable: true,
-    configurable: true,
-  });
-
-  Object.defineProperty(actions[waitCollectionFrom], 'name', {
-    value: waitCollectionFrom,
-    writable: true,
-    configurable: true,
-  });
-
-  return actions;
+  return redefineActionsMethodName(actions);
 }
 
 function getPureCountFlowsObject(pageInstance, asActorAndPage) {

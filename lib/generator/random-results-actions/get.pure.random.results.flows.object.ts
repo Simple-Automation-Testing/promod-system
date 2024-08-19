@@ -1,24 +1,23 @@
 /* eslint-disable sonarjs/no-nested-template-literals, sonarjs/cognitive-complexity*/
-import { camelize, toArray, getRandomArrayItem } from 'sat-utils';
+import { toArray, getRandomArrayItem } from 'sat-utils';
 
 import { config } from '../../config/config';
 import { getCollectionsPathes } from '../create.type';
 import { getResultMappedResult, getActionsList, getName, addDescriptions } from '../utils.random';
+import { redefineActionsMethodName, getPageRandomGettersMethodNames } from '../namings';
 
 const { baseLibraryDescription = {}, baseResultData = [] } = config.get();
 
 function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
   const { action, /* _countResult, */ _fields } = actionDescriptor || {};
 
-  // TODO this should be refactored and reused
-  const randomData = camelize(`${asActorAndPage} get random data from ${getName(action)}`);
-  const oneValue = camelize(`${asActorAndPage} get random field value from ${getName(action)}`);
-  const severalValues = camelize(`${asActorAndPage} get several random field values from ${getName(action)}`);
+  const { getRandomDataActionName, getOneValueActionName, getSeveralValuesActionName } =
+    getPageRandomGettersMethodNames(asActorAndPage, action);
 
   const actions = {};
 
   if (_fields?.length) {
-    actions[randomData] = async (_field = [_fields[0]], descriptions = {}) => {
+    actions[getRandomDataActionName] = async (_field = [_fields[0]], descriptions = {}) => {
       await page[baseLibraryDescription.waitForVisibilityMethod](
         addDescriptions({ length: '>0', ...descriptions }, action),
       );
@@ -47,7 +46,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
       );
     };
 
-    actions[oneValue] = async (_field, descriptions = {}) => {
+    actions[getOneValueActionName] = async (_field, descriptions = {}) => {
       await page[baseLibraryDescription.waitForVisibilityMethod](
         addDescriptions({ ...descriptions, length: '>0' }, action),
         {
@@ -65,7 +64,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
       );
     };
 
-    actions[severalValues] = async (_field = _fields[0], quantity = 2, descriptions = {}) => {
+    actions[getSeveralValuesActionName] = async (_field = _fields[0], quantity = 2, descriptions = {}) => {
       await page[baseLibraryDescription.waitForVisibilityMethod](
         addDescriptions({ length: '>0', ...descriptions }, action, { [_field]: null }),
       );
@@ -81,7 +80,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
       );
     };
   } else {
-    actions[oneValue] = async (descriptions = {}) => {
+    actions[getOneValueActionName] = async (descriptions = {}) => {
       await page[baseLibraryDescription.waitForVisibilityMethod](addDescriptions(descriptions, action), {
         everyArrayItem: false,
       });
@@ -92,7 +91,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
       return getRandomArrayItem(flatResult.map(item => (toArray(baseResultData).includes('text') ? item.text : item)));
     };
 
-    actions[severalValues] = async (quantity = 2, descriptions = {}) => {
+    actions[getSeveralValuesActionName] = async (quantity = 2, descriptions = {}) => {
       await page[baseLibraryDescription.waitForVisibilityMethod](
         addDescriptions({ length: '>0', ...descriptions }, action),
       );
@@ -107,7 +106,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
     };
   }
 
-  return actions;
+  return redefineActionsMethodName(actions);
 }
 
 function getPureRandomResultsFlowsObject(asActorAndPage, pageInstance) {

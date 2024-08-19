@@ -2,7 +2,7 @@ import { isObject, camelize } from 'sat-utils';
 
 import { config } from '../config/config';
 
-const { baseLibraryDescription = {}, collectionDescription } = config.get();
+const { collectionDescription } = config.get();
 
 function getName(data) {
   return Object.keys(data).reduce((pattern, key) => {
@@ -34,4 +34,41 @@ function getPageActionMethodNames(asActorAndPage: string, prettyFlowActionNamePa
   };
 }
 
-export { getCollectionMethodNames, getPageActionMethodNames };
+function getPageRandomGettersMethodNames(asActorAndPage: string, action: { [key: string]: any }) {
+  const getRandomDataActionName = camelize(`${asActorAndPage} get random data from ${getName(action)}`);
+  const getOneValueActionName = camelize(`${asActorAndPage} get random field value from ${getName(action)}`);
+  const getSeveralValuesActionName = camelize(
+    `${asActorAndPage} get several random field values from ${getName(action)}`,
+  );
+
+  return {
+    getRandomDataActionName,
+    getOneValueActionName,
+    getSeveralValuesActionName,
+  };
+}
+
+function updateActionsMethodName(actions, methodName) {
+  Object.defineProperty(actions[methodName], 'name', {
+    value: methodName,
+    writable: false,
+    enumerable: false,
+    configurable: true,
+  });
+
+  return actions;
+}
+
+function redefineActionsMethodName(actions) {
+  Object.keys(actions).forEach(key => updateActionsMethodName(actions, key));
+
+  return actions;
+}
+
+export {
+  getCollectionMethodNames,
+  getPageActionMethodNames,
+  updateActionsMethodName,
+  redefineActionsMethodName,
+  getPageRandomGettersMethodNames,
+};
