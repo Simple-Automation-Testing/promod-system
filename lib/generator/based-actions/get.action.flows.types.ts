@@ -1,7 +1,8 @@
 /* eslint-disable sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
-import { isObject, camelize, isArray, isNotEmptyArray } from 'sat-utils';
+import { isObject, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getActionInstanceFields } from '../utils';
+import { getPageActionMethodNames } from '../namings';
 
 import { getFlowRestArguments, getFlowTypes } from './common';
 
@@ -86,7 +87,7 @@ function createFlowTemplateForPageElements(name, action, instance) {
 
   const { flowArgumentType, flowResultType, typeName } = getFlowTypes(instance, action, name, true);
 
-  const flowActionName = camelize(`${name} ${prettyFlowActionNamePart} PageElements`);
+  const { flowElementsActionName } = getPageActionMethodNames(name, prettyFlowActionNamePart);
 
   const optionsSecondArgument = getFlowRestArguments(action);
 
@@ -96,7 +97,7 @@ function createFlowTemplateForPageElements(name, action, instance) {
     ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
     : `${typeName}Result`;
 
-  const actionDeclaration = `declare function ${flowActionName}<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}>`;
+  const actionDeclaration = `declare function ${flowElementsActionName}<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}>`;
 
   return `
 type ${typeName} = ${flowArgumentType}
@@ -118,10 +119,13 @@ ${[...fragmentFields, ...collectionsFields].reduce(
     const prettyFlowActionNamePart = prettyMethodName[action] || action;
 
     const instanceFieldIdentifier = instance[fragmentFieldName][baseLibraryDescription.entityId];
+    const { flowChildActionName } = getPageActionMethodNames(
+      asActorAndPage,
+      prettyFlowActionNamePart,
+      instanceFieldIdentifier,
+    );
 
-    const name = camelize(`${asActorAndPage} ${prettyFlowActionNamePart} ${instanceFieldIdentifier}`);
-
-    return `${template}\n${createFlowTemplates(name, action, fragmentFieldName, instance[fragmentFieldName])}\n`;
+    return `${template}\n${createFlowTemplates(flowChildActionName, action, fragmentFieldName, instance[fragmentFieldName])}\n`;
   },
   `\n
 `,

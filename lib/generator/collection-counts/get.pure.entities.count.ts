@@ -1,9 +1,10 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
-import { camelize, stringifyData } from 'sat-utils';
+import { stringifyData } from 'sat-utils';
 //
 import { config } from '../../config/config';
-import { getActionsList, getResult, getName } from '../utils.random';
+import { getActionsList, getResult } from '../utils.random';
 import { getCollectionsPathes } from '../create.type';
+import { getCollectionMethodNames } from '../namings';
 
 const { baseLibraryDescription = {}, collectionDescription = {}, promod = {} } = config.get();
 
@@ -12,8 +13,7 @@ function createTemplatePureTemplate(asActorAndPage, actionDescriptor, entryType 
 
   const result = getResult(action);
 
-  const getCollectionFrom = camelize(`${asActorAndPage} Get Collection From ${getName(action)}`);
-  const waitCollectionFrom = camelize(`${asActorAndPage} Wait Content For Collection ${getName(action)}`);
+  const { getCollectionFrom, waitCollectionFrom } = getCollectionMethodNames(asActorAndPage, action);
 
   const actionSignature = stringifyData(action).replace(
     `${collectionDescription.action}: null`,

@@ -1,8 +1,9 @@
 /* eslint-disable sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
-import { isObject, camelize, isArray, isNotEmptyArray } from 'sat-utils';
+import { isObject, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getActionInstanceFields } from '../utils';
 
+import { getPageActionMethodNames } from '../namings';
 import { getFlowRestArguments, getFlowTypes } from './common';
 
 const noTransormTypes = new Set(['void', 'boolean']);
@@ -103,7 +104,7 @@ function createFlowTemplateForPageElements(name, action, instance) {
 
   const { flowArgumentType, flowResultType, typeName } = getFlowTypes(instance, action, name, true);
 
-  const flowActionName = camelize(`${name} ${prettyFlowActionNamePart} PageElements`);
+  const { flowElementsActionName } = getPageActionMethodNames(name, prettyFlowActionNamePart);
 
   const optionsSecondArgument = getFlowRestArguments(action);
 
@@ -116,8 +117,8 @@ function createFlowTemplateForPageElements(name, action, instance) {
   const isDeclaration = promod.actionsDeclaration === 'declaration';
 
   const firstLine = isDeclaration
-    ? `async function ${flowActionName}<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {`
-    : `const ${flowActionName} = async <Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> => {`;
+    ? `async function ${flowElementsActionName}<Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> {`
+    : `const ${flowElementsActionName} = async <Tentry extends ${typeName}>(data: Tentry${optionsSecondArgument}): Promise<${callResultType}> => {`;
 
   return `
 type ${typeName} = ${flowArgumentType}
@@ -144,9 +145,13 @@ ${[...fragmentFields, ...collectionsFields].reduce(
 
     const instanceFieldIdentifier = instance[fragmentFieldName][baseLibraryDescription.entityId];
 
-    const name = camelize(`${asActorAndPage} ${prettyFlowActionNamePart} ${instanceFieldIdentifier}`);
+    const { flowChildActionName } = getPageActionMethodNames(
+      asActorAndPage,
+      prettyFlowActionNamePart,
+      instanceFieldIdentifier,
+    );
 
-    return `${template}\n${createFlowTemplates(name, action, fragmentFieldName, instance[fragmentFieldName])}\n`;
+    return `${template}\n${createFlowTemplates(flowChildActionName, action, fragmentFieldName, instance[fragmentFieldName])}\n`;
   },
   `\n
 `,

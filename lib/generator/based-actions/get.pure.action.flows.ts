@@ -4,6 +4,7 @@ import { camelize, isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getFragmentTypes } from '../create.type';
 import { getActionInstanceFields } from '../utils';
+import { getPageActionMethodNames } from '../namings';
 
 const {
   actionWithWaitOpts,
@@ -64,7 +65,7 @@ function createFlowTemplates(name, action, field, instance) {
 function createFlowTemplateForPageElements(name, action) {
   const prettyFlowActionNamePart = prettyMethodName[action] || action;
 
-  const flowActionName = camelize(`${name} ${prettyFlowActionNamePart} PageElements`);
+  const { flowElementsActionName } = getPageActionMethodNames(name, prettyFlowActionNamePart);
 
   let optionsSecondArgument = '';
   // TODO need to update duplicated branches
@@ -77,8 +78,8 @@ function createFlowTemplateForPageElements(name, action) {
   const isDeclaration = promod.actionsDeclaration === 'declaration';
 
   const firstLine = isDeclaration
-    ? `async function ${flowActionName}(data${optionsSecondArgument}) {`
-    : `const ${flowActionName} = async (data${optionsSecondArgument}) => {`;
+    ? `async function ${flowElementsActionName}(data${optionsSecondArgument}) {`
+    : `const ${flowElementsActionName} = async (data${optionsSecondArgument}) => {`;
 
   return `
 ${firstLine}

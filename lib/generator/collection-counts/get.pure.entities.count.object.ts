@@ -1,18 +1,17 @@
 /* eslint-disable unicorn/no-object-as-default-parameter, sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
-import { camelize, waitForCondition, compareToPattern } from 'sat-utils';
+import { waitForCondition, compareToPattern } from 'sat-utils';
 //
 import { config } from '../../config/config';
-import { getActionsList, getResultMappedResult, addDescriptions, getName } from '../utils.random';
+import { getActionsList, getResultMappedResult, addDescriptions } from '../utils.random';
 import { getCollectionsPathes } from '../create.type';
+import { getCollectionMethodNames } from '../namings';
 
 const { baseLibraryDescription = {} } = config.get();
 
 function createTemplateObjectTemplate(asActorAndPage, actionDescriptor, page, ..._rest) {
   const { action } = actionDescriptor || {};
 
-  // TODO this needs to be common for all actions
-  const getCollectionFrom = camelize(`${asActorAndPage} Get Collection From ${getName(action)}`);
-  const waitCollectionFrom = camelize(`${asActorAndPage} Wait Content For Collection ${getName(action)}`);
+  const { getCollectionFrom, waitCollectionFrom } = getCollectionMethodNames(asActorAndPage, action);
 
   const actions = {
     [getCollectionFrom]: async (descriptions = {}, opts?) => {

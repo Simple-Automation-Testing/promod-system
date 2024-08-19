@@ -1,7 +1,8 @@
 /* eslint-disable unicorn/prefer-set-has, sonarjs/no-duplicated-branches, sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
-import { camelize, isNotEmptyArray, toArray } from 'sat-utils';
+import { isNotEmptyArray, toArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getActionInstanceFields } from '../utils';
+import { getPageActionMethodNames } from '../namings';
 
 const { repeatingActions = [], resultActionsMap, baseLibraryDescription = {}, prettyMethodName = {} } = config.get();
 
@@ -58,10 +59,14 @@ function getPureActionFlowsObject(asActorAndPage: string, instance: object, acti
     (template, fragmentFieldName) => {
       const instanceFieldIdentifier = instance[fragmentFieldName][baseLibraryDescription.entityId];
 
-      const name = camelize(`${asActorAndPage} ${prettyFlowActionNamePart} ${instanceFieldIdentifier}`);
+      const { flowChildActionName } = getPageActionMethodNames(
+        asActorAndPage,
+        prettyFlowActionNamePart,
+        instanceFieldIdentifier,
+      );
 
       const actions = createFlowTemplates({
-        name,
+        name: flowChildActionName,
         action,
         field: fragmentFieldName,
         page: instance,
@@ -75,7 +80,7 @@ function getPureActionFlowsObject(asActorAndPage: string, instance: object, acti
       ? createFlowTemplateForPageElements({
           page: instance,
           action,
-          nameElements: camelize(`${asActorAndPage} ${prettyFlowActionNamePart} PageElements`),
+          nameElements: getPageActionMethodNames(asActorAndPage, prettyFlowActionNamePart).flowElementsActionName,
         })
       : {},
   );

@@ -1,17 +1,17 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
-import { camelize } from 'sat-utils';
-import { getActionsList, getName } from '../utils.random';
+import { getActionsList } from '../utils.random';
 import { getCollectionsPathes } from '../create.type';
 import { createTemplatePureTemplate } from './get.pure.entities.count';
+import { getCollectionMethodNames } from '../namings';
 
 function createTemplate(asActorAndPage, actionDescriptor) {
   const { action, _countResult, _type, _check } = actionDescriptor || {};
 
-  const name = camelize(`${asActorAndPage} Get Collection From ${getName(action)}`);
+  const { getCollectionFrom } = getCollectionMethodNames(asActorAndPage, action);
 
   return `
-  type T${name}Entry = ${_type.get}
-  type T${name} = ${_countResult}
+  type T${getCollectionFrom}Entry = ${_type.get}
+  type T${getCollectionFrom} = ${_countResult}
   ${createTemplatePureTemplate(asActorAndPage, actionDescriptor, `: T${name}Entry`, `: Promise<T${name}[]>`)}
   `;
 }

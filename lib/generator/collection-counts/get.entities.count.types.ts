@@ -1,18 +1,16 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
-import { camelize } from 'sat-utils';
-
 import { config } from '../../config/config';
 
-import { getActionsList, getName } from '../utils.random';
+import { getActionsList } from '../utils.random';
 import { getCollectionsPathes } from '../create.type';
+import { getCollectionMethodNames } from '../namings';
 
 const { baseLibraryDescription = {}, collectionActionTypes = {} } = config.get();
 
 function createTemplate(asActorAndPage, actionDescriptor) {
   const { action, _countResult, _type, _check } = actionDescriptor || {};
 
-  const getCollectionFrom = camelize(`${asActorAndPage} Get Collection From ${getName(action)}`);
-  const waitCollectionFrom = camelize(`${asActorAndPage} Wait Content For Collection ${getName(action)}`);
+  const { getCollectionFrom, waitCollectionFrom } = getCollectionMethodNames(asActorAndPage, action);
 
   const getActionDeclaration = `declare function ${getCollectionFrom}(descriptions?: T${getCollectionFrom}Entry): Promise<T${getCollectionFrom}[]>;`;
   const waitActionDeclaration = `declare function ${waitCollectionFrom}(state: T${getCollectionFrom}Check, waitingCheckOpts?: ${baseLibraryDescription.waitOptionsId}, descriptions?: T${getCollectionFrom}Entry): Promise<void>;`;
