@@ -33,31 +33,9 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
   const additionalArguments = optionsSecondArgument ? ', opts' : '';
 
-  let entryDataType = `Tentry${optionsSecondArgument}`;
-
   let flowBody = `${isActionVoid ? 'return' : `const { ${field} } =`} await ${
     baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
   }${action}({ ${field}: data }${additionalArguments});${isActionVoid ? '' : `\n\treturn ${field};`}`;
-
-  /**
-   * @info
-   * repeat action is not allowed for actions that return values
-   * but for void actions we can repeat action, i.e click, set data to input fieds.
-   */
-  if (!isRepeatingAllowed && isArray(repeatingActions) && repeatingActions.includes(action)) {
-    // TODO use logger here
-    console.info(
-      `${action} result type is not void, but action exists in 'repeatingActions' list. Repeat is not allowed here`,
-    );
-  } else if (isRepeatingAllowed) {
-    entryDataType = `Tentry | Tentry[]${optionsSecondArgument}`;
-
-    flowBody = `for (const actionData of toArray(data)) {
-      await ${
-        baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
-      }${action}({ ${field}: actionData }${additionalArguments})
-    }`;
-  }
 
   let resultTypeClarification;
 
@@ -73,14 +51,39 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
     resultTypeClarification = flowResultType;
   }
 
-  const callResultType = shouldResultTypeBeBasedOnArgument(resultTypeClarification, flowArgumentType)
-    ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
-    : `${typeName}Result`;
+  const baseOnArg = shouldResultTypeBeBasedOnArgument(resultTypeClarification, flowArgumentType);
+
+  let entryDataType = baseOnArg ? `Tentry${optionsSecondArgument}` : `${typeName}${optionsSecondArgument}`;
+  const entryGeneric = baseOnArg ? `<Tentry extends ${typeName}>` : '';
+
+  /**
+   * @info
+   * repeat action is not allowed for actions that return values
+   * but for void actions we can repeat action, i.e click, set data to input fieds.
+   */
+  if (!isRepeatingAllowed && isArray(repeatingActions) && repeatingActions.includes(action)) {
+    // TODO use logger here
+    console.info(
+      `${action} result type is not void, but action exists in 'repeatingActions' list. Repeat is not allowed here`,
+    );
+  } else if (isRepeatingAllowed) {
+    entryDataType = baseOnArg
+      ? `Tentry | Tentry[]${optionsSecondArgument}`
+      : `${typeName} | ${typeName}[]${optionsSecondArgument}`;
+
+    flowBody = `for (const actionData of toArray(data)) {
+        await ${
+          baseLibraryDescription.getPageInstance ? `${baseLibraryDescription.getPageInstance}().` : 'page.'
+        }${action}({ ${field}: actionData }${additionalArguments})
+      }`;
+  }
+
+  const callResultType = baseOnArg ? `TresultBasedOnArgument<Tentry, ${typeName}Result>` : `${typeName}Result`;
 
   const isDeclaration = promod.actionsDeclaration === 'declaration';
   const firstLine = isDeclaration
-    ? `async function ${name}<Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}> {`
-    : `const ${name} = async <Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}> => {`;
+    ? `async function ${name}${entryGeneric}(data: ${entryDataType}): Promise<${callResultType}> {`
+    : `const ${name} = async ${entryGeneric}(data: ${entryDataType}): Promise<${callResultType}> => {`;
 
   return `
 type ${typeName} = ${flowArgumentType}

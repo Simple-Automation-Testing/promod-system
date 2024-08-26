@@ -31,22 +31,6 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
   const isActionVoid = flowResultType === 'void';
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
 
-  let entryDataType = `Tentry${optionsSecondArgument}`;
-
-  /**
-   * @info
-   * repeat action is not allowed for actions that return values
-   * but for void actions we can repeat action, i.e click, set data to input fieds.
-   */
-  if (!isRepeatingAllowed && isArray(repeatingActions) && repeatingActions.includes(action)) {
-    // TODO use logger here
-    console.info(
-      `${action} result type is not void, but action exists in 'repeatingActions' list. Repeat is not allowed here`,
-    );
-  } else if (isRepeatingAllowed) {
-    entryDataType = `Tentry | Tentry[]${optionsSecondArgument}`;
-  }
-
   let resultTypeClarification;
 
   if (flowResultType === 'void' && optionsSecondArgument && actionWithWaitOpts?.includes(action)) {
@@ -61,11 +45,30 @@ function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, op
     resultTypeClarification = flowResultType;
   }
 
-  const callResultType = shouldResultTypeBeBasedOnArgument(resultTypeClarification, flowArgumentType)
-    ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
-    : `${typeName}Result`;
+  const baseOnArg = shouldResultTypeBeBasedOnArgument(resultTypeClarification, flowArgumentType);
 
-  const actionDeclaration = `declare function ${name}<Tentry extends ${typeName}>(data: ${entryDataType}): Promise<${callResultType}>`;
+  let entryDataType = baseOnArg ? `Tentry${optionsSecondArgument}` : `${typeName}${optionsSecondArgument}`;
+  const entryGeneric = baseOnArg ? `<Tentry extends ${typeName}>` : '';
+
+  /**
+   * @info
+   * repeat action is not allowed for actions that return values
+   * but for void actions we can repeat action, i.e click, set data to input fieds.
+   */
+  if (!isRepeatingAllowed && isArray(repeatingActions) && repeatingActions.includes(action)) {
+    // TODO use logger here
+    console.info(
+      `${action} result type is not void, but action exists in 'repeatingActions' list. Repeat is not allowed here`,
+    );
+  } else if (isRepeatingAllowed) {
+    entryDataType = baseOnArg
+      ? `Tentry | Tentry[]${optionsSecondArgument}`
+      : `${typeName} | ${typeName}[]${optionsSecondArgument}`;
+  }
+
+  const callResultType = baseOnArg ? `TresultBasedOnArgument<Tentry, ${typeName}Result>` : `${typeName}Result`;
+
+  const actionDeclaration = `declare function ${name}${entryGeneric}(data: ${entryDataType}): Promise<${callResultType}>`;
 
   return `
 type ${typeName} = ${flowArgumentType}
