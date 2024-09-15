@@ -65,6 +65,7 @@ const reportersManager = {
 };
 
 let _suiteAdditionalCall;
+let _globalIsRunnable;
 
 function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixtures?: Tfixtures) {
   const reportersCreators: (() => TreporterInstance)[] = [];
@@ -310,6 +311,9 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
       if (isString(result)) {
         testName = result;
       }
+    }
+    if (_globalIsRunnable) {
+      opts['isRunnable'] = _globalIsRunnable;
     }
 
     // @ts-expect-error
@@ -581,4 +585,11 @@ function additionalSuiteCall(cb) {
   _suiteAdditionalCall = cb;
 }
 
-export { getPreparedRunner, reportersManager, additionalSuiteCall };
+function setGlobalIsRunnable(fn) {
+  if (!isFunction(fn)) {
+    throw new TypeError('setGlobalIsRunnable(): first argument should be a function');
+  }
+  _globalIsRunnable = fn;
+}
+
+export { getPreparedRunner, reportersManager, additionalSuiteCall, setGlobalIsRunnable };
