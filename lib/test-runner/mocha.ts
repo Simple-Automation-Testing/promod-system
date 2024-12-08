@@ -67,7 +67,8 @@ const reportersManager = {
 let _suiteAdditionalCall;
 let _globalIsRunnable;
 
-function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixtures?: Tfixtures) {
+function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }>(fixtures?: TRunnerFixtures) {
+  type Tfixtures = { callOnFinish: (cb: () => any) => () => any } & typeof fixtures;
   const reportersCreators: (() => TreporterInstance)[] = [];
   const _reportersManager = (() => {
     const activeReporters: TreporterInstance[] = [];
@@ -230,6 +231,14 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
 
   function testBodyWrapper(testName, fn, opts) {
     return async function () {
+      let _callOnFinish = null;
+
+      const callOnFinishFixture = {
+        callOnFinish: cb => {
+          _callOnFinish = cb;
+        },
+      };
+
       try {
         // TODO improve this approach
         Object.assign(reportersManager, _reportersManager);
@@ -257,7 +266,11 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
           await _beforeEachCase.call(this, fixtures);
         }
 
-        await fn.call(this, fixtures);
+        const callFixtures = fixtures || {};
+
+        Object.assign(callFixtures, callOnFinishFixture);
+
+        await fn.call(this, callFixtures);
 
         if (_afterEachCase) {
           await _afterEachCase.call(this, fixtures);
@@ -272,6 +285,12 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
 
         await reportersManager.finishSuccessCase(testName);
         reportersManager.reset();
+
+        try {
+          if (_callOnFinish) await _callOnFinish();
+        } catch (error) {
+          warn(error);
+        }
       } catch (error) {
         await reportersManager.finishFailedCase(testName, error);
         reportersManager.reset();
@@ -280,6 +299,12 @@ function getPreparedRunner<Tfixtures, TrequiredOpts = { [k: string]: any }>(fixt
           console.error(error);
           console.info('Waiting for 250 seconds before next test case');
           await sleep(isNumber(+PROMOD_S_DEBUG_CASE_TIME) ? +PROMOD_S_DEBUG_CASE_TIME : 5000);
+        }
+
+        try {
+          if (_callOnFinish) await _callOnFinish();
+        } catch (error) {
+          warn(error);
         }
 
         if (shouldRecallAfterEachOnFail() && _afterEachCase) {

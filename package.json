@@ -1,14 +1,22 @@
 {
   "name": "promod-system",
-  "version": "3.3.0-beta-7",
+  "version": "3.3.1",
   "description": "Library promod condition waitings",
-  "main": "./built/index.js",
   "bin": "./bin/cli.js",
+  "main": "./built/cjs/index.js",
+  "exports": {
+    ".": {
+      "require": "./built/cjs/index.js",
+      "import": "./built/esm/index.js"
+    }
+  },
   "scripts": {
     "test": "mocha $(find specs -name '*.spec.*') --require ts-node/register --timeout 500000",
     "test:runner": "mocha $(find specs -name '*.test.*') --require ts-node/register --timeout 500000",
     "lint": "eslint --ext .ts ./ --fix",
-    "tsc": "rm -rf ./built && tsc"
+    "tsc:cjs": "tsc -p tsconfig.json",
+    "tsc:esm": "tsc -p tsconfig.esm.json",
+    "tsc": "rm -rf ./built && npm run tsc:cjs && npm run tsc:esm"
   },
   "repository": {
     "type": "git",
