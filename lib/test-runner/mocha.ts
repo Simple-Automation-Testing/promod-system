@@ -68,7 +68,7 @@ let _suiteAdditionalCall;
 let _globalIsRunnable;
 
 function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }>(fixtures?: TRunnerFixtures) {
-  type Tfixtures = { callOnFinish: (cb: () => any) => () => any } & typeof fixtures;
+  type Tfixtures = { afterTest: (cb: () => any) => () => any } & typeof fixtures;
   const reportersCreators: (() => TreporterInstance)[] = [];
   const _reportersManager = (() => {
     const activeReporters: TreporterInstance[] = [];
@@ -231,11 +231,22 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
 
   function testBodyWrapper(testName, fn, opts) {
     return async function () {
-      let _callOnFinish = null;
+      const _afterTest = [];
+      const runAfterTests = async () => {
+        if (_afterTest.length) {
+          for (const cb of _afterTest) {
+            try {
+              await cb();
+            } catch (error) {
+              warn(error);
+            }
+          }
+        }
+      };
 
-      const callOnFinishFixture = {
-        callOnFinish: cb => {
-          _callOnFinish = cb;
+      const afterTestFixture = {
+        afterTest: cb => {
+          _afterTest.push(cb);
         },
       };
 
@@ -268,7 +279,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
 
         const callFixtures = fixtures || {};
 
-        Object.assign(callFixtures, callOnFinishFixture);
+        Object.assign(callFixtures, afterTestFixture);
 
         await fn.call(this, callFixtures);
 
@@ -282,15 +293,9 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
             return;
           }
         }
-
+        await runAfterTests();
         await reportersManager.finishSuccessCase(testName);
         reportersManager.reset();
-
-        try {
-          if (_callOnFinish) await _callOnFinish();
-        } catch (error) {
-          warn(error);
-        }
       } catch (error) {
         await reportersManager.finishFailedCase(testName, error);
         reportersManager.reset();
@@ -301,11 +306,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
           await sleep(isNumber(+PROMOD_S_DEBUG_CASE_TIME) ? +PROMOD_S_DEBUG_CASE_TIME : 5000);
         }
 
-        try {
-          if (_callOnFinish) await _callOnFinish();
-        } catch (error) {
-          warn(error);
-        }
+        await runAfterTests();
 
         if (shouldRecallAfterEachOnFail() && _afterEachCase) {
           await _afterEachCase.call(this);

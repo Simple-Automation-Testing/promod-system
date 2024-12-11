@@ -13,12 +13,12 @@ const { test, suite } = r;
 
 suite('example sync', function () {
   test('first call', async f => {
-    f?.callOnFinish(async () => {
+    f?.afterTest(async () => {
       throw new Error('This is a debug test');
     });
   });
 
   test('second call', f => {
-    f?.callOnFinish(() => console.log('!!!!!!! 2'));
+    f?.afterTest(() => console.log('!!!!!!! 2'));
   });
 });
