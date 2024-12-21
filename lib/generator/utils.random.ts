@@ -1,7 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import {
   isUndefined,
-  compareToPattern,
   isNull,
   isNotEmptyObject,
   isEmptyObject,
@@ -10,6 +9,7 @@ import {
   isObject,
   isEmptyArray,
 } from 'sat-utils';
+import { compare } from 'sat-compare';
 import { config } from '../config/config';
 
 // TODO refactor
@@ -126,7 +126,7 @@ function removeKeys(data: { [k: string]: any }, keysPath: string) {
   } else {
     const part = removeKeys(data[first], rest.join('.'));
 
-    if (isNotEmptyObject(part) && compareToPattern(Object.keys(part).sort(), descriptionKeys.sort()).result) {
+    if (isNotEmptyObject(part) && compare(Object.keys(part).sort(), descriptionKeys.sort()).result) {
       // TODO this should be improved
       data[first] = {};
     } else if (isEmptyObject(part) || isEmptyArray(part) || isNull(part) || isUndefined(part)) {

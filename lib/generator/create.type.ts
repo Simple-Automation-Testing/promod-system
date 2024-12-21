@@ -55,12 +55,22 @@ function getColletionActionType(collectionsItem, getTypes, collectionActionType,
   return Object.keys(collectionActionType).reduce((typeString, actionKey, index, allActions) => {
     const actionDescriptor = collectionActionType[actionKey] as { action: string; actionType: string };
 
-    return `${typeString}${getTypes(
+    const typesItem = getTypes(
       collectionsItem,
       actionDescriptor.action,
       actionDescriptor.actionType,
       collectionActionDescriptor,
-    )}${allActions.length - 1 === index ? '' : ','}`;
+    );
+
+    const isEmptyType = typesItem?.trim() === '';
+
+    const combinedType = `${typeString}${typesItem}${allActions.length - 1 === index ? '' : ','}`;
+
+    if (isEmptyType && combinedType.endsWith(',')) {
+      return combinedType.slice(0, -1);
+    }
+
+    return combinedType;
   }, '');
 }
 

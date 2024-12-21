@@ -1,5 +1,6 @@
 /* eslint-disable unicorn/no-object-as-default-parameter, sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
-import { waitForCondition, compareToPattern } from 'sat-utils';
+import { waitForCondition } from 'sat-utils';
+import { compare } from 'sat-compare';
 //
 import { config } from '../../config/config';
 import { getActionsList, getResultMappedResult, addDescriptions } from '../utils.random';
@@ -34,7 +35,7 @@ function createTemplateObjectTemplate(asActorAndPage, actionDescriptor, page, ..
         async () => {
           const actionResult = await actions[getCollectionFrom](descriptions, mergedOpts);
 
-          const { message, result } = compareToPattern(actionResult, state, { customCheck: true, ...mergedOpts });
+          const { message, result } = compare(actionResult, state, { customCheck: true, ...mergedOpts });
 
           if (result !== mergedOpts.isEql) {
             throw new Error(message);

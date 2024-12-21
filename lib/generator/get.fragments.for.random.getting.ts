@@ -6,7 +6,12 @@ import { config } from '../config/config';
 
 import { getElementsTypes } from './create.type';
 import { getInstanceInteractionFields } from './utils';
-import { checkThatElementHasAction, getElementType, isBaseElementInstance, getFragmentBaseElementsFields } from './get.base';
+import {
+  checkThatElementHasAction,
+  getElementType,
+  isBaseElementInstance,
+  getFragmentBaseElementsFields,
+} from './get.base';
 import {
   getCollectionItemInstance,
   isCollectionWithItemBaseElement,

@@ -12,6 +12,7 @@ export * from './generator/validators';
 
 export { getInstanceInteractionFields } from './generator/utils';
 export { isBaseElementInstance, isCollectionInstance, isFragmentInstance } from './generator/get.base';
+export { config } from './config';
 
 // types
 export type { TobjectFromStringArray, TresultBasedOnArgument, TChainableActions, TisEq } from './generator/types';

@@ -11,10 +11,10 @@ const { hideBin } = require('yargs/helpers');
 
 const argv = yargs(hideBin(process.argv)).argv;
 
-const { createPageStructure } = require('../built/generator/generate');
-const { createPageActionTypes } = require('../built/generator/generate.types');
-const { createTemplateConfig } = require('../built/config/config.template');
-const { logEnvUsage } = require('../built/config/env');
+const { createPageStructure } = require('../built/cjs/generator/generate');
+const { createPageActionTypes } = require('../built/cjs/generator/generate.types');
+const { createTemplateConfig } = require('../built/cjs/config/config.template');
+const { logEnvUsage } = require('../built/cjs/config/env');
 
 if (argv.clihelp) {
   console.info(`
@@ -50,7 +50,7 @@ if (argv['generate-config']) {
     getDirFilesList(folderPath)
       .filter(file => (argv.ignorePattern ? !file.includes(argv.ignorePattern) : true))
       .filter(file => {
-        console.log(file)
+        console.log(file);
         return file.includes(argv.pattern);
       })
       .forEach(argv.types ? createPageActionTypes : createPageStructure);
