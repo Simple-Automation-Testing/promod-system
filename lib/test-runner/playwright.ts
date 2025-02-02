@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/consistent-function-scoping, no-console, no-only-tests/no-only-tests, sonarjs/cognitive-complexity */
-//
+import { test as base } from '@playwright/test';
 import { isNumber, sleep, isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
 import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 
@@ -68,7 +68,7 @@ const reportersManager = {
 let _suiteAdditionalCall;
 let _globalIsRunnable;
 
-function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }>(fixtures?: TRunnerFixtures) {
+function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }>(fixtures: TRunnerFixtures) {
   type Tfixtures = { afterTest: (cb: () => any) => () => any } & typeof fixtures;
   const reportersCreators: (() => TreporterInstance)[] = [];
   const _reportersManager = (() => {
@@ -345,12 +345,12 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
 
     // @ts-expect-error
     if ((opts as TrequiredOpts)?.isRunnable && opts.isRunnable(testName, opts as TrequiredOpts)) {
-      global.it(testName, testBodyWrapper(testName, fn, opts));
+      base(testName, testBodyWrapper(testName, fn, opts));
       // @ts-expect-error
     } else if ((opts as TrequiredOpts)?.isRunnable && !opts.isRunnable(testName, opts as TrequiredOpts)) {
-      global.it.skip(testName, testBodyWrapper(testName, fn, opts));
+      base.skip(testName, testBodyWrapper(testName, fn, opts));
     } else {
-      global.it(testName, testBodyWrapper(testName, fn, opts));
+      base(testName, testBodyWrapper(testName, fn, opts));
     }
   }
 
@@ -375,7 +375,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
         testName = result;
       }
     }
-    global.it.only(testName, testBodyWrapper(testName, fn, opts));
+    base.only(testName, testBodyWrapper(testName, fn, opts));
   };
 
   /**
@@ -410,8 +410,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
         testName = result;
       }
     }
-    console.log(testName, opts, fn);
-    global.it.only(testName as string, async function () {
+    base.only(testName as string, async function () {
       try {
         await testBodyWrapper(testName, fn, opts)();
       } catch (error) {
@@ -438,7 +437,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
       fn = opts as TtestBody<Tfixtures>;
       opts = {};
     }
-    global.it.skip(`${skipReason} ${testName}`, testBodyWrapper(testName, fn, opts));
+    base.skip(`${skipReason} ${testName}`, testBodyWrapper(testName, fn, opts));
   };
 
   /**
@@ -462,7 +461,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
     if (condition(testName, opts as TrequiredOpts)) {
       test(testName, opts, fn);
     } else {
-      global.it.skip(testName, testBodyWrapper(testName, fn, opts));
+      base.skip(testName, testBodyWrapper(testName, fn, opts));
     }
   };
 
@@ -472,17 +471,17 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
     }
 
     if (isFunction(_afterAllCases)) {
-      global.after(_afterAllCases);
+      base.afterAll(_afterAllCases);
     } else if (isAsyncFunction(_afterAllCases)) {
-      global.after(async function () {
+      base.afterAll(async function () {
         await _afterAllCases.call(this);
       });
     }
 
     if (isFunction(_beforeAllCases)) {
-      global.before(_beforeAllCases);
+      base.beforeAll(_beforeAllCases);
     } else if (isAsyncFunction(_beforeAllCases)) {
-      global.before(async function () {
+      base.beforeAll(async function () {
         await _beforeAllCases.call(this);
       });
     }
@@ -498,7 +497,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
       }
     }
 
-    global.describe(suiteName, function () {
+    base.describe(suiteName, function () {
       if (isFunction(_suiteAdditionalCall)) {
         _suiteAdditionalCall(this);
       }
@@ -513,7 +512,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
     if (condition()) {
       suite(suiteName, cb);
     } else {
-      global.describe.skip(suiteName, function () {
+      base.describe.skip(suiteName, function () {
         cb.call(this, fixtures);
       });
     }
@@ -526,7 +525,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
         suiteName = updated;
       }
     }
-    global.describe.skip(suiteName, function () {
+    base.describe.skip(suiteName, function () {
       suiteBodyWrapper.call(this, suiteName, cb);
     });
   };
@@ -539,7 +538,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
       }
     }
     // eslint-disable-next-line sonarjs/no-identical-functions
-    global.describe.only(suiteName, function () {
+    base.describe.only(suiteName, function () {
       if (isFunction(_suiteAdditionalCall)) {
         _suiteAdditionalCall(this);
       }

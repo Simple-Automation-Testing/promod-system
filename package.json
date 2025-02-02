@@ -1,6 +1,6 @@
 {
   "name": "promod-system",
-  "version": "3.4.3",
+  "version": "3.5.0",
   "description": "Library promod condition waitings",
   "bin": "./bin/cli.js",
   "main": "./built/cjs/index.js",
@@ -8,6 +8,14 @@
     ".": {
       "require": "./built/cjs/index.js",
       "import": "./built/esm/index.js"
+    },
+    "./tr/mocha": {
+      "require": "./built/cjs/test-runner/mocha.js",
+      "import": "./built/esm/test-runner/mocha.js"
+    },
+    "./tr/pw": {
+      "require": "./built/cjs/test-runner/playwright.js",
+      "import": "./built/esm/test-runner/playwright.js"
     }
   },
   "scripts": {
@@ -32,6 +40,7 @@
   },
   "homepage": "https://github.com/Simple-Automation-Testing/promod-system#readme",
   "devDependencies": {
+    "@playwright/test": "^1.50.1",
     "@types/mocha": "^9.1.1",
     "@types/node": "^20.11.24",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
@@ -45,6 +54,7 @@
     "eslint-plugin-sonarjs": "^0.24.0",
     "eslint-plugin-unicorn": "^51.0.1",
     "mocha": "^10.0.0",
+    "playwright": "^1.50.1",
     "prettier": "^3.2.5",
     "promod": "1.4.2",
     "ts-node": "^10.9.2",

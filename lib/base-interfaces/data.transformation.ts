@@ -1,17 +1,85 @@
 /* eslint-disable sonarjs/cognitive-complexity */
-import { safeHasOwnPropery, isObject, isUndefined, isEmptyObject, isNotEmptyObject, isNotEmptyArray } from 'sat-utils';
+import {
+  safeHasOwnPropery,
+  isObject,
+  isUndefined,
+  isEmptyObject,
+  isNotEmptyObject,
+  isNotEmptyArray,
+  safeJSONstringify,
+  isPrimitive,
+} from 'sat-utils';
 import { config } from '../config';
 import { getCollectionElementInstance, getCollectionActionData } from './utils';
 import { isCollectionInstance } from '../generator/get.base';
 
 import { promodLogger } from '../logger';
 
+const { collectionDescription, baseLibraryDescription } = config.get();
+
+function getActionDescriptorsFilledData(item, getNestedKey?) {
+  promodLogger.promodSystem(`[PROMOD SYSTEM DATA] filled data: `, item, getNestedKey);
+  if (isUndefined(collectionDescription)) {
+    throw new ReferenceError('promod.system.config should have `collectionDescription`');
+  }
+
+  const collectionNestedDesciption = [
+    collectionDescription.where,
+    collectionDescription.whereNot,
+    collectionDescription.visible,
+  ].filter(Boolean);
+  // if item is not an object we do not need to iterate
+  if (!isObject(item)) {
+    return item;
+  }
+  // if item does not have collection like properties - we do not need to iterate
+  if (!safeJSONstringify(item).includes(collectionDescription.action)) {
+    return item;
+  }
+
+  const keys = Object.keys(item);
+  const actionalable = keys.find(k => k === collectionDescription.action);
+
+  if (keys.some(k => collectionNestedDesciption.includes(k)) && getNestedKey) {
+    return keys
+      .filter(k => collectionNestedDesciption.includes(k))
+      .reduce((descriptors, key) => {
+        descriptors[key] = item[key];
+
+        return descriptors;
+      }, {})[getNestedKey];
+  }
+
+  // actionable key was found but any nested descriptors there
+  if (actionalable && collectionNestedDesciption.every(k => !safeJSONstringify(item[actionalable]).includes(k))) {
+    return item;
+  }
+
+  const upDescription = {};
+  const descriptors = actionalable
+    ? collectionNestedDesciption.filter(k => safeJSONstringify(item[actionalable]).includes(k) && !keys.includes(k))
+    : [];
+
+  if (actionalable && descriptors.length) {
+    descriptors.forEach(k => {
+      upDescription[k] = getActionDescriptorsFilledData(item[actionalable], k);
+    });
+
+    return { ...upDescription, ...item };
+  } else {
+    for (const k of keys) {
+      const res = getActionDescriptorsFilledData(item[k]);
+      Object.assign(upDescription, { [k]: res });
+    }
+  }
+
+  return upDescription;
+}
+
 function getCollectionRecomposedData(recomposedData, component) {
   promodLogger.promodSystem(`[PROMOD SYSTEM DATA] recomposition of the collection data: `, recomposedData, component);
 
   if (!recomposedData) return recomposedData;
-
-  const { collectionDescription, baseLibraryDescription } = config.get();
 
   if (isUndefined(collectionDescription) || isUndefined(baseLibraryDescription)) {
     throw new ReferenceError('promod.system.config should have `baseLibraryDescription` and `collectionDescription`');
@@ -19,67 +87,66 @@ function getCollectionRecomposedData(recomposedData, component) {
 
   const collectionActionProps = new Set(Object.values(collectionDescription).filter(key => key !== 'length'));
 
+  /**
+   * !@info
+   * length is a part of the array and should be ignored during action recomposition
+   * [collectionDescription.comparison]
+   */
   const { length, [collectionDescription.comparison]: ignoreComparison, ...rest } = recomposedData;
 
   for (const key of Object.keys(rest)) {
-    rest[key] = processKey(
-      rest[key],
-      key,
-      component,
-      collectionActionProps,
-      collectionDescription,
-      baseLibraryDescription,
-    );
+    if (isCollectionInstance(component && component[key]) && !collectionActionProps.has(key)) {
+      const actionDescription = safeHasOwnPropery(rest[key], collectionDescription.action)
+        ? rest[key][collectionDescription.action]
+        : undefined;
+      const itemsArrayChild = getCollectionElementInstance(component && component[key], baseLibraryDescription);
+      const {
+        _outOfDescription,
+        [collectionDescription.comparison]: ignoreComparison,
+        ...data
+      } = getCollectionActionData(rest[key], collectionDescription);
+
+      if (isEmptyObject(_outOfDescription) && isNotEmptyArray(ignoreComparison)) {
+        rest[key] = {
+          ...data,
+          [collectionDescription.action]: isUndefined(actionDescription)
+            ? getCollectionRecomposedData(ignoreComparison[0], itemsArrayChild)
+            : actionDescription,
+        };
+      } else if (isEmptyObject(_outOfDescription) && isNotEmptyObject(ignoreComparison)) {
+        rest[key] = {
+          ...data,
+          [collectionDescription.action]: isUndefined(actionDescription)
+            ? getCollectionRecomposedData(ignoreComparison, itemsArrayChild)
+            : actionDescription,
+        };
+      } else if (isNotEmptyArray(_outOfDescription)) {
+        rest[key] = {
+          ...data,
+          [collectionDescription.action]: isUndefined(actionDescription)
+            ? getCollectionRecomposedData(_outOfDescription[0], itemsArrayChild)
+            : actionDescription,
+        };
+      } else {
+        rest[key] = {
+          ...data,
+          [collectionDescription.action]: isUndefined(actionDescription)
+            ? getCollectionRecomposedData(_outOfDescription, itemsArrayChild)
+            : actionDescription,
+        };
+      }
+    } else if (isObject(rest[key]) && !collectionActionProps.has(key)) {
+      rest[key] = getCollectionRecomposedData(rest[key], component && component[key]);
+    } else if (collectionActionProps.has(key) && !isPrimitive(rest[key])) {
+      rest[key] = { ...rest[key] };
+    } else if (collectionActionProps.has(key) && isPrimitive(rest[key])) {
+      rest[key] = rest[key];
+    } else {
+      rest[key] = null;
+    }
   }
 
   return rest;
 }
 
-function processKey(value, key, component, collectionActionProps, collectionDescription, baseLibraryDescription) {
-  if (
-    isCollectionInstance(component && component[key]) &&
-    !collectionActionProps.has(key) &&
-    !safeHasOwnPropery(value, collectionDescription.action)
-  ) {
-    return processCollectionInstance(value, key, component, collectionDescription, baseLibraryDescription);
-  } else if (isObject(value) && !collectionActionProps.has(key)) {
-    return getCollectionRecomposedData(value, component && component[key]);
-  } else if (collectionActionProps.has(key)) {
-    return { ...value };
-  } else {
-    return null;
-  }
-}
-
-function processCollectionInstance(value, key, component, collectionDescription, baseLibraryDescription) {
-  const itemsArrayChild = getCollectionElementInstance(component && component[key], baseLibraryDescription);
-  const {
-    _outOfDescription,
-    [collectionDescription.comparison]: ignoreComparison,
-    ...data
-  } = getCollectionActionData(value, collectionDescription);
-
-  if (isEmptyObject(_outOfDescription) && isNotEmptyArray(ignoreComparison)) {
-    return {
-      ...data,
-      [collectionDescription.action]: getCollectionRecomposedData(ignoreComparison[0], itemsArrayChild),
-    };
-  } else if (isEmptyObject(_outOfDescription) && isNotEmptyObject(ignoreComparison)) {
-    return {
-      ...data,
-      [collectionDescription.action]: getCollectionRecomposedData(ignoreComparison, itemsArrayChild),
-    };
-  } else if (isNotEmptyArray(_outOfDescription)) {
-    return {
-      ...data,
-      [collectionDescription.action]: getCollectionRecomposedData(_outOfDescription[0], itemsArrayChild),
-    };
-  } else {
-    return {
-      ...data,
-      [collectionDescription.action]: getCollectionRecomposedData(_outOfDescription, itemsArrayChild),
-    };
-  }
-}
-
-export { getCollectionRecomposedData };
+export { getCollectionRecomposedData, getActionDescriptorsFilledData };

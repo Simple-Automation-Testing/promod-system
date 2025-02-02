@@ -4,7 +4,6 @@ export * from './base-interfaces-arguments';
 
 export * from './base-interfaces';
 export * from './reporter';
-export * from './test-runner';
 
 export * from './generator/generate.pure';
 export * from './generator/generate.pure.object';
