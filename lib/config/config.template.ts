@@ -240,7 +240,6 @@ const baseLibraryDescription = {
   pageId: 'Page',
   fragmentId: 'Fragment',
   collectionId: 'Collection',
-  collectionRootElementsId: 'rootElements',
   waitOptionsId: 'IWaitOpts',
   getDataMethod: 'get',
   waitVisibilityState: 'waitForVisibilityState',

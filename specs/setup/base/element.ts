@@ -11,7 +11,7 @@ class ElementTest extends PromodSystemElement<PromodElementType> {
   }
 
   async waitLoadedState() {
-    await waitForCondition(async () => this.rootElement.isDisplayed());
+    await waitFor(async () => this.rootElement.isDisplayed());
   }
 
   async baseSendKeys(value): Promise<void> {

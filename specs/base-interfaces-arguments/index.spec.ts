@@ -26,7 +26,6 @@ config.updateConfigField('baseLibraryDescription', {
   fragmentId: 'Fragment',
   collectionId: 'Collection',
   collectionItemId: 'CollectionItemClass',
-  collectionRootElementsId: 'rootElements',
   waitOptionsId: 'IWaitOpts',
   collectionActionId: 'ICollectionAction',
   collectionCheckId: 'ICollectionCheck',

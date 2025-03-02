@@ -26,7 +26,6 @@ type TbaseLibraryDescriptionMap = {
   pageId: string;
   fragmentId: string;
   collectionId: string;
-  collectionRootElementsId: string;
   waitOptionsId: string;
   collectionActionId: string;
   collectionCheckId: string;

@@ -16,7 +16,7 @@ class StructureTest extends PromodSystemStructure<PromodElementType> {
   }
 
   async waitLoadedState() {
-    await waitForCondition(async () => this.rootElement.isDisplayed());
+    await waitFor(async () => this.rootElement.isDisplayed());
   }
 }
 
@@ -39,7 +39,7 @@ class StructureAsPage extends PromodSystemStructure<PromodElementType> {
   }
 
   async waitLoadedState() {
-    await waitForCondition(async () => {
+    await waitFor(async () => {
       return this.rootElement.isDisplayed();
     });
   }
@@ -64,7 +64,7 @@ class StructureAsFragment extends PromodSystemStructure<PromodElementType> {
   }
 
   async waitLoadedState() {
-    await waitForCondition(async () => {
+    await waitFor(async () => {
       return this.rootElement.isDisplayed();
     });
   }

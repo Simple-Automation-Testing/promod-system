@@ -55,7 +55,6 @@ const {
     pageId: 'Page',
     fragmentId: 'Fragment',
     collectionId: 'Collection',
-    collectionRootElementsId: 'rootElements',
     waitOptionsId: 'IWaitOpts',
     collectionActionId: 'ICollectionAction',
     collectionCheckId: 'ICollectionCheck',
