@@ -10,7 +10,7 @@ import {
   isPrimitive,
 } from 'sat-utils';
 import { config } from '../config';
-import { getCollectionElementInstance, getCollectionActionData } from './utils';
+import { getCollectionActionData } from './utils';
 import { isCollectionInstance } from '../generator/get.base';
 
 import { promodLogger } from '../logger';
@@ -99,7 +99,8 @@ function getCollectionRecomposedData(recomposedData, component) {
       const actionDescription = safeHasOwnPropery(rest[key], collectionDescription.action)
         ? rest[key][collectionDescription.action]
         : undefined;
-      const itemsArrayChild = getCollectionElementInstance(component && component[key], baseLibraryDescription);
+      const itemsArrayChild = component[key][baseLibraryDescription.getCollectionItemInstance](0);
+
       const {
         _outOfDescription,
         [collectionDescription.comparison]: ignoreComparison,

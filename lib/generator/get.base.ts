@@ -61,7 +61,7 @@ function getAllBaseElements(instance, baseElements = []) {
     baseElements.push(baseLibraryDescription.collectionId);
 
     if (isCollectionWithItemBaseElement(instance)) {
-      baseElements.push(instance[baseLibraryDescription.collectionItemId].name);
+      baseElements.push(getCollectionItemInstance(instance)?.constructor?.name);
     } else {
       const collectionInstance = getCollectionItemInstance(instance);
 

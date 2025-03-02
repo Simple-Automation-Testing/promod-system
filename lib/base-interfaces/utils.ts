@@ -1,24 +1,3 @@
-type TConfig = {
-  rootLocatorId: string;
-  collectionItemId: string;
-  getBaseElementFromCollectionByIndex: string;
-  entityId: string;
-};
-
-/**
- * @param {Object} collectionInstance collection object instance
- * @param {Object} config config
- * @param {number} index index in elements lust
- * @returns {Object} collection child instance
- */
-function getCollectionElementInstance(collectionInstance, config: TConfig, index = 0) {
-  return new collectionInstance[config.collectionItemId](
-    collectionInstance[config.rootLocatorId],
-    `${collectionInstance[config.entityId]} index [${index}]`,
-    collectionInstance.rootElements[config.getBaseElementFromCollectionByIndex](index),
-  );
-}
-
 type TCollectionAction = {
   [key: string]: string;
 };
@@ -63,4 +42,5 @@ function getCollectionActionData(
   return data;
 }
 
-export { getCollectionElementInstance, getCollectionActionData };
+export { getCollectionItemInstance } from '../generator/utils.collection';
+export { getCollectionActionData };

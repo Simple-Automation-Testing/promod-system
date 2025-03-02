@@ -4,7 +4,7 @@ import { isCollectionInstance } from './get.base';
 
 const { baseLibraryDescription, baseElementsActionsDescription } = config.get();
 
-function getCollectionItemInstance(collectionInstance) {
+function getCollectionItemInstance(collectionInstance, index = 0): unknown {
   if (!baseLibraryDescription.getCollectionItemInstance) {
     throw new Error('"getCollectionItemInstance" is not defined in baseLibraryDescription');
   }
@@ -13,20 +13,20 @@ function getCollectionItemInstance(collectionInstance) {
       `collection should have "${baseLibraryDescription.getCollectionItemInstance}" method that returns collection item instance`,
     );
   }
-  return collectionInstance[baseLibraryDescription.getCollectionItemInstance]();
+  return collectionInstance[baseLibraryDescription.getCollectionItemInstance](index);
 }
 
 function isCollectionWithItemBaseElement(instance) {
   return (
     isCollectionInstance(instance) &&
-    baseElementsActionsDescription[instance[baseLibraryDescription.collectionItemId]?.name]
+    baseElementsActionsDescription[getCollectionItemInstance(instance)?.constructor?.name || '']
   );
 }
 
 function isCollectionWithItemFragment(instance) {
   return (
     isCollectionInstance(instance) &&
-    instance[baseLibraryDescription.collectionItemId].name.includes(baseLibraryDescription.fragmentId)
+    getCollectionItemInstance(instance)?.constructor?.name.includes(baseLibraryDescription.fragmentId)
   );
 }
 

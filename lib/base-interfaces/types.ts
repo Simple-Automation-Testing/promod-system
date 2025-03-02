@@ -26,14 +26,12 @@ type TbaseLibraryDescriptionMap = {
   pageId: string;
   fragmentId: string;
   collectionId: string;
-  collectionItemId: string;
   collectionRootElementsId: string;
   waitOptionsId: string;
   collectionActionId: string;
   collectionCheckId: string;
   getDataMethod: string;
   getVisibilityMethod: string;
-  getBaseElementFromCollectionByIndex: string;
 };
 
 export type { TelementActionsMap, TcollectionActionDescriptionMap, TbaseLibraryDescriptionMap };

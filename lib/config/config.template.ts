@@ -240,13 +240,11 @@ const baseLibraryDescription = {
   pageId: 'Page',
   fragmentId: 'Fragment',
   collectionId: 'Collection',
-  collectionItemId: 'CollectionItemClass',
   collectionRootElementsId: 'rootElements',
   waitOptionsId: 'IWaitOpts',
   getDataMethod: 'get',
   waitVisibilityState: 'waitForVisibilityState',
   getVisibilityMethod: 'isDisplayed',
-  getBaseElementFromCollectionByIndex: 'get',
 };
 
 const baseResultData = ['attribute', 'color', 'backgroundColor', 'tagName', 'text', 'isSelected'];

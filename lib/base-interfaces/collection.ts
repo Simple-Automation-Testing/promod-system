@@ -11,7 +11,7 @@ import {
   getRandomArrayItem,
   isFunction,
 } from 'sat-utils';
-import { getCollectionElementInstance, getCollectionActionData } from './utils';
+import { getCollectionItemInstance, getCollectionActionData } from './utils';
 import { PromodeSystemCollectionStateError } from './error';
 
 import { promodLogger } from '../logger';
@@ -54,18 +54,16 @@ const {
     pageId: 'Page',
     fragmentId: 'Fragment',
     collectionId: 'Collection',
-    collectionItemId: 'CollectionItemClass',
     collectionRootElementsId: 'rootElements',
     waitOptionsId: 'IWaitOpts',
     collectionActionId: 'ICollectionAction',
     collectionCheckId: 'ICollectionCheck',
     getDataMethod: 'get',
     getVisibilityMethod: 'isDisplayed',
-    getBaseElementFromCollectionByIndex: 'get',
   },
 } = config.get();
 
-class PromodSystemCollection<TrootElements = any, TitemClass = any> {
+class PromodSystemCollection<TrootElements = unknown, TitemClass = unknown> {
   protected rootLocator: string;
   protected rootElements: TrootElements;
   protected identifier: string;
@@ -109,10 +107,6 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
     this.overrideCollectionItems = [];
 
     this.logger = collection;
-  }
-
-  async getRoot(index: number) {
-    return this.rootElements[baseLibraryDescription.getBaseElementFromCollectionByIndex](index);
   }
 
   set collectionLogger(logger: { log: (...args) => void }) {
@@ -428,16 +422,11 @@ class PromodSystemCollection<TrootElements = any, TitemClass = any> {
    * @returns
    */
   private getElement(index): TitemClass {
-    const instance = getCollectionElementInstance(this, baseLibraryDescription, index);
+    const instance: TitemClass = getCollectionItemInstance(this, index) as TitemClass;
 
-    if (this.overrideCollectionItems.length) {
-      instance.overrideBaseMethods(...this.overrideCollectionItems);
+    if (instance['overrideBaseMethods'] && this.overrideCollectionItems.length) {
+      instance['overrideBaseMethods'](...this.overrideCollectionItems);
     }
-
-    const parent = this;
-
-    instance.setParent = parent;
-    instance.setIndex = index;
 
     return instance;
   }

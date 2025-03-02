@@ -12,7 +12,7 @@ const { baseElementsActionsDescription, baseLibraryDescription } = config.get();
 
 function checkThatInstanceHasActionItems(instance, action: string) {
   if (isCollectionWithItemBaseElement(instance)) {
-    return checkThatElementHasAction(getCollectionItemInstance(instance), action);
+    return checkThatElementHasAction(getCollectionItemInstance(instance)?.constructor?.name, action);
   }
 
   if (isCollectionWithItemFragment(instance)) {

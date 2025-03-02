@@ -61,7 +61,10 @@ function getPathesToCollections(childInstance, name) {
         (isCollectionWithItemFragment(instance[field]) &&
           getFragmentBaseElementsFields(getCollectionItemInstance(instance[field])).length) ||
         (isCollectionWithItemBaseElement(instance[field]) &&
-          checkThatElementHasAction(getCollectionItemInstance(instance[field]), baseLibraryDescription.getDataMethod))
+          checkThatElementHasAction(
+            getCollectionItemInstance(instance[field])?.constructor?.name,
+            baseLibraryDescription.getDataMethod,
+          ))
       ) {
         const collectionItemInstance = getCollectionItemInstance(instance[field]);
 

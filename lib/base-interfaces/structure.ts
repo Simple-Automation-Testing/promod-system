@@ -55,14 +55,12 @@ const {
     pageId: 'Page',
     fragmentId: 'Fragment',
     collectionId: 'Collection',
-    collectionItemId: 'CollectionItemClass',
     collectionRootElementsId: 'rootElements',
     waitOptionsId: 'IWaitOpts',
     collectionActionId: 'ICollectionAction',
     collectionCheckId: 'ICollectionCheck',
     getDataMethod: 'get',
     getVisibilityMethod: 'isDisplayed',
-    getBaseElementFromCollectionByIndex: 'get',
   },
 } = config.get();
 
@@ -75,7 +73,7 @@ const {
  * Designed for promod library but works with any other library or framework.
  *
  * @example
- * import { waitFor } from 'sat-wait';
+ * import { waitForCondition } from 'sat-utils';
  * import { PromodSystemElement, PromodSystemStructure } from 'promod-system';
  *
  * import type { PromodElementType } from 'promod/built/interface';

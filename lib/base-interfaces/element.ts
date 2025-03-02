@@ -33,7 +33,7 @@ const element = {
  *
  * @example
  * import type { PromodElementType } from 'promod/built/interface';
- * import { waitFor } from 'sat-wait';
+ * import { waitForCondition } from 'sat-utils';
  * import { PromodSystemElement } from 'promod-system';
  *
  * class Button extends PromodSystemElement<PromodElementType> {
