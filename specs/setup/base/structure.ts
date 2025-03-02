@@ -1,5 +1,5 @@
 /* eslint-disable sonarjs/no-identical-functions */
-import { waitForCondition } from 'sat-utils';
+import { waitFor } from 'sat-wait';
 import { PromodSystemStructure } from '../../../lib/base-interfaces/structure';
 import { PromodSystemCollection } from '../../../lib/base-interfaces/collection';
 

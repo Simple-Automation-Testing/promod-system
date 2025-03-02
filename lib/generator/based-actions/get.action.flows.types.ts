@@ -4,9 +4,7 @@ import { config } from '../../config/config';
 import { getActionInstanceFields } from '../utils';
 import { getPageActionMethodNames } from '../namings';
 
-import { getFlowRestArguments, getFlowTypes } from './common';
-
-const noTransormTypes = new Set(['void', 'boolean']);
+import { getFlowRestArguments, getFlowTypes, noTransormTypes } from './common';
 
 const {
   repeatingActions = [],
@@ -29,6 +27,7 @@ function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType
 
 function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field }) {
   const isActionVoid = flowResultType === 'void';
+
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
 
   let resultTypeClarification;
@@ -81,7 +80,15 @@ function createFlowTemplates(name, action, field, instance) {
 
   const optionsSecondArgument = getFlowRestArguments(action);
 
-  return getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field });
+  return getTemplatedCode({
+    name,
+    typeName,
+    flowArgumentType,
+    flowResultType,
+    optionsSecondArgument,
+    action,
+    field,
+  });
 }
 
 // TODO try to build generic method for page elements and page fragments
@@ -96,6 +103,7 @@ function createFlowTemplateForPageElements(name, action, instance) {
 
   // TODO waiters returns boolean if error was not thrown
   const resultTypeClarification = flowResultType === 'void' && optionsSecondArgument ? 'boolean' : flowResultType;
+
   const callResultType = shouldResultTypeBeBasedOnArgument(resultTypeClarification, flowArgumentType)
     ? `TresultBasedOnArgument<Tentry, ${typeName}Result>`
     : `${typeName}Result`;
@@ -128,7 +136,12 @@ ${[...fragmentFields, ...collectionsFields].reduce(
       instanceFieldIdentifier,
     );
 
-    return `${template}\n${createFlowTemplates(flowChildActionName, action, fragmentFieldName, instance[fragmentFieldName])}\n`;
+    return `${template}\n${createFlowTemplates(
+      flowChildActionName,
+      action,
+      fragmentFieldName,
+      instance[fragmentFieldName],
+    )}\n`;
   },
   `\n
 `,

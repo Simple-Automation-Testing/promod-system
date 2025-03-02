@@ -3,7 +3,7 @@ import { toArray, getRandomArrayItem } from 'sat-utils';
 
 import { config } from '../../config/config';
 import { getCollectionsPathes } from '../create.type';
-import { getResultMappedResult, getActionsList, getName, addDescriptions } from '../utils.random';
+import { getResultMappedResult, getActionsList, addDescriptions } from '../utils.random';
 import { redefineActionsMethodName, getPageRandomGettersMethodNames } from '../namings';
 
 const { baseLibraryDescription = {}, baseResultData = [] } = config.get();

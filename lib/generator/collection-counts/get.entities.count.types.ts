@@ -16,9 +16,9 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   const waitActionDeclaration = `declare function ${waitCollectionFrom}(state: T${getCollectionFrom}Check, waitingCheckOpts?: ${baseLibraryDescription.waitOptionsId}, descriptions?: T${getCollectionFrom}Entry): Promise<void>;`;
 
   return `
-  type T${getCollectionFrom}Entry = ${_type.get}
+  type T${getCollectionFrom}Entry = ${_type[baseLibraryDescription.getDataMethod]}
   type T${getCollectionFrom} = ${_countResult}
-  type T${getCollectionFrom}Check = ${collectionActionTypes.compare}<${_check}, ${_check}>
+  type T${getCollectionFrom}Check = ${collectionActionTypes.compare}<${_check}>
   ${getActionDeclaration}
   ${waitActionDeclaration}
     `;
@@ -26,6 +26,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
 
 function getCountFlowsTypes(pageInstance, asActorAndPage) {
   const data = getCollectionsPathes(pageInstance);
+
   const actions = getActionsList(data);
 
   return actions.reduce((flows, dataObject) => {

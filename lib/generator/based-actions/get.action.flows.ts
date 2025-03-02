@@ -4,9 +4,7 @@ import { config } from '../../config/config';
 import { getActionInstanceFields } from '../utils';
 
 import { getPageActionMethodNames } from '../namings';
-import { getFlowRestArguments, getFlowTypes } from './common';
-
-const noTransormTypes = new Set(['void', 'boolean']);
+import { getFlowRestArguments, getFlowTypes, noTransormTypes } from './common';
 
 const {
   repeatingActions = [],

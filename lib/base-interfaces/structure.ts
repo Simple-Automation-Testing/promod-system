@@ -75,7 +75,7 @@ const {
  * Designed for promod library but works with any other library or framework.
  *
  * @example
- * import { waitForCondition } from 'sat-utils';
+ * import { waitFor } from 'sat-wait';
  * import { PromodSystemElement, PromodSystemStructure } from 'promod-system';
  *
  * import type { PromodElementType } from 'promod/built/interface';

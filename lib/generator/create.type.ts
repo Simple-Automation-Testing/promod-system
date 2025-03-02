@@ -52,10 +52,15 @@ function createType(itemObject: Array<{ [k: string]: { [k: string]: string } }> 
 function getColletionActionType(collectionsItem, getTypes, collectionActionType, ...rest) {
   let [collectionActionDescriptor] = rest;
 
-  return Object.keys(collectionActionType).reduce((typeString, actionKey, index, allActions) => {
-    const actionDescriptor = collectionActionType[actionKey] as { action: string; actionType: string };
+  const objectStrategy = baseLibraryDescription.getCollectionTypeFormat === 'object';
 
-    const typesItem = getTypes(
+  const collectionType = Object.keys(collectionActionType).reduce((typeString, actionKey, index, allActions) => {
+    const actionDescriptor = collectionActionType[actionKey] as {
+      action: string;
+      actionType: string;
+    };
+
+    let typesItem: string = getTypes(
       collectionsItem,
       actionDescriptor.action,
       actionDescriptor.actionType,
@@ -63,6 +68,10 @@ function getColletionActionType(collectionsItem, getTypes, collectionActionType,
     );
 
     const isEmptyType = typesItem?.trim() === '';
+
+    if (objectStrategy) {
+      typesItem = `${collectionDescription[actionKey]}: ${typesItem}`;
+    }
 
     const combinedType = `${typeString}${typesItem}${allActions.length - 1 === index ? '' : ','}`;
 
@@ -72,6 +81,8 @@ function getColletionActionType(collectionsItem, getTypes, collectionActionType,
 
     return combinedType;
   }, '');
+
+  return objectStrategy ? `{${collectionType}}` : objectStrategy;
 }
 
 function getCollectionTypes(instance, action, actionType, ...rest) {
@@ -92,7 +103,9 @@ function getCollectionTypes(instance, action, actionType, ...rest) {
   }
 
   const types = {};
+
   collectionActionDescriptor = collectionActionDescriptor || baseCollectionActionsDescription[action][actionType];
+
   const { generic, endType, ...actionDescriptor } = collectionActionDescriptor;
 
   let colletionItemType = getColletionActionType(
@@ -130,7 +143,9 @@ function getFragmentTypes(instance, action: string, actionType: string, ...rest)
   }));
 
   const fragmentFragments = fragmentFields.map(itemFiledName => ({
-    [itemFiledName]: { [action]: getFragmentTypes(instance[itemFiledName], action, actionType, ...rest) },
+    [itemFiledName]: {
+      [action]: getFragmentTypes(instance[itemFiledName], action, actionType, ...rest),
+    },
   }));
 
   // TODO add possibility do run as collections
@@ -148,22 +163,36 @@ function getElementsTypes(instance, action: string, actionType: string): string 
 
   const instanceElements = getInstanceInteractionFields(instance)
     .filter(itemFiledName => checkThatElementHasAction(instance[itemFiledName], action))
-    .map(itemFiledName => ({ [itemFiledName]: getElementActionType(instance[itemFiledName], action, actionType) }));
+    .map(itemFiledName => ({
+      [itemFiledName]: getElementActionType(instance[itemFiledName], action, actionType),
+    }));
 
   return createType(Array.from(instanceElements), action);
 }
 
 function getCollectionsPathes(instance) {
-  // TODO this needs to be getted from the config
-  const { action, ...collectionReducedType } = baseCollectionActionsDescription['get']['entryType'];
+  const { action, ...collectionReducedType } =
+    baseCollectionActionsDescription[baseLibraryDescription.getDataMethod]['entryType'];
   if (isCollectionWithItemBaseElement(instance)) {
     return {
       [collectionDescription.action]: null,
-      // TODO this needs to be getted from the config
-      _countResult: getElementType(getCollectionItemInstance(instance), 'get', 'resultType'),
-      _check: getElementType(getCollectionItemInstance(instance), 'waitForContentState', 'entryType'),
-      // TODO this needs to be getted from the config
-      _type: getCollectionTypes(instance, 'get', 'entryType', collectionReducedType, wrap),
+      _countResult: getElementType(
+        getCollectionItemInstance(instance),
+        baseLibraryDescription.getDataMethod,
+        'resultType',
+      ),
+      _check: getElementType(
+        getCollectionItemInstance(instance),
+        baseLibraryDescription.waitContentMethod,
+        'entryType',
+      ),
+      _type: getCollectionTypes(
+        instance,
+        baseLibraryDescription.getDataMethod,
+        'entryType',
+        collectionReducedType,
+        wrap,
+      ),
       _fields: getInstanceInteractionFields(getCollectionItemInstance(instance)),
     };
   }
@@ -173,6 +202,8 @@ function getCollectionsPathes(instance) {
   }
 
   const interactionFields = getInstanceInteractionFields(instance);
+  const objectStrategy = baseLibraryDescription.getCollectionTypeFormat === 'object';
+
   // TODO document this
   return interactionFields.reduce((result, field) => {
     const childConstructorName = instance[field].constructor.name;
@@ -189,11 +220,31 @@ function getCollectionsPathes(instance) {
       result[field] = {
         [collectionDescription.action]: fragment ? getCollectionsPathes(collectionInstance) : null,
 
-        _countResult: (fragment ? getFragmentTypes : getElementType)(collectionInstance, 'get', 'resultType'),
-        _check: (fragment ? getFragmentTypes : getElementType)(collectionInstance, 'waitForContentState', 'entryType'),
-        _type: getCollectionTypes(instance[field], 'get', 'entryType', collectionReducedType, wrap),
+        _countResult: (fragment ? getFragmentTypes : getElementType)(
+          collectionInstance,
+          baseLibraryDescription.getDataMethod,
+          'resultType',
+        ),
+        _check: (fragment ? getFragmentTypes : getElementType)(
+          collectionInstance,
+          baseLibraryDescription.waitContentMethod,
+          'entryType',
+        ),
+        _type: getCollectionTypes(
+          instance[field],
+          baseLibraryDescription.getDataMethod,
+          'entryType',
+          collectionReducedType,
+          wrap,
+        ),
         _fields: getInstanceInteractionFields(collectionInstance),
       };
+
+      if (objectStrategy) {
+        result[field]._check = `{${
+          baseCollectionActionsDescription[baseLibraryDescription.waitContentMethod]['entryType'].where.action
+        }: ${result[field]._check}}`;
+      }
     }
 
     return result;

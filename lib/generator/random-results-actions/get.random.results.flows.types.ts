@@ -1,9 +1,12 @@
 /* eslint-disable sonarjs/no-nested-template-literals, sonarjs/cognitive-complexity*/
 import { camelize } from 'sat-utils';
+import { config } from '../../config/config';
 
 import { getCollectionsPathes } from '../create.type';
 import { getActionsList, getName, getFieldsEnumList } from '../utils.random';
 import { getPageRandomGettersMethodNames } from '../namings';
+
+const { baseLibraryDescription = {} } = config.get();
 
 function createFlowTemplates(asActorAndPage, actionDescriptor) {
   const { action, /* _countResult, */ _type, _fields } = actionDescriptor || {};
@@ -15,7 +18,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 
   const fieldsType = `${_fields?.length ? `type T${typeName}EntryFields = ${getFieldsEnumList(_fields)}` : ''}`;
 
-  const descriptionsType = `type T${typeName}Entry = ${_type.get}`;
+  const descriptionsType = `type T${typeName}Entry = ${_type[baseLibraryDescription.getDataMethod]}`;
   // TODO usage of the resultsType is required for future optimizations
   // const resultsType = `type T${typeName}Result = ${_countResult}`;
 

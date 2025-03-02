@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/prefer-dom-node-text-content */
-import { waitForCondition } from 'sat-utils';
+import { waitFor } from 'sat-wait';
 import { PromodSystemElement } from '../../../lib/base-interfaces/element';
 
 import type { PromodElementType } from 'promod/built/interface';

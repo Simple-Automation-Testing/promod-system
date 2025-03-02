@@ -4,7 +4,7 @@ import { config } from '../../config/config';
 
 import { getElementsTypes, getFragmentTypes } from '../create.type';
 
-const { baseLibraryDescription = {}, actionWithWaitOpts } = config.get();
+const { baseLibraryDescription = {}, actionWithWaitOpts = [] } = config.get();
 
 function getFlowRestArguments(action: string): string {
   // TODO this should be done via config
@@ -16,6 +16,8 @@ function getFlowRestArguments(action: string): string {
 
   return '';
 }
+
+const noTransormTypes = new Set(['void', 'boolean']);
 
 function getFlowTypes(instance: object, action: string, name: string, elementType?: boolean) {
   return {
@@ -30,4 +32,4 @@ function getFlowTypes(instance: object, action: string, name: string, elementTyp
   };
 }
 
-export { getFlowRestArguments, getFlowTypes };
+export { getFlowRestArguments, getFlowTypes, noTransormTypes };

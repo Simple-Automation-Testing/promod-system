@@ -6,30 +6,7 @@ import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 const { PROMOD_S_SHORE_REPORTER_ERRORS, PROMOD_S_DEBUG_CASE, PROMOD_S_DEBUG_CASE_TIME } = process.env;
 const { warn, error } = console;
 
-type TtestOpts = {
-  [k: string]: string | string[] | number | number[] | unknown;
-};
-
-export type TreporterInstance<Topts = TtestOpts> = {
-  startCase?: (testCaseTitle: string) => void | Promise<void>;
-
-  logTestBody?: (testBody: string | ((...args: any[]) => any | Promise<any>)) => void | Promise<void>;
-
-  addCaseProperties?: (opts: Topts) => void | Promise<void>;
-  addStep?: (stepData: string, stepArguments?: any, stepResult?: any) => void | Promise<void>;
-  finishStep?: (...args) => void | Promise<void>;
-
-  addCustomData?: (...args) => void | Promise<void>;
-  log?: (...args) => void | Promise<void>;
-
-  finishSuccessCase?: (testCaseTitle: string) => void | Promise<void>;
-  finishFailedCase?: (testCaseTitle: string, error: Error) => void | Promise<void>;
-};
-
-type TtestBody<Tfixtures> = (fixtures?: Tfixtures) => Promise<void> | any;
-type TcheckTestCondition<Topts = TtestOpts> = (testName: string, opts?: Topts) => boolean;
-type TdescribeBody<Tfixtures> = (fixtures?: Tfixtures) => void;
-
+import type { TcheckTestCondition, TdescribeBody, TreporterInstance, TtestBody, TtestOpts } from './commons';
 /**
  * @param {string|string[]} tags test cases tags
  * @returns {boolean}
@@ -47,7 +24,7 @@ function checkExecutionTags(testTags?: string | string[]): boolean {
   return true;
 }
 
-const reportersManager = {
+const mochaReporterManager = {
   addReporter: (...args) => ({}),
   startCase: (...args) => ({}),
   addCaseProperties: (...args) => ({}),
@@ -67,11 +44,12 @@ const reportersManager = {
 
 let _suiteAdditionalCall;
 let _globalIsRunnable;
+let _globalBeforeTest;
 
-function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }>(fixtures?: TRunnerFixtures) {
+function getMochaPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }>(fixtures?: TRunnerFixtures) {
   type Tfixtures = { afterTest: (cb: () => any) => () => any } & typeof fixtures;
   const reportersCreators: (() => TreporterInstance)[] = [];
-  const _reportersManager = (() => {
+  const _mochaReporterManager = (() => {
     const activeReporters: TreporterInstance[] = [];
 
     return {
@@ -120,7 +98,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
           }
         }
 
-        return _reportersManager.finishStep;
+        return _mochaReporterManager.finishStep;
       },
       finishStep: async (...data) => {
         for (const reporter of activeReporters) {
@@ -253,7 +231,7 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
 
       try {
         // TODO improve this approach
-        Object.assign(reportersManager, _reportersManager);
+        Object.assign(mochaReporterManager, _mochaReporterManager);
 
         if (isFunction(_customTestPreExecution) || isAsyncFunction(_customTestPreExecution)) {
           const result = await _customTestPreExecution(testName, fn.toString());
@@ -263,16 +241,16 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
         }
         reportersCreators.forEach(reporter => {
           if (isFunction(reporter)) {
-            reportersManager.addReporter(reporter());
+            mochaReporterManager.addReporter(reporter());
           } else if (isObject(reporter)) {
-            reportersManager.addReporter(reporter);
+            mochaReporterManager.addReporter(reporter);
           } else {
             error(`${reporter} should be an object of function that returns reporter object`);
           }
         });
-        await reportersManager.logTestBody(fn.toString());
-        await reportersManager.startCase(testName);
-        await reportersManager.addCaseProperties(opts);
+        await mochaReporterManager.logTestBody(fn.toString());
+        await mochaReporterManager.startCase(testName);
+        await mochaReporterManager.addCaseProperties(opts);
 
         if (_beforeEachCase) {
           await _beforeEachCase.call(this, fixtures);
@@ -295,11 +273,11 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
           }
         }
         await runAfterTests();
-        await reportersManager.finishSuccessCase(testName);
-        reportersManager.reset();
+        await mochaReporterManager.finishSuccessCase(testName);
+        mochaReporterManager.reset();
       } catch (error) {
-        await reportersManager.finishFailedCase(testName, error);
-        reportersManager.reset();
+        await mochaReporterManager.finishFailedCase(testName, error);
+        mochaReporterManager.reset();
 
         if (PROMOD_S_DEBUG_CASE) {
           console.error(error);
@@ -605,18 +583,18 @@ function getPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }
   return runner;
 }
 
-function additionalSuiteCall(cb) {
+function mochaAdditionalSuiteCall(cb) {
   if (!isFunction(cb)) {
-    throw new TypeError('additionalSuiteCall(): first argument should be a function');
+    throw new TypeError('mochaAdditionalSuiteCall(): first argument should be a function');
   }
   _suiteAdditionalCall = cb;
 }
 
-function setGlobalIsRunnable(fn) {
+function setMochaGlobalIsRunnable(fn) {
   if (!isFunction(fn)) {
-    throw new TypeError('setGlobalIsRunnable(): first argument should be a function');
+    throw new TypeError('setMochaGlobalIsRunnable(): first argument should be a function');
   }
   _globalIsRunnable = fn;
 }
 
-export { getPreparedRunner, reportersManager, additionalSuiteCall, setGlobalIsRunnable };
+export { getMochaPreparedRunner, mochaReporterManager, mochaAdditionalSuiteCall, setMochaGlobalIsRunnable };

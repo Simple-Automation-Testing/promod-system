@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-object-as-default-parameter, sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
-import { waitForCondition } from 'sat-utils';
+import { waitFor } from 'sat-wait';
 import { compare } from 'sat-compare';
 //
 import { config } from '../../config/config';
@@ -31,7 +31,7 @@ function createTemplateObjectTemplate(asActorAndPage, actionDescriptor, page, ..
         message: (t, e) => `Required state was not achived during ${t} ms, error: ${e}`,
         ...waitingCheckOpts,
       };
-      await waitForCondition(
+      await waitFor(
         async () => {
           const actionResult = await actions[getCollectionFrom](descriptions, mergedOpts);
 

@@ -3,7 +3,7 @@
 ## Structure
 
 ```ts
-import { waitForCondition } from 'sat-utils';
+import { waitFor } from 'sat-wait';
 import { seleniumWD } from 'promod';
 import { PromodSystemStructure } from 'promod-system';
 

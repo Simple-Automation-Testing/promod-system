@@ -1,6 +1,6 @@
 {
   "name": "promod-system",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "description": "Library promod condition waitings",
   "bin": "./bin/cli.js",
   "main": "./built/cjs/index.js",
@@ -8,14 +8,6 @@
     ".": {
       "require": "./built/cjs/index.js",
       "import": "./built/esm/index.js"
-    },
-    "./tr/mocha": {
-      "require": "./built/cjs/test-runner/mocha.js",
-      "import": "./built/esm/test-runner/mocha.js"
-    },
-    "./tr/pw": {
-      "require": "./built/cjs/test-runner/playwright.js",
-      "import": "./built/esm/test-runner/playwright.js"
     }
   },
   "scripts": {
@@ -58,13 +50,14 @@
     "prettier": "^3.2.5",
     "promod": "1.4.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "dayjs": "^1.11.7"
   },
   "dependencies": {
-    "dayjs": "^1.11.7",
     "node-fetch": "2.7.0",
     "sat-compare": "^0.1.0",
     "sat-utils": "^1.15.1",
+    "sat-wait": "^0.1.4",
     "yargs": "17.6.2"
   },
   "keywords": [
@@ -76,5 +69,8 @@
     "automation testing",
     "automation framework",
     "wait for conditions"
-  ]
+  ],
+  "engines": {
+    "node": ">=18.20.7"
+  }
 }

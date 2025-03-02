@@ -3,7 +3,7 @@
 ## Element
 
 ```ts
-import { waitForCondition } from 'sat-utils';
+import { waitFor } from 'sat-wait';
 import { seleniumWD, PromodElementType } from 'promod';
 import { PromodSystemElement } from 'promod-system';
 

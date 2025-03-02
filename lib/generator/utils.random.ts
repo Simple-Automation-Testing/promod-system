@@ -14,6 +14,7 @@ import { config } from '../config/config';
 
 // TODO refactor
 const descriptionKeys = ['_countResult', '_type', '_fields', '_check'];
+
 const { collectionRandomDataDescription, collectionDescription = { action: '_action' } } = config.get();
 
 function isCollectionDescription(data) {
@@ -92,7 +93,13 @@ function getKeyFormat(dataItem) {
     } else if (isObject(dataItem[key]) && !isActionInside && isDescription) {
       const { _countResult, _type, _fields, _check } = dataItem[key];
 
-      return { [key]: { [collectionDescription.action]: null }, _countResult, _type, _fields, _check };
+      return {
+        [key]: { [collectionDescription.action]: null },
+        _countResult,
+        _type,
+        _fields,
+        _check,
+      };
     } else if (isNotEmptyObject(dataItem[key]) && isActionInside) {
       const { _countResult, _type, _fields, _check, ...rest } = getKeyFormat(dataItem[key]);
       return { [key]: rest, _countResult, _type, _fields, _check };
@@ -112,6 +119,8 @@ function getSanitizeDataKeys(sanitizePattern) {
   } else if (isNotEmptyObject(sanitizePattern[firstKey])) {
     pathKeys = `${firstKey}.${getSanitizeDataKeys(sanitizePattern[firstKey])}`;
   } else {
+    // eslint-disable-next-line no-console
+    console.error(`First ${firstKey}, sanitize pattern ${safeJSONstringify(sanitizePattern)}`);
     throw new Error(`Something is wrong`);
   }
 
@@ -153,9 +162,15 @@ function getActionsList(data) {
       const { _countResult, _type, _fields, _check, ...result } = getKeyFormat(data[key]);
       const action = { [key]: result };
 
-      data = removeKeys(data, getSanitizeDataKeys(action));
+      try {
+        data = removeKeys(data, getSanitizeDataKeys(action));
 
-      actions.push({ action, _countResult, _type, _check, _fields });
+        actions.push({ action, _countResult, _type, _check, _fields });
+      } catch (error) {
+        console.error(`Key ${key}, data ${safeJSONstringify(data)}, action ${safeJSONstringify(action)}`);
+
+        throw error;
+      }
     }
   }
 
