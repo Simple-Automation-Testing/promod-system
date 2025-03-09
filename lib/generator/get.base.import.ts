@@ -1,9 +1,10 @@
+import { getUniqItems } from 'sat-utils';
 import { config } from '../config/config';
 
 const { collectionActionTypes, baseLibraryDescription, baseElementsActionsDescription } = config.get();
 
 function getCollectionTypesImport() {
-  const types = Object.values(collectionActionTypes);
+  const types = getUniqItems(Object.values(collectionActionTypes));
   if (types.length === 1) return `${types[0]}, `;
 
   return types.reduce((allTypes, itemType) => `${allTypes}${itemType},`, '');

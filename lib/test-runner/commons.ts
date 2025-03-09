@@ -18,6 +18,6 @@ export type TreporterInstance<Topts = TtestOpts> = {
   finishFailedCase?: (testCaseTitle: string, error: Error) => void | Promise<void>;
 };
 
-export type TtestBody<Tfixtures> = (fixtures?: Tfixtures) => Promise<void> | any;
+export type TtestBody<Tfixtures> = (fixtures: Tfixtures) => Promise<void> | any;
 export type TcheckTestCondition<Topts = TtestOpts> = (testName: string, opts?: Topts) => boolean;
-export type TdescribeBody<Tfixtures> = (fixtures?: Tfixtures) => void;
+export type TdescribeBody<Tfixtures> = (fixtures: Tfixtures) => void;

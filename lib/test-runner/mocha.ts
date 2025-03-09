@@ -46,8 +46,8 @@ let _suiteAdditionalCall;
 let _globalIsRunnable;
 let _globalBeforeTest;
 
-function getMochaPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any }>(fixtures?: TRunnerFixtures) {
-  type Tfixtures = { afterTest: (cb: () => any) => () => any } & typeof fixtures;
+function getMochaPreparedRunner<TProvidedfixtures, TrequiredOpts = { [k: string]: any }>(fixtures: TProvidedfixtures) {
+  type Tfixtures = { afterTest: (cb: () => any) => () => any } & TProvidedfixtures;
   const reportersCreators: (() => TreporterInstance)[] = [];
   const _mochaReporterManager = (() => {
     const activeReporters: TreporterInstance[] = [];
