@@ -6,6 +6,12 @@ import { getPageActionMethodNames, redefineActionsMethodName } from '../namings'
 
 const { repeatingActions = [], resultActionsMap, baseLibraryDescription = {}, prettyMethodName = {} } = config.get();
 
+function checkActionExist(page, action) {
+  if (!page[action]) {
+    throw new Error(`Action "${action}" does not exist. ${page[baseLibraryDescription.entityId]}`);
+  }
+}
+
 function createFlowTemplateForPageElements({ action, page, nameElements }) {
   const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action);
 
@@ -14,10 +20,12 @@ function createFlowTemplateForPageElements({ action, page, nameElements }) {
   actions[nameElements] = isRepeatingAllowed
     ? async (data, ...rest) => {
         for (const actionData of toArray(data)) {
+          checkActionExist(page, action);
           await page[action](actionData, ...rest);
         }
       }
     : async (data, ...rest) => {
+        checkActionExist(page, action);
         return await page[action](data, ...rest);
       };
 
@@ -34,15 +42,18 @@ function createFlowTemplates({ name, action, field, page }) {
   if (isRepeatingAllowed) {
     actions[name] = async (data, opts) => {
       for (const actionData of toArray(data)) {
+        checkActionExist(page, action);
         await page[action]({ [field]: actionData }, opts);
       }
     };
   } else if (isActionVoid) {
     actions[name] = async (data, opts) => {
+      checkActionExist(page, action);
       return await page[action]({ [field]: data }, opts);
     };
   } else {
     actions[name] = async (data, opts) => {
+      checkActionExist(page, action);
       const { [field]: res } = await page[action]({ [field]: data }, opts);
       return res;
     };
