@@ -322,10 +322,14 @@ function getMochaPreparedRunner<TProvidedfixtures, TrequiredOpts = { [k: string]
     }
 
     // @ts-expect-error
-    if ((opts as TrequiredOpts)?.isRunnable && opts.isRunnable(testName, opts as TrequiredOpts)) {
+    if ((opts as TrequiredOpts)?.isRunnable && opts.isRunnable(testName, opts as TrequiredOpts, fn.toString())) {
       global.it(testName, testBodyWrapper(testName, fn, opts));
+    } else if (
       // @ts-expect-error
-    } else if ((opts as TrequiredOpts)?.isRunnable && !opts.isRunnable(testName, opts as TrequiredOpts)) {
+      (opts as TrequiredOpts)?.isRunnable &&
+      // @ts-expect-error
+      !opts.isRunnable(testName, opts as TrequiredOpts, fn.toString())
+    ) {
       global.it.skip(testName, testBodyWrapper(testName, fn, opts));
     } else {
       global.it(testName, testBodyWrapper(testName, fn, opts));
