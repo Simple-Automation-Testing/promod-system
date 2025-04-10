@@ -18,7 +18,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   return `
   type T${getCollectionFrom}Entry = ${_type[baseLibraryDescription.getDataMethod]}
   type T${getCollectionFrom} = ${_countResult}
-  type T${getCollectionFrom}Check = ${collectionActionTypes.compare}<${_check}>
+  type T${getCollectionFrom}Check = ${collectionActionTypes.compare}<${_type.get}, ${_check}>
   ${getActionDeclaration}
   ${waitActionDeclaration}
     `;

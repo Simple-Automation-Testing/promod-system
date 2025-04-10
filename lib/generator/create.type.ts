@@ -41,7 +41,7 @@ function createType(itemObject: Array<{ [k: string]: { [k: string]: string } }> 
 
   if (generatedTypeString === '{') {
     // TODO need to find a solution to make
-    console.log('Issue, type generation does not handle properly ');
+    console.log('Issue, type generation does not handle properly', itemObject);
 
     return 'unknown';
   }
@@ -82,7 +82,7 @@ function getColletionActionType(collectionsItem, getTypes, collectionActionType,
     return combinedType;
   }, '');
 
-  return objectStrategy ? `{${collectionType}}` : objectStrategy;
+  return objectStrategy ? `{${collectionType}}` : collectionType;
 }
 
 function getCollectionTypes(instance, action, actionType, ...rest) {
