@@ -8,6 +8,7 @@ import { getCollectionMethodNames } from '../namings';
 const { baseLibraryDescription = {}, collectionActionTypes = {} } = config.get();
 
 function createTemplate(asActorAndPage, actionDescriptor) {
+  const objectStrategy = baseLibraryDescription.getCollectionTypeFormat === 'object';
   const { action, _countResult, _type, _check } = actionDescriptor || {};
 
   const { getCollectionFrom, waitCollectionFrom } = getCollectionMethodNames(asActorAndPage, action);
@@ -15,10 +16,11 @@ function createTemplate(asActorAndPage, actionDescriptor) {
   const getActionDeclaration = `declare function ${getCollectionFrom}(descriptions?: T${getCollectionFrom}Entry): Promise<T${getCollectionFrom}[]>;`;
   const waitActionDeclaration = `declare function ${waitCollectionFrom}(state: T${getCollectionFrom}Check, waitingCheckOpts?: ${baseLibraryDescription.waitOptionsId}, descriptions?: T${getCollectionFrom}Entry): Promise<void>;`;
 
+  const compareDataType = objectStrategy ? `<${_check}>` : `<${_type.get}, ${_check}>`;
   return `
   type T${getCollectionFrom}Entry = ${_type[baseLibraryDescription.getDataMethod]}
   type T${getCollectionFrom} = ${_countResult}
-  type T${getCollectionFrom}Check = ${collectionActionTypes.compare}<${_type.get}, ${_check}>
+  type T${getCollectionFrom}Check = ${collectionActionTypes.compare}${compareDataType}
   ${getActionDeclaration}
   ${waitActionDeclaration}
     `;
