@@ -2,9 +2,9 @@
 import { stringifyData } from 'sat-utils';
 //
 import { config } from '../../config/config';
-import { getActionsList, getResult } from '../utils.random';
-import { getCollectionsPathes } from '../create.type';
+import { getResult } from '../utils.random';
 import { getCollectionMethodNames } from '../namings';
+import { getCollectionFlowTemplate } from '../based-actions/common';
 
 const { baseLibraryDescription = {}, collectionDescription = {}, promod = {} } = config.get();
 
@@ -48,12 +48,7 @@ function createTemplatePureTemplate(asActorAndPage, actionDescriptor, entryType 
 }
 
 function getPureCountFlows(pageInstance, asActorAndPage) {
-  const data = getCollectionsPathes(pageInstance);
-  const actions = getActionsList(data);
-
-  return actions.reduce((flows, dataObject) => {
-    return `${flows}\n${createTemplatePureTemplate(asActorAndPage, dataObject)}`;
-  }, '');
+  return getCollectionFlowTemplate(asActorAndPage, pageInstance, createTemplatePureTemplate);
 }
 
 export { getPureCountFlows, createTemplatePureTemplate };

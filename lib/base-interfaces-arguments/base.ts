@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable sonarjs/no-nested-template-literals, complexity, sonarjs/cognitive-complexity */
 import {
   prettifyCamelCase,
@@ -15,7 +14,7 @@ import {
 } from 'sat-utils';
 import { config } from '../config';
 
-const { collectionDescription = {} } = config.get();
+const { prettyMethodName = {}, collectionDescription = {} } = config.get();
 
 const stringifyBase = base => {
   return Object.keys(base).reduce((descriptor, key, index, { length }) => {
@@ -201,7 +200,6 @@ const doesArgumentHaveCollection = (obj: { [k: string]: any }) => {
 };
 
 const isPropValueCollection = (propValue: { [k: string]: any }, action, propName?: string) => {
-  const { collectionDescription = {} } = config.get();
   const { collectionPropsId, ...collectionProps } = collectionDescription;
 
   if (propName && collectionPropsId && propName.endsWith(collectionPropsId)) {
@@ -214,7 +212,6 @@ const isPropValueCollection = (propValue: { [k: string]: any }, action, propName
 };
 
 const isActionableAction = (actionFlow: string) => {
-  const { prettyMethodName = {} } = config.get();
   const { action, click, sendKeys } = prettyMethodName;
 
   const actionableActions = [action, click, sendKeys].filter(Boolean);

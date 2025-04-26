@@ -22,7 +22,7 @@ import {
 } from './base';
 import { config } from '../config';
 
-const { warn, log } = console;
+const { warn } = console;
 
 const {
   collectionDescription = {},

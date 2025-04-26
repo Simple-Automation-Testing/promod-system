@@ -1,13 +1,12 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
-import { getActionsList } from '../utils.random';
-import { getCollectionsPathes } from '../create.type';
 import { createTemplatePureTemplate } from './get.pure.entities.count';
 import { getCollectionMethodNames } from '../namings';
+import { getCollectionFlowTemplate } from '../based-actions/common';
 
 function createTemplate(asActorAndPage, actionDescriptor) {
   const { action, _countResult, _type, _check } = actionDescriptor || {};
 
-  const { getCollectionFrom } = getCollectionMethodNames(asActorAndPage, action);
+  const { getCollectionFrom, waitCollectionFrom } = getCollectionMethodNames(asActorAndPage, action);
 
   return `
   type T${getCollectionFrom}Entry = ${_type.get}
@@ -17,12 +16,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
 }
 
 function getCountFlows(pageInstance, asActorAndPage) {
-  const data = getCollectionsPathes(pageInstance);
-  const actions = getActionsList(data);
-
-  return actions.reduce((flows, dataObject) => {
-    return `${flows}\n${createTemplate(asActorAndPage, dataObject)}`;
-  }, '');
+  return getCollectionFlowTemplate(asActorAndPage, pageInstance, createTemplate);
 }
 
 export { getCountFlows };

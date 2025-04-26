@@ -2,9 +2,9 @@
 import { camelize, stringifyData, toArray } from 'sat-utils';
 
 import { config } from '../../config/config';
-import { getCollectionsPathes } from '../create.type';
-import { getResult, getActionsList, getName, getFieldsEnumList } from '../utils.random';
+import { getResult, getName, getFieldsEnumList } from '../utils.random';
 import { getPageRandomGettersMethodNames } from '../namings';
+import { getCollectionFlowTemplate } from '../based-actions/common';
 
 const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();
 
@@ -133,13 +133,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor) {
 }
 
 function getRandomResultsFlows(asActorAndPage, pageInstance) {
-  const data = getCollectionsPathes(pageInstance);
-
-  const actions = getActionsList(data);
-
-  return actions.reduce((flows, dataObject) => {
-    return `${flows}${createFlowTemplates(asActorAndPage, dataObject)}`;
-  }, '');
+  return getCollectionFlowTemplate(asActorAndPage, pageInstance, createFlowTemplates);
 }
 
 export { getRandomResultsFlows };

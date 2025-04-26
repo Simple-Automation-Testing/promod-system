@@ -3,9 +3,9 @@ import { waitFor } from 'sat-wait';
 import { compare } from 'sat-compare';
 //
 import { config } from '../../config/config';
-import { getActionsList, getResultMappedResult, addDescriptions } from '../utils.random';
-import { getCollectionsPathes } from '../create.type';
+import { getResultMappedResult, addDescriptions } from '../utils.random';
 import { getCollectionMethodNames, redefineActionsMethodName } from '../namings';
+import { getCollectionFlowObj } from '../based-actions/common';
 
 const { baseLibraryDescription = {} } = config.get();
 
@@ -52,16 +52,7 @@ function createTemplateObjectTemplate(asActorAndPage, actionDescriptor, page, ..
 }
 
 function getPureCountFlowsObject(pageInstance, asActorAndPage) {
-  const data = getCollectionsPathes(pageInstance);
-  const actions = getActionsList(data);
-
-  return actions.reduce((flows, dataObject) => {
-    const actions = createTemplateObjectTemplate(asActorAndPage, dataObject, pageInstance);
-
-    flows = { ...flows, ...actions };
-
-    return flows;
-  }, {});
+  return getCollectionFlowObj(asActorAndPage, pageInstance, createTemplateObjectTemplate);
 }
 
 export { getPureCountFlowsObject };

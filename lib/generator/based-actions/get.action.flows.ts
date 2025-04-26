@@ -1,30 +1,18 @@
 /* eslint-disable sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
-import { isObject, isArray, isNotEmptyArray } from 'sat-utils';
+import { isArray, isNotEmptyArray } from 'sat-utils';
 import { config } from '../../config/config';
 import { getActionInstanceFields } from '../utils';
 
 import { getPageActionMethodNames } from '../namings';
-import { getFlowRestArguments, getFlowTypes, noTransormTypes } from './common';
+import { getFlowRestArguments, getFlowTypes, shouldResultTypeBeBasedOnArgument } from './common';
 
 const {
   repeatingActions = [],
   baseLibraryDescription = {},
   promod,
-  collectionActionTypes,
   prettyMethodName = {},
   actionWithWaitOpts,
 } = config.get();
-
-function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType) {
-  if (noTransormTypes.has(resultTypeClarification.trim())) {
-    return false;
-  }
-
-  return !(
-    isObject(collectionActionTypes) &&
-    Object.values(collectionActionTypes).some(collectionAction => argumentType.startsWith(collectionAction))
-  );
-}
 
 function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field }) {
   const isActionVoid = flowResultType === 'void';

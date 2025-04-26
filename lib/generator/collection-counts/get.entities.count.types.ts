@@ -4,6 +4,7 @@ import { config } from '../../config/config';
 import { getActionsList } from '../utils.random';
 import { getCollectionsPathes } from '../create.type';
 import { getCollectionMethodNames } from '../namings';
+import { getCollectionFlowTemplate } from '../based-actions/common';
 
 const { baseLibraryDescription = {}, collectionActionTypes = {} } = config.get();
 
@@ -27,13 +28,7 @@ function createTemplate(asActorAndPage, actionDescriptor) {
 }
 
 function getCountFlowsTypes(pageInstance, asActorAndPage) {
-  const data = getCollectionsPathes(pageInstance);
-
-  const actions = getActionsList(data);
-
-  return actions.reduce((flows, dataObject) => {
-    return `${flows}\n${createTemplate(asActorAndPage, dataObject)}`;
-  }, '');
+  return getCollectionFlowTemplate(asActorAndPage, pageInstance, createTemplate);
 }
 
 export { getCountFlowsTypes };

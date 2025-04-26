@@ -1,7 +1,7 @@
 import { equal } from 'node:assert';
-import { getPreparedRunner } from '../../lib/test-runner/mocha';
+import { getMochaPreparedRunner } from '../../lib/test-runner/mocha';
 
-const { afterAll, test, beforeAll, afterEach, suite, beforeEach } = getPreparedRunner();
+const { afterAll, test, beforeAll, afterEach, suite, beforeEach } = getMochaPreparedRunner({});
 
 let suiteCall = 0;
 let testCall = 0;

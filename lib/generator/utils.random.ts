@@ -1,4 +1,4 @@
-/* eslint-disable sonarjs/cognitive-complexity */
+/* eslint-disable no-console, sonarjs/cognitive-complexity */
 import {
   isUndefined,
   isNull,

@@ -1,4 +1,4 @@
-import { getPreparedRunner } from '../../lib/test-runner/mocha';
+import { getMochaPreparedRunner } from '../../lib/test-runner/mocha';
 
 const fixtures = {
   a: 1,
@@ -7,7 +7,7 @@ const fixtures = {
 type TOpts = {
   tags: string[];
 };
-const { beforeAll, ...r } = getPreparedRunner<typeof fixtures, TOpts>(fixtures);
+const { beforeAll, ...r } = getMochaPreparedRunner<typeof fixtures, TOpts>(fixtures);
 
 const { test, suite } = r;
 

@@ -2,265 +2,180 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const template = `
-const baseElementsActionsDescription = {
-  Input: {
-    click: {
-      entryType: 'Action',
-    },
-    get: {
-      entryType: 'Action',
-      resultType: 'GetRes',
-    },
-    isDisplayed: {
-      entryType: 'Action',
-      resultType: 'IsDispRes',
-    },
-    sendKeys: {
-      entryType: 'SendKeys',
-    },
-    waitForVisibilityState: {
-      entryType: 'IsDispRes',
-    },
-    waitForContentState: {
-      entryType: 'GetRes',
-    },
-    _where: {
-      resultType: 'GetRes',
-    },
-    _visible: {
-      resultType: 'IsDispRes',
-    },
+const commonActions = {
+  click: {
+    entryType: 'Action',
   },
-  Button: {
-    click: {
-      entryType: 'Action',
-    },
-    get: {
-      entryType: 'Action',
-      resultType: 'GetRes',
-    },
-    isDisplayed: {
-      entryType: 'Action',
-      resultType: 'IsDispRes',
-    },
-    waitForVisibilityState: {
-      entryType: 'IsDispRes',
-    },
-    waitForContentState: {
-      entryType: 'GetRes',
-    },
-    _where: {
-      resultType: 'GetRes',
-    },
-    _visible: {
-      resultType: 'IsDispRes',
-    },
+  getContent: {
+    entryType: 'Action',
+    resultType: 'Content',
   },
-  Text: {
-    click: {
-      entryType: 'Action',
-    },
-    get: {
-      entryType: 'Action',
-      resultType: 'GetRes',
-    },
-    isDisplayed: {
-      entryType: 'Action',
-      resultType: 'IsDispRes',
-    },
-    waitForVisibilityState: {
-      entryType: 'IsDispRes',
-    },
-    waitForContentState: {
-      entryType: 'GetRes',
-    },
-    _where: {
-      resultType: 'GetRes',
-    },
-    _visible: {
-      resultType: 'IsDispRes',
-    },
+  getVisibility: {
+    entryType: 'Action',
+    resultType: 'Visible',
+  },
+  waitContent: {
+    entryType: 'Content',
+  },
+  _whereContent: {
+    resultType: 'Content',
+  },
+  _whereVisibiliy: {
+    resultType: 'Visible',
   },
 };
 
+const baseElementsActionsDescription = {
+  Input: {
+    setKeys: {
+      entryType: 'SetKeys',
+    },
+    ...commonActions,
+  },
+  Button: {
+    ...commonActions,
+  },
+  Text: {
+    ...commonActions,
+  },
+};
+
+
 const collectionActionTypes = {
-  action: 'CollectionActionType',
-  check: 'CollectionWaitingType',
-  compare: 'CollectionCompareType',
+  action: 'TItemListAction',
+  check: 'TItemListCheck',
+  compare: 'TItemListCompare',
+};
+
+const collectionDescription = {
+  action: '_action',
+  where: '_whereContent',
+  visible: '_whereVisibiliy',
+  length: 'length',
+};
+
+const collectionGenericAction = {
+  where: { action: '_whereContent', actionType: 'resultType' },
+  visible: { action: '_whereVisibiliy', actionType: 'resultType' },
+  generic: collectionActionTypes.action,
 };
 
 const baseCollectionActionsDescription = {
-  waitForContentState: {
+  getContent: {
     entryType: {
-      where: { action: '_where', actionType: 'resultType' },
-      visible: { action: '_visible', actionType: 'resultType' },
-      action: { action: 'get', actionType: 'entryType' },
-      compare: { action: 'get', actionType: 'resultType' },
-      generic: 'CollectionWaitingType',
-    },
-  },
-  waitForVisibilityState: {
-    entryType: {
-      where: { action: '_where', actionType: 'resultType' },
-      visible: { action: '_visible', actionType: 'resultType' },
-      action: { action: 'isDisplayed', actionType: 'entryType' },
-      compare: { action: 'isDisplayed', actionType: 'resultType' },
-      generic: 'CollectionWaitingType',
-    },
-  },
-  get: {
-    entryType: {
-      where: { action: '_where', actionType: 'resultType' },
-      visible: { action: '_visible', actionType: 'resultType' },
-      action: { action: 'get', actionType: 'entryType' },
-      generic: 'CollectionActionType',
+      ...collectionGenericAction,
+      action: { action: 'getContent', actionType: 'entryType' },
     },
     resultType: {
-      action: { action: 'get', actionType: 'resultType' },
+      action: { action: 'getContent', actionType: 'resultType' },
       endType: '[]',
     },
   },
-  isDisplayed: {
+  getVisibility: {
     entryType: {
-      where: { action: '_where', actionType: 'resultType' },
-      visible: { action: '_visible', actionType: 'resultType' },
-      action: { action: 'isDisplayed', actionType: 'entryType' },
-      generic: 'CollectionActionType',
+      ...collectionGenericAction,
+      action: { action: 'getVisibility', actionType: 'entryType' },
     },
     resultType: {
-      action: { action: 'isDisplayed', actionType: 'resultType' },
+      click: { action: 'getVisibility', actionType: 'resultType' },
       endType: '[]',
     },
   },
-  sendKeys: {
+  setKeys: {
     entryType: {
-      where: { action: '_where', actionType: 'resultType' },
-      visible: { action: '_visible', actionType: 'resultType' },
-      action: { action: 'sendKeys', actionType: 'entryType' },
-      generic: 'CollectionActionType',
+      ...collectionGenericAction,
+      action: { action: 'setKeys', actionType: 'entryType' },
     },
   },
   click: {
     entryType: {
-      where: { action: '_where', actionType: 'resultType' },
-      visible: { action: '_visible', actionType: 'resultType' },
+      ...collectionGenericAction,
       action: { action: 'click', actionType: 'entryType' },
-      generic: 'CollectionActionType',
     },
   },
-  _where: {
+  _whereContent: {
     entryType: {
-      where: { action: '_where', actionType: 'resultType' },
-      visible: { action: '_visible', actionType: 'resultType' },
-      action: { action: 'get', actionType: 'entryType' },
-      generic: 'CollectionActionType',
+      where: { action: '_whereContent', actionType: 'resultType' },
+      visible: { action: '_whereVisibiliy', actionType: 'resultType' },
+      generic: collectionActionTypes.action,
+      action: { action: 'getContent', actionType: 'entryType' },
     },
     resultType: {
-      where: { action: '_where', actionType: 'resultType' },
-      visible: { action: '_visible', actionType: 'resultType' },
-      action: { action: 'get', actionType: 'entryType' },
-      generic: 'CollectionActionType',
+      where: { action: '_whereContent', actionType: 'resultType' },
+      visible: { action: '_whereVisibiliy', actionType: 'resultType' },
+      action: { action: 'getContent', actionType: 'entryType' },
+      generic: collectionActionTypes.action,
     },
   },
-  _visible: {
+  _whereVisibiliy: {
     entryType: {
-      where: { action: '_where', actionType: 'resultType' },
-      visible: { action: '_visible', actionType: 'resultType' },
-      action: { action: 'isDisplayed', actionType: 'entryType' },
-      generic: 'CollectionActionType',
+      ...collectionGenericAction,
     },
     resultType: {
-      where: { action: '_where', actionType: 'resultType' },
-      visible: { action: '_visible', actionType: 'resultType' },
-      action: { action: 'isDisplayed', actionType: 'entryType' },
-      generic: 'CollectionActionType',
+      ...collectionGenericAction,
+    },
+  },
+  waitContent: {
+    entryType: {
+      where: { action: '_whereContent', actionType: 'resultType' },
+      visible: { action: '_whereVisibiliy', actionType: 'resultType' },
+      action: { action: 'getContent', actionType: 'entryType' },
+      generic: collectionActionTypes.check,
     },
   },
 };
 
 const resultActionsMap = {
   click: 'void',
-  get: 'resultType',
-  isDisplayed: 'resultType',
-  sendKeys: 'void',
-  waitForVisibilityState: 'void',
-  waitForContentState: 'void',
-};
-
-const actionWithWaitOpts = ['waitForVisibilityState', 'waitForContentState'];
-
-const prettyMethodName = {
-  isDisplayed: 'get Visibility of',
-  get: 'get data from',
-  sendKeys: 'set Values to',
-};
-
-const collectionRandomDataDescription = {
-  _where: {
-    action: '_where',
-    actionType: 'resultType',
-  },
-  _visible: {
-    action: '_visible',
-    actionType: 'resultType',
-  },
-  _whereNot: {
-    action: '_where',
-    actionType: 'resultType',
-  },
-};
-
-const promod = {
-  actionsDeclaration: 'declaration',
-};
-
-const collectionDescription = {
-  action: '_action',
-  where: '_where',
-  whereNot: '_whereNot',
-  visible: '_visible',
-  index: '_indexes',
-  count: '_count',
-  length: 'length',
-};
-
-const elementAction = {
-  isEnabled: 'isEnabled',
-  isDisplayed: 'isDisplayed',
-  isPresent: 'isPresent',
-  getText: 'getText',
-  getAttribute: 'getAttribute',
-  count: 'count',
-  get: 'get',
+  getContent: 'resultType',
+  getVisibility: 'resultType',
+  setKeys: 'void',
+  waitVisibility: 'void',
+  waitContent: 'void',
 };
 
 const baseLibraryDescription = {
-  entityId: 'identifier',
-  rootLocatorId: 'rootLocator',
+  getPageInstance: 'getPage',
+
+  getDataMethod: 'getContent',
+  getVisibilityMethod: 'getVisibility',
+  waitVisibilityMethod: 'waitVisibility',
+  waitContentMethod: 'waitContent',
+
+  entityId: 'id',
   pageId: 'Page',
   fragmentId: 'Fragment',
-  collectionId: 'Collection',
-  waitOptionsId: 'IWaitOpts',
-  getDataMethod: 'get',
-  waitVisibilityState: 'waitForVisibilityState',
-  getVisibilityMethod: 'isDisplayed',
+
+  waitOptionsId: 'TWaitOpts',
+  generalActionOptionsId: 'TActionOpts',
+
+  collectionId: 'ItemList',
+  collectionRootElementsId: 'roots',
+
+  getCollectionItemInstance: 'getListItem',
+
+  getCollectionTypeFormat: 'object',
 };
 
-const baseResultData = ['attribute', 'color', 'backgroundColor', 'tagName', 'text', 'isSelected'];
+const collectionRandomDataDescription = {
+  _whereContent: {
+    action: '_whereContent',
+    actionType: 'resultType',
+  },
+  _whereVisibiliy: {
+    action: '_whereVisibiliy',
+    actionType: 'resultType',
+  },
+};
 
 module.exports = {
   pathToBase: 'lib',
-  promod,
-  collectionDescription,
-  baseResultData,
-  prettyMethodName,
-  elementAction,
-  baseLibraryDescription,
-  collectionRandomDataDescription,
-  resultActionsMap,
-  actionWithWaitOpts,
   baseElementsActionsDescription,
   baseCollectionActionsDescription,
+  resultActionsMap,
+  baseLibraryDescription,
+  collectionDescription,
+  collectionRandomDataDescription,
   collectionActionTypes,
 };
 `;
@@ -269,4 +184,4 @@ function createTemplateConfig() {
   fs.writeFileSync(path.resolve(process.cwd(), './promod.system.config.js'), template);
 }
 
-export { createTemplateConfig };
+export { createTemplateConfig, template };

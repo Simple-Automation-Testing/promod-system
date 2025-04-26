@@ -1,10 +1,12 @@
-import { camelize } from 'sat-utils';
+import { camelize, isObject } from 'sat-utils';
 
 import { config } from '../../config/config';
 
 import { getElementsTypes, getFragmentTypes } from '../create.type';
+import { getCollectionsPathes } from '../create.type';
+import { getActionsList } from '../utils.random';
 
-const { baseLibraryDescription = {}, actionWithWaitOpts = [] } = config.get();
+const { baseLibraryDescription = {}, collectionActionTypes, actionWithWaitOpts = [] } = config.get();
 
 function getFlowRestArguments(action: string): string {
   // TODO this should be done via config
@@ -32,4 +34,42 @@ function getFlowTypes(instance: object, action: string, name: string, elementTyp
   };
 }
 
-export { getFlowRestArguments, getFlowTypes, noTransormTypes };
+function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType) {
+  if (noTransormTypes.has(resultTypeClarification.trim())) {
+    return false;
+  }
+
+  return !(
+    isObject(collectionActionTypes) &&
+    Object.values(collectionActionTypes).some(collectionAction => argumentType.startsWith(collectionAction))
+  );
+}
+
+function getCollectionFlowTemplate(asActorAndPage, pageInstance, createFlowTemplates) {
+  const data = getCollectionsPathes(pageInstance);
+  const actions = getActionsList(data);
+
+  return actions.reduce((flows, dataObject) => {
+    return `${flows}${createFlowTemplates(asActorAndPage, dataObject)}\n`;
+  }, '');
+}
+
+function getCollectionFlowObj(asActorAndPage, pageInstance, createFlowObj) {
+  const data = getCollectionsPathes(pageInstance);
+  const actions = getActionsList(data);
+
+  return actions.reduce((flows, dataObject) => {
+    const actions = createFlowObj(asActorAndPage, dataObject, pageInstance);
+
+    return { ...flows, ...actions };
+  }, {});
+}
+
+export {
+  getFlowRestArguments,
+  getFlowTypes,
+  noTransormTypes,
+  shouldResultTypeBeBasedOnArgument,
+  getCollectionFlowTemplate,
+  getCollectionFlowObj,
+};

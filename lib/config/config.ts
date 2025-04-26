@@ -1,6 +1,9 @@
+/* eslint-disable no-console */
 /* eslint-disable sonarjs/cognitive-complexity, sonarjs/prefer-immediate-return*/
 import * as path from 'path';
 import * as fs from 'fs';
+
+import { template, createTemplateConfig } from './config.template';
 
 const expectedConfigPath = path.resolve(process.cwd(), './promod.system.config.js');
 
@@ -22,12 +25,17 @@ const config: IConfig = (function getConfiguration() {
       const doesFileExist = fs.existsSync(expectedConfigPath);
 
       if (!doesFileExist && !ignoreExisting) {
-        throw new Error(`${expectedConfigPath} does not exist`);
-      } else if (doesFileExist) {
-        const conf = require(expectedConfigPath);
-        // TODO validation
-        Object.assign(wrappedConfig, conf);
+        console.log('!!!!!!!!!!!')
+        console.error(`${expectedConfigPath} does not exist`);
+        console.error(`Default config will be used, \n${template}`);
+        createTemplateConfig();
       }
+
+      const conf = require(expectedConfigPath);
+      // TODO validation
+      Object.assign(wrappedConfig, conf);
+
+      throw '!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 
       return configMethods;
     },

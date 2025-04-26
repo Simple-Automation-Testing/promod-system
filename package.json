@@ -1,7 +1,7 @@
 {
   "name": "promod-system",
-  "version": "3.6.6",
-  "description": "Library promod condition waitings",
+  "version": "4.0.0-alpha.0",
+  "description": "Promod System Package",
   "bin": "./bin/cli.js",
   "main": "./built/cjs/index.js",
   "exports": {
@@ -38,6 +38,7 @@
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
     "assertior": "^0.0.28",
+    "dayjs": "^1.11.7",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-no-only-tests": "^3.1.0",
@@ -50,11 +51,9 @@
     "prettier": "^3.2.5",
     "promod": "1.4.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3",
-    "dayjs": "^1.11.7"
+    "typescript": "^5.3.3"
   },
   "dependencies": {
-    "node-fetch": "2.7.0",
     "sat-compare": "^0.1.0",
     "sat-utils": "^1.15.1",
     "sat-wait": "^0.1.4",

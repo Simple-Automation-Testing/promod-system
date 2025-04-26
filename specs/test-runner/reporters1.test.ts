@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 import { equal } from 'node:assert';
-import { getPreparedRunner } from '../../lib/test-runner/mocha';
+import { getMochaPreparedRunner } from '../../lib/test-runner/mocha';
 
-const { afterAll, test, suite, addReporters, customSuiteHook } = getPreparedRunner();
+const { afterAll, test, suite, addReporters, customSuiteHook } = getMochaPreparedRunner({});
 
 let titleByClass;
 let titleByObj;

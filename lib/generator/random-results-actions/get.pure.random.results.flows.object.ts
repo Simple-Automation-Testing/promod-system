@@ -2,9 +2,9 @@
 import { toArray, getRandomArrayItem } from 'sat-utils';
 
 import { config } from '../../config/config';
-import { getCollectionsPathes } from '../create.type';
-import { getResultMappedResult, getActionsList, addDescriptions } from '../utils.random';
+import { getResultMappedResult, addDescriptions } from '../utils.random';
 import { redefineActionsMethodName, getPageRandomGettersMethodNames } from '../namings';
+import { getCollectionFlowObj } from '../based-actions/common';
 
 const { baseLibraryDescription = {}, baseResultData = [] } = config.get();
 
@@ -110,17 +110,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
 }
 
 function getPureRandomResultsFlowsObject(asActorAndPage, pageInstance) {
-  const data = getCollectionsPathes(pageInstance);
-
-  const actions = getActionsList(data);
-
-  return actions.reduce((flows, dataObject) => {
-    const data = createFlowTemplates(asActorAndPage, dataObject, pageInstance);
-
-    flows = { ...flows, ...data };
-
-    return flows;
-  }, {});
+  return getCollectionFlowObj(asActorAndPage, pageInstance, createFlowTemplates);
 }
 
 export { getPureRandomResultsFlowsObject };
