@@ -25,7 +25,7 @@ const config: IConfig = (function getConfiguration() {
       const doesFileExist = fs.existsSync(expectedConfigPath);
 
       if (!doesFileExist && !ignoreExisting) {
-        console.log('!!!!!!!!!!!')
+        console.log('!!!!!!!!!!!');
         console.error(`${expectedConfigPath} does not exist`);
         console.error(`Default config will be used, \n${template}`);
         createTemplateConfig();
@@ -34,8 +34,6 @@ const config: IConfig = (function getConfiguration() {
       const conf = require(expectedConfigPath);
       // TODO validation
       Object.assign(wrappedConfig, conf);
-
-      throw '!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 
       return configMethods;
     },
