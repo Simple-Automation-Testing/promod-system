@@ -11,6 +11,8 @@ export * from './generator/validators';
 export * from './test-runner/mocha';
 export * from './test-runner/playwright';
 
+export * from './commons';
+
 export { getInstanceInteractionFields } from './generator/utils';
 export { isBaseElementInstance, isCollectionInstance, isFragmentInstance } from './generator/get.base';
 export { config } from './config';
