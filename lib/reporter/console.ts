@@ -1,5 +1,5 @@
 // @ts-check
-import { colors, safeJSONstringify, isNotEmptyObject } from 'sat-utils';
+import { colors, safeJSONstringify, isNotEmptyObject, stringifyData } from 'sat-utils';
 
 const { log } = console;
 
@@ -32,7 +32,14 @@ ______________________________________________________`);
 
   addStep(stepData: string) {
     if (this.isEnabled) {
-      log(colors.yellow('STEP: '), stepData);
+      log(colors.yellow('STEP START: '), stepData);
+    }
+    return this.finishStep.bind(this);
+  }
+
+  finishStep(message, result, error) {
+    if (this.isEnabled) {
+      log(colors.yellow('FINISH STEP: '), message, stringifyData(result), error);
     }
   }
 

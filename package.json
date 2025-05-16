@@ -1,6 +1,6 @@
 {
   "name": "promod-system",
-  "version": "4.0.0-alpha.01",
+  "version": "4.0.0-alpha-2",
   "description": "Promod System Package",
   "bin": "./bin/cli.js",
   "main": "./built/cjs/index.js",

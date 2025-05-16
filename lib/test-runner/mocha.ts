@@ -1,5 +1,4 @@
 /* eslint-disable unicorn/consistent-function-scoping, no-console, no-only-tests/no-only-tests, sonarjs/cognitive-complexity */
-//
 import { isNumber, sleep, isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
 import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 
@@ -44,7 +43,6 @@ const mochaReporterManager = {
 
 let _suiteAdditionalCall;
 let _globalIsRunnable;
-let _globalBeforeTest;
 
 function getMochaPreparedRunner<TProvidedfixtures, TrequiredOpts = { [k: string]: any }>(fixtures: TProvidedfixtures) {
   type Tfixtures = { afterTest: (cb: () => any) => () => any } & TProvidedfixtures;
@@ -547,7 +545,12 @@ function getMochaPreparedRunner<TProvidedfixtures, TrequiredOpts = { [k: string]
 
   function beforeAll(fn: TtestBody<Tfixtures>) {
     _beforeAllCases = async function () {
-      await fn.call(this, fixtures);
+      try {
+        await fn.call(this, fixtures);
+      } catch (error) {
+        console.error('Error in beforeAll:', error);
+        throw error;
+      }
     };
 
     return runner;
