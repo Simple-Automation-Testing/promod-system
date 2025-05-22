@@ -2,7 +2,7 @@
 import { toArray, getRandomArrayItem } from 'sat-utils';
 
 import { config } from '../../config/config';
-import { getResultMappedResult, addDescriptions } from '../utils.random';
+import { getResultMappedResult, addDescriptions, addWaitingBasedOnAction } from '../utils.random';
 import { redefineActionsMethodName, getPageRandomGettersMethodNames } from '../namings';
 import { getCollectionFlowObj } from '../based-actions/common';
 
@@ -19,7 +19,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
   if (_fields?.length) {
     actions[getRandomDataActionName] = async (_field = [_fields[0]], descriptions = {}) => {
       await page[baseLibraryDescription.waitForVisibilityMethod](
-        addDescriptions({ length: '>0', ...descriptions }, action),
+        addWaitingBasedOnAction({ length: '>0', ...descriptions }, action),
       );
 
       const result = await page[baseLibraryDescription.getDataMethod](
@@ -48,7 +48,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
 
     actions[getOneValueActionName] = async (_field, descriptions = {}) => {
       await page[baseLibraryDescription.waitForVisibilityMethod](
-        addDescriptions({ ...descriptions, length: '>0' }, action),
+        addWaitingBasedOnAction({ ...descriptions, length: '>0' }, action),
         {
           everyArrayItem: false,
         },
@@ -66,7 +66,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
 
     actions[getSeveralValuesActionName] = async (_field = _fields[0], quantity = 2, descriptions = {}) => {
       await page[baseLibraryDescription.waitForVisibilityMethod](
-        addDescriptions({ length: '>0', ...descriptions }, action, { [_field]: null }),
+        addWaitingBasedOnAction({ length: '>0', ...descriptions }, action),
       );
 
       const result = await page[baseLibraryDescription.getDataMethod](
@@ -93,7 +93,7 @@ function createFlowTemplates(asActorAndPage, actionDescriptor, page) {
 
     actions[getSeveralValuesActionName] = async (quantity = 2, descriptions = {}) => {
       await page[baseLibraryDescription.waitForVisibilityMethod](
-        addDescriptions({ length: '>0', ...descriptions }, action),
+        addWaitingBasedOnAction({ length: '>0', ...descriptions }, action),
       );
 
       const result = await page[baseLibraryDescription.getDataMethod](addDescriptions(descriptions, action));

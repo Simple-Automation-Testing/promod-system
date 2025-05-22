@@ -254,6 +254,21 @@ function addDescriptions(descriptions, action, actionData = null) {
   return { [firstKey]: addDescriptions(descriptions, action[firstKey], actionData) };
 }
 
+function addWaitingBasedOnAction(descriptions, action) {
+  const actionKey = Object.keys(action).find(k => k === collectionDescription.action);
+
+  const notActionsProps = Object.keys(action)
+    .filter(k => k !== collectionDescription.action)
+    .reduce((acc, key) => {
+      acc[key] = addWaitingBasedOnAction(descriptions, action[key]);
+      return acc;
+    }, {});
+
+  const actionProps = actionKey ? action[actionKey] : {};
+
+  return { ...actionProps, ...notActionsProps, ...(actionKey ? descriptions : {}) };
+}
+
 function getName(data) {
   return Object.keys(data).reduce((pattern, key) => {
     if (key === collectionDescription.action) {
@@ -283,4 +298,5 @@ export {
   getSanitizeDataKeys,
   getKeyFormat,
   addDescriptions,
+  addWaitingBasedOnAction,
 };
