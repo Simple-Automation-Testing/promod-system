@@ -1,6 +1,6 @@
 {
   "name": "promod-system",
-  "version": "4.0.0-alpha-5",
+  "version": "4.0.0-alpha-7",
   "description": "Promod System Package",
   "bin": "./bin/cli.js",
   "main": "./built/cjs/index.js",
@@ -49,9 +49,9 @@
     "mocha": "^10.0.0",
     "playwright": "^1.50.1",
     "prettier": "^3.2.5",
-    "promod": "1.4.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.9.3",
+    "promod": "2.4.1"
   },
   "dependencies": {
     "sat-compare": "^0.1.0",

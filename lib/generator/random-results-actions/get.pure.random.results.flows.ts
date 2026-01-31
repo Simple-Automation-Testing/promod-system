@@ -2,8 +2,8 @@
 import { camelize, stringifyData, toArray } from 'sat-utils';
 
 import { config } from '../../config/config';
-import { getResult, getName, getFieldsEnumList } from '../utils.random';
-import { getPageRandomGettersMethodNames } from '../namings';
+import { getResult, getFieldsEnumList } from '../utils.random';
+import { getName, getPageRandomGettersMethodNames } from '../namings';
 import { getCollectionFlowTemplate } from '../based-actions/common';
 
 const { baseLibraryDescription = {}, collectionDescription = {}, promod = {}, baseResultData = [] } = config.get();

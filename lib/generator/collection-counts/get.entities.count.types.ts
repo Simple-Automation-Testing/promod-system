@@ -1,8 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity, unicorn/consistent-function-scoping */
 import { config } from '../../config/config';
 
-import { getActionsList } from '../utils.random';
-import { getCollectionsPathes } from '../create.type';
 import { getCollectionMethodNames } from '../namings';
 import { getCollectionFlowTemplate } from '../based-actions/common';
 

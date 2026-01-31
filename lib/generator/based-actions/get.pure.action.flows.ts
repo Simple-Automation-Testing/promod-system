@@ -5,14 +5,9 @@ import { config } from '../../config/config';
 import { getFragmentTypes } from '../create.type';
 import { getActionInstanceFields } from '../utils';
 import { getPageActionMethodNames } from '../namings';
+import { getFlowRestArguments } from './common';
 
-const {
-  actionWithWaitOpts,
-  repeatingActions = [],
-  baseLibraryDescription = {},
-  promod,
-  prettyMethodName = {},
-} = config.get();
+const { repeatingActions = [], baseLibraryDescription = {}, promod, prettyMethodName = {} } = config.get();
 
 function getTemplatedCode({ name, flowResultType, optionsSecondArgument, action, field }) {
   const isActionVoid = flowResultType === 'void';
@@ -50,13 +45,7 @@ ${firstLine}
 
 function createFlowTemplates(name, action, field, instance) {
   const flowResultType = getFragmentTypes(instance, action, 'resultType');
-
-  let optionsSecondArgument = '';
-  if (actionWithWaitOpts.includes(action)) {
-    optionsSecondArgument = `, opts`;
-  } else if (baseLibraryDescription.generalActionOptionsId) {
-    optionsSecondArgument = `, opts`;
-  }
+  const optionsSecondArgument = getFlowRestArguments(action, false);
 
   return getTemplatedCode({ name, flowResultType, optionsSecondArgument, action, field });
 }
@@ -67,13 +56,7 @@ function createFlowTemplateForPageElements(name, action) {
 
   const { flowElementsActionName } = getPageActionMethodNames(name, prettyFlowActionNamePart);
 
-  let optionsSecondArgument = '';
-  // TODO need to update duplicated branches
-  if (actionWithWaitOpts.includes(action)) {
-    optionsSecondArgument = `, opts`;
-  } else if (baseLibraryDescription.generalActionOptionsId) {
-    optionsSecondArgument = `, opts`;
-  }
+  const optionsSecondArgument = getFlowRestArguments(action, false);
 
   const isDeclaration = promod.actionsDeclaration === 'declaration';
 

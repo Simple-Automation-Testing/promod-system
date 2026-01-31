@@ -66,6 +66,7 @@ function redefineActionsMethodName(actions) {
 }
 
 export {
+  getName,
   getCollectionMethodNames,
   getPageActionMethodNames,
   updateActionsMethodName,

@@ -7,32 +7,34 @@ import { getInstanceInteractionFields } from './utils';
 
 const { baseElementsActionsDescription, baseLibraryDescription } = config.get();
 
-function isBaseElementInstance(constructorName: string) {
-  if (!isString(constructorName)) {
-    constructorName = (constructorName as any as object)?.constructor?.name;
+/**
+ * Extracts constructor name from either a string or an object instance.
+ * Handles the common pattern of accepting both instance and constructor name.
+ */
+function getConstructorName(constructorNameOrInstance: string | object): string {
+  if (isString(constructorNameOrInstance)) {
+    return constructorNameOrInstance as string;
   }
+  return (constructorNameOrInstance as object)?.constructor?.name ?? '';
+}
+
+function isBaseElementInstance(constructorNameOrInstance: string | object) {
+  const constructorName = getConstructorName(constructorNameOrInstance);
   return Boolean(baseElementsActionsDescription[constructorName]);
 }
 
-function isCollectionInstance(constructorName) {
-  if (!isString(constructorName)) {
-    constructorName = (constructorName as any as object)?.constructor?.name;
-  }
+function isCollectionInstance(constructorNameOrInstance: string | object) {
+  const constructorName = getConstructorName(constructorNameOrInstance);
   return constructorName?.includes(baseLibraryDescription.collectionId);
 }
 
-function isFragmentInstance(constructorName) {
-  if (!isString(constructorName)) {
-    constructorName = (constructorName as any as object)?.constructor?.name;
-  }
+function isFragmentInstance(constructorNameOrInstance: string | object) {
+  const constructorName = getConstructorName(constructorNameOrInstance);
   return constructorName?.includes(baseLibraryDescription.fragmentId);
 }
 
-function checkThatElementHasAction(constructorName: string, action: string) {
-  if (!isString(constructorName)) {
-    constructorName = (constructorName as any as object)?.constructor?.name;
-  }
-
+function checkThatElementHasAction(constructorNameOrInstance: string | object, action: string) {
+  const constructorName = getConstructorName(constructorNameOrInstance);
   return isBaseElementInstance(constructorName) && Boolean(baseElementsActionsDescription[constructorName][action]);
 }
 

@@ -2,6 +2,10 @@
 import * as fs from 'fs';
 import { getDirFilesList } from 'sat-utils';
 
+/** Module-level regex constants for better performance */
+const DEFAULT_EXPORT_GET_ACTIONS_PATTERN = /(?<=export {).*(?= )/gim;
+const DEFAULT_EXPORT_TYPE_PATTERN = /(?<=export type).*(?==)/gim;
+
 type TvalidateActor = {
   targetFolder: string;
   actorActionType: string;
@@ -13,8 +17,8 @@ function validateTypesActor({
   targetFolder,
   actorActionType,
   actorActionGetters,
-  matchExportGetActions = /(?<=export {).*(?= )/gim,
-  matchExportType = /(?<=export type).*(?==)/gim,
+  matchExportGetActions = DEFAULT_EXPORT_GET_ACTIONS_PATTERN,
+  matchExportType = DEFAULT_EXPORT_TYPE_PATTERN,
 }: TvalidateActor) {
   const actorTypesContent = fs.readFileSync(actorActionType, 'utf8');
   const actorActionGetterContent = fs.readFileSync(actorActionGetters, 'utf8');

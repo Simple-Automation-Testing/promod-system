@@ -1,9 +1,8 @@
 /* eslint-disable no-console */
-import { safeJSONstringify } from 'sat-utils';
-
 import { config } from '../config/config';
 
 import { checkThatInstanceHasActionItems } from './check.that.action.exists';
+import { hasKeyDeep } from './utils.random';
 import { checkThatElementHasAction, getElementActionType, getElementType, isCollectionInstance } from './get.base';
 import { getInstanceInteractionFields, getActionInstanceFields } from './utils';
 import { getCollectionItemInstance } from './utils.collection';
@@ -108,7 +107,7 @@ function getCollectionTypes(instance, action, actionType, ...rest) {
 
   const { generic, endType, ...actionDescriptor } = collectionActionDescriptor;
 
-  let colletionItemType = getColletionActionType(
+  let collectionItemType = getColletionActionType(
     collectionsItem,
     getTypeHandler,
     actionDescriptor,
@@ -116,13 +115,13 @@ function getCollectionTypes(instance, action, actionType, ...rest) {
   );
 
   if (generic) {
-    colletionItemType = wrap ? wrap(`${generic}<${colletionItemType}>`) : `${generic}<${colletionItemType}>`;
+    collectionItemType = wrap ? wrap(`${generic}<${collectionItemType}>`) : `${generic}<${collectionItemType}>`;
   }
   if (endType) {
-    colletionItemType = `${colletionItemType}${endType}`;
+    collectionItemType = `${collectionItemType}${endType}`;
   }
 
-  types[action] = colletionItemType;
+  types[action] = collectionItemType;
 
   return types;
 }
@@ -170,7 +169,7 @@ function getElementsTypes(instance, action: string, actionType: string): string 
   return createType(Array.from(instanceElements), action);
 }
 
-function getCollectionsPathes(instance) {
+function getCollectionsPaths(instance) {
   const { action, ...collectionReducedType } =
     baseCollectionActionsDescription[baseLibraryDescription.getDataMethod]['entryType'];
   if (isCollectionWithItemBaseElement(instance)) {
@@ -198,7 +197,7 @@ function getCollectionsPathes(instance) {
   }
 
   if (isCollectionWithItemFragment(instance)) {
-    return getCollectionsPathes(getCollectionItemInstance(instance));
+    return getCollectionsPaths(getCollectionItemInstance(instance));
   }
 
   const interactionFields = getInstanceInteractionFields(instance);
@@ -209,8 +208,8 @@ function getCollectionsPathes(instance) {
     const childConstructorName = instance[field].constructor.name;
 
     if (childConstructorName.includes(baseLibraryDescription.fragmentId)) {
-      const nestedItem = getCollectionsPathes(instance[field]);
-      if (safeJSONstringify(nestedItem).includes(collectionDescription.action)) {
+      const nestedItem = getCollectionsPaths(instance[field]);
+      if (hasKeyDeep(nestedItem, collectionDescription.action)) {
         result[field] = nestedItem;
       }
     } else if (isCollectionInstance(instance[field])) {
@@ -218,7 +217,7 @@ function getCollectionsPathes(instance) {
       const collectionInstance = getCollectionItemInstance(instance[field]);
 
       result[field] = {
-        [collectionDescription.action]: fragment ? getCollectionsPathes(collectionInstance) : null,
+        [collectionDescription.action]: fragment ? getCollectionsPaths(collectionInstance) : null,
 
         _countResult: (fragment ? getFragmentTypes : getElementType)(
           collectionInstance,
@@ -251,4 +250,4 @@ function getCollectionsPathes(instance) {
   }, {});
 }
 
-export { createType, getFragmentTypes, getElementsTypes, getCollectionTypes, getCollectionsPathes };
+export { createType, getFragmentTypes, getElementsTypes, getCollectionTypes, getCollectionsPaths };

@@ -3,23 +3,35 @@ import { camelize, isObject } from 'sat-utils';
 import { config } from '../../config/config';
 
 import { getElementsTypes, getFragmentTypes } from '../create.type';
-import { getCollectionsPathes } from '../create.type';
+import { getCollectionsPaths } from '../create.type';
 import { getActionsList } from '../utils.random';
 
 const { baseLibraryDescription = {}, collectionActionTypes, actionWithWaitOpts = [] } = config.get();
 
-function getFlowRestArguments(action: string): string {
-  // TODO this should be done via config
+/**
+ * Gets the optional second argument string for flow functions.
+ * @param action - The action name
+ * @param includeTypes - Whether to include TypeScript type annotations (default: true)
+ * @returns The argument string (e.g., ", opts?: WaitOptions" or ", opts")
+ */
+function getFlowRestArguments(action: string, includeTypes = true): string {
   if (actionWithWaitOpts.includes(action)) {
-    return `, opts?: ${baseLibraryDescription.waitOptionsId}`;
+    return includeTypes ? `, opts?: ${baseLibraryDescription.waitOptionsId}` : `, opts`;
   } else if (baseLibraryDescription.generalActionOptionsId) {
-    return `, opts?: ${baseLibraryDescription.generalActionOptionsId}`;
+    return includeTypes ? `, opts?: ${baseLibraryDescription.generalActionOptionsId}` : `, opts`;
   }
 
   return '';
 }
 
-const noTransormTypes = new Set(['void', 'boolean']);
+/**
+ * Checks if an action has optional arguments.
+ */
+function hasOptionalArguments(action: string): boolean {
+  return actionWithWaitOpts.includes(action) || Boolean(baseLibraryDescription.generalActionOptionsId);
+}
+
+const noTransformTypes = new Set(['void', 'boolean']);
 
 function getFlowTypes(instance: object, action: string, name: string, elementType?: boolean) {
   return {
@@ -35,7 +47,7 @@ function getFlowTypes(instance: object, action: string, name: string, elementTyp
 }
 
 function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType) {
-  if (noTransormTypes.has(resultTypeClarification.trim())) {
+  if (noTransformTypes.has(resultTypeClarification.trim())) {
     return false;
   }
 
@@ -46,7 +58,7 @@ function shouldResultTypeBeBasedOnArgument(resultTypeClarification, argumentType
 }
 
 function getCollectionFlowTemplate(asActorAndPage, pageInstance, createFlowTemplates) {
-  const data = getCollectionsPathes(pageInstance);
+  const data = getCollectionsPaths(pageInstance);
   const actions = getActionsList(data);
 
   return actions.reduce((flows, dataObject) => {
@@ -55,7 +67,7 @@ function getCollectionFlowTemplate(asActorAndPage, pageInstance, createFlowTempl
 }
 
 function getCollectionFlowObj(asActorAndPage, pageInstance, createFlowObj) {
-  const data = getCollectionsPathes(pageInstance);
+  const data = getCollectionsPaths(pageInstance);
   const actions = getActionsList(data);
 
   return actions.reduce((flows, dataObject) => {
@@ -67,8 +79,9 @@ function getCollectionFlowObj(asActorAndPage, pageInstance, createFlowObj) {
 
 export {
   getFlowRestArguments,
+  hasOptionalArguments,
   getFlowTypes,
-  noTransormTypes,
+  noTransformTypes,
   shouldResultTypeBeBasedOnArgument,
   getCollectionFlowTemplate,
   getCollectionFlowObj,

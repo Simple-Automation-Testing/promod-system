@@ -38,9 +38,9 @@ function getCollectionItemTypes(collectionItemInstance) {
   return { _fields, ...types };
 }
 
-function getPathesToCollections(childInstance, name) {
+function getPathsToCollections(childInstance, name) {
   function getPathToListIfExists(instance) {
-    const pathes = {};
+    const paths = {};
 
     if (isCollectionWithItemBaseElement(instance) || isCollectionWithItemFragment(instance)) {
       return getCollectionItemTypes(getCollectionItemInstance(instance));
@@ -55,7 +55,7 @@ function getPathesToCollections(childInstance, name) {
         const result = getPathToListIfExists(instance[field]);
 
         if (isNotEmptyObject(result)) {
-          pathes[field] = result;
+          paths[field] = result;
         }
       } else if (
         (isCollectionWithItemFragment(instance[field]) &&
@@ -68,11 +68,11 @@ function getPathesToCollections(childInstance, name) {
       ) {
         const collectionItemInstance = getCollectionItemInstance(instance[field]);
 
-        pathes[field] = getCollectionItemTypes(collectionItemInstance);
+        paths[field] = getCollectionItemTypes(collectionItemInstance);
       }
     }
 
-    return pathes;
+    return paths;
   }
 
   const result = getPathToListIfExists(childInstance);
@@ -80,4 +80,4 @@ function getPathesToCollections(childInstance, name) {
   if (isNotEmptyObject(result)) return { [name]: result };
 }
 
-export { getPathesToCollections };
+export { getPathsToCollections };

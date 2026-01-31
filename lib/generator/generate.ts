@@ -34,7 +34,13 @@ function createPageStructure(pagePath: string) {
 
   let getPage: () => any;
   let pageBaseLine;
-  const pageModule = require(pagePath);
+  let pageModule: { [k: string]: any };
+
+  try {
+    pageModule = require(pagePath);
+  } catch (error) {
+    throw new Error(`Failed to load page module at '${pagePath}': ${(error as Error).message}`);
+  }
 
   if (baseLibraryDescription.getPageInstance) {
     getPage = pageModule[baseLibraryDescription.getPageInstance];

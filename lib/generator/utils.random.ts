@@ -17,6 +17,27 @@ const descriptionKeys = ['_countResult', '_type', '_fields', '_check'];
 
 const { collectionRandomDataDescription, collectionDescription = { action: '_action' } } = config.get();
 
+/**
+ * Recursively checks if a key exists anywhere in the object tree.
+ * More efficient than JSON.stringify().includes() for key presence checks.
+ */
+function hasKeyDeep(obj: unknown, targetKey: string): boolean {
+  if (!isObject(obj) || obj === null) {
+    return false;
+  }
+
+  for (const key of Object.keys(obj)) {
+    if (key === targetKey) {
+      return true;
+    }
+    if (hasKeyDeep(obj[key], targetKey)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function isCollectionDescription(data) {
   return isNotEmptyObject(data) && Object.keys(collectionRandomDataDescription).some(key => key in data);
 }
@@ -83,7 +104,7 @@ function findTypedObject(dataObj) {
 
 function getKeyFormat(dataItem) {
   for (const key of Object.keys(dataItem).filter(k => !descriptionKeys.includes(k))) {
-    const isActionInside = safeJSONstringify(dataItem[key]).includes(collectionDescription.action);
+    const isActionInside = hasKeyDeep(dataItem[key], collectionDescription.action);
     const isDescription = descriptionKeys.every(k => safeHasOwnPropery(dataItem[key], k));
 
     if (key === collectionDescription.action && (isNull(dataItem[key]) || !isActionInside)) {
@@ -109,22 +130,32 @@ function getKeyFormat(dataItem) {
   return dataItem;
 }
 
-function getSanitizeDataKeys(sanitizePattern) {
-  let pathKeys = '';
-
+/**
+ * Extracts the dot-separated key path from a sanitize pattern.
+ * Used to identify which keys should be removed from the data structure.
+ */
+function getSanitizeDataKeys(sanitizePattern: { [k: string]: any }): string {
   const firstKey = Object.keys(sanitizePattern).find(k => !descriptionKeys.includes(k));
 
-  if (isNull(sanitizePattern[firstKey])) {
-    pathKeys = firstKey;
-  } else if (isNotEmptyObject(sanitizePattern[firstKey])) {
-    pathKeys = `${firstKey}.${getSanitizeDataKeys(sanitizePattern[firstKey])}`;
-  } else {
-    // eslint-disable-next-line no-console
-    console.error(`First ${firstKey}, sanitize pattern ${safeJSONstringify(sanitizePattern)}`);
-    throw new Error(`Something is wrong`);
+  if (!firstKey) {
+    throw new Error(
+      `No valid key found in sanitize pattern. ` +
+        `Pattern contains only description keys: ${safeJSONstringify(sanitizePattern)}`,
+    );
   }
 
-  return pathKeys;
+  if (isNull(sanitizePattern[firstKey])) {
+    return firstKey;
+  }
+
+  if (isNotEmptyObject(sanitizePattern[firstKey])) {
+    return `${firstKey}.${getSanitizeDataKeys(sanitizePattern[firstKey])}`;
+  }
+
+  throw new Error(
+    `Invalid sanitize pattern structure. Key '${firstKey}' has unexpected value type. ` +
+      `Expected null or non-empty object, got: ${safeJSONstringify(sanitizePattern[firstKey])}`,
+  );
 }
 
 function removeKeys(data: { [k: string]: any }, keysPath: string) {
@@ -152,13 +183,10 @@ function getActionsList(data) {
   const actions = [];
 
   /**
-   * @info it is possible that some wrapping is done and we need to make sure
-   * that collection action key is wrapped in default JSON double quotes
+   * @info check if the collection action key exists anywhere in the data tree
    */
-  while (isNotEmptyObject(data) && safeJSONstringify(data).includes(`"${collectionDescription.action}"`)) {
-    for (const key of Object.keys(data).filter(k =>
-      safeJSONstringify(data[k]).includes(`"${collectionDescription.action}"`),
-    )) {
+  while (isNotEmptyObject(data) && hasKeyDeep(data, collectionDescription.action)) {
+    for (const key of Object.keys(data).filter(k => hasKeyDeep(data[k], collectionDescription.action))) {
       const { _countResult, _type, _fields, _check, ...result } = getKeyFormat(data[key]);
       const action = { [key]: result };
 
@@ -185,23 +213,15 @@ function getResult(data, flat?) {
       return `${key}${next}`;
     }
 
-    if (
-      key === collectionDescription.action &&
-      !safeJSONstringify(data[key]).includes(collectionDescription.action) &&
-      flat
-    ) {
+    if (key === collectionDescription.action && !hasKeyDeep(data[key], collectionDescription.action) && flat) {
       return `${pattern}map(item => item)`;
     }
 
-    if (
-      key === collectionDescription.action &&
-      !safeJSONstringify(data[key]).includes(collectionDescription.action) &&
-      !flat
-    ) {
+    if (key === collectionDescription.action && !hasKeyDeep(data[key], collectionDescription.action) && !flat) {
       return `${pattern}`;
     }
 
-    if (key === collectionDescription.action && safeJSONstringify(data[key]).includes(collectionDescription.action)) {
+    if (key === collectionDescription.action && hasKeyDeep(data[key], collectionDescription.action)) {
       return `${pattern}flatMap((item) => item.${getResult(data[key], true)})`;
     }
 
@@ -212,26 +232,15 @@ function getResult(data, flat?) {
 function getResultMappedResult(result, data, flat?) {
   const firstKey = Object.keys(data)[0];
 
-  if (
-    firstKey === collectionDescription.action &&
-    safeJSONstringify(data[firstKey]).includes(collectionDescription.action)
-  ) {
+  if (firstKey === collectionDescription.action && hasKeyDeep(data[firstKey], collectionDescription.action)) {
     return result.flatMap(item => getResultMappedResult(item, data[firstKey], true));
   }
 
-  if (
-    firstKey === collectionDescription.action &&
-    !safeJSONstringify(data[firstKey]).includes(collectionDescription.action) &&
-    flat
-  ) {
+  if (firstKey === collectionDescription.action && !hasKeyDeep(data[firstKey], collectionDescription.action) && flat) {
     return result.map(item => item);
   }
 
-  if (
-    firstKey === collectionDescription.action &&
-    !safeJSONstringify(data[firstKey]).includes(collectionDescription.action) &&
-    !flat
-  ) {
+  if (firstKey === collectionDescription.action && !hasKeyDeep(data[firstKey], collectionDescription.action) && !flat) {
     return result;
   }
 
@@ -269,16 +278,6 @@ function addWaitingBasedOnAction(descriptions, action) {
   return { ...actionProps, ...notActionsProps, ...(actionKey ? descriptions : {}) };
 }
 
-function getName(data) {
-  return Object.keys(data).reduce((pattern, key) => {
-    if (key === collectionDescription.action) {
-      return `${pattern}${isObject(data[key]) ? getName(data[key]) : ''}`;
-    }
-
-    return `${pattern} ${key}${isObject(data[key]) ? getName(data[key]) : key}`;
-  }, '');
-}
-
 function getFieldsEnumList(fieldsArr: string[]) {
   return fieldsArr.reduce((enumList, item, index, arr) => {
     const separator = index === arr.length - 1 ? '' : '|';
@@ -287,13 +286,13 @@ function getFieldsEnumList(fieldsArr: string[]) {
 }
 
 export {
+  hasKeyDeep,
   isCollectionDescription,
   toRandomTemplateFormat,
   findTypedObject,
   getActionsList,
   getResult,
   getResultMappedResult,
-  getName,
   getFieldsEnumList,
   getSanitizeDataKeys,
   getKeyFormat,

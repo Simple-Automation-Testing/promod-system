@@ -1,24 +1,58 @@
 // @ts-check
 import { colors, safeJSONstringify, isNotEmptyObject, stringifyData } from 'sat-utils';
 
-const { log } = console;
+/**
+ * Logger interface for dependency injection.
+ * Allows replacing console.log with a mock during testing.
+ */
+interface Logger {
+  log: (...args: any[]) => void;
+}
+
+/** Default logger using console.log */
+const defaultLogger: Logger = {
+  log: (...args: any[]) => {
+    try {
+      // eslint-disable-next-line no-console
+      console.log(...args);
+    } catch {
+      /* swallow errors during logging */
+    }
+  },
+};
+
+/**
+ * Configuration options for ConsoleReporter
+ */
+interface ConsoleReporterOptions {
+  isEnabled?: boolean;
+  logger?: Logger;
+}
 
 class ConsoleReporter {
   private isEnabled: boolean;
+  private logger: Logger;
 
-  constructor(isEnabled?: boolean) {
-    this.isEnabled = isEnabled;
+  constructor(options?: boolean | ConsoleReporterOptions) {
+    // Support both old API (boolean) and new API (options object)
+    if (typeof options === 'boolean') {
+      this.isEnabled = options;
+      this.logger = defaultLogger;
+    } else {
+      this.isEnabled = options?.isEnabled ?? false;
+      this.logger = options?.logger ?? defaultLogger;
+    }
   }
 
   inSuite(suiteTitle: string) {
     if (this.isEnabled) {
-      log(colors.blue('START SUITE: '), suiteTitle);
+      this.logger.log(colors.blue('START SUITE: '), suiteTitle);
     }
   }
 
   addCaseProperties(opts) {
     if (this.isEnabled && isNotEmptyObject(opts)) {
-      log(`${colors.blue('CASE PROPERTIES:')}
+      this.logger.log(`${colors.blue('CASE PROPERTIES:')}
 ${safeJSONstringify(opts)}
 ______________________________________________________`);
     }
@@ -26,40 +60,40 @@ ______________________________________________________`);
 
   startCase(testCaseTitle: string) {
     if (this.isEnabled) {
-      log(colors.blue('START CASE: '), testCaseTitle);
+      this.logger.log(colors.blue('START CASE: '), testCaseTitle);
     }
   }
 
   addStep(stepData: string) {
     if (this.isEnabled) {
-      log(colors.yellow('STEP START: '), stepData);
+      this.logger.log(colors.yellow('STEP START: '), stepData);
     }
     return this.finishStep.bind(this);
   }
 
-  finishStep(message, result, error) {
+  finishStep(message: string, result: unknown, error: Error | null) {
     if (this.isEnabled) {
-      log(colors.yellow('FINISH STEP: '), message, stringifyData(result), error);
+      this.logger.log(colors.yellow('FINISH STEP: '), message, stringifyData(result), error);
     }
   }
 
   addCustomData(...args: any[]) {
     if (this.isEnabled) {
-      log(colors.yellow('DATA: '), ...args);
+      this.logger.log(colors.yellow('DATA: '), ...args);
     }
   }
 
   finishSuccessCase(testCaseTitle: string) {
     if (this.isEnabled) {
-      log(colors.green('FINISH TEST CASE: '), testCaseTitle);
+      this.logger.log(colors.green('FINISH TEST CASE: '), testCaseTitle);
     }
   }
 
   finishFailedCase(testCaseTitle: string, error: Error) {
     if (this.isEnabled) {
-      log(colors.green('FINISH TEST CASE WITH ERRORS: '), testCaseTitle, '\n', error);
+      this.logger.log(colors.green('FINISH TEST CASE WITH ERRORS: '), testCaseTitle, '\n', error);
     }
   }
 }
 
-export { ConsoleReporter };
+export { ConsoleReporter, Logger, ConsoleReporterOptions };
