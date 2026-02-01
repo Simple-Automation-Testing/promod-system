@@ -12,9 +12,16 @@ const { hideBin } = require('yargs/helpers');
 const argv = yargs(hideBin(process.argv)).argv;
 
 const { createPageStructure } = require('../built/cjs/generator/generate');
-const { createPageActionTypes } = require('../built/cjs/generator/generate.types');
+const { createPageActionTypes, createPageActionTypesWithFragments } = require('../built/cjs/generator/generate.types');
 const { createTemplateConfig } = require('../built/cjs/config/config.template');
 const { logEnvUsage } = require('../built/cjs/config/env');
+
+function getTypeGenerator() {
+  if (argv['fragment-types']) {
+    return createPageActionTypesWithFragments;
+  }
+  return createPageActionTypes;
+}
 
 if (argv.clihelp) {
   console.info(`
@@ -53,7 +60,7 @@ if (argv['generate-config']) {
         console.log(file);
         return file.includes(argv.pattern);
       })
-      .forEach(argv.types ? createPageActionTypes : createPageStructure);
+      .forEach(argv.types ? getTypeGenerator() : createPageStructure);
   } else {
     throw new Error(`folder ${argv.folder} does not exist`);
   }
@@ -62,5 +69,5 @@ if (argv['generate-config']) {
 } else if (!fs.existsSync(argv.file)) {
   throw new Error('"file" should exist, please check file path which you use');
 } else {
-  argv.types ? createPageActionTypes(argv.file) : createPageStructure(argv.file);
+  argv.types ? getTypeGenerator()(argv.file) : createPageStructure(argv.file);
 }

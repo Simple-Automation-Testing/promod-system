@@ -1,12 +1,18 @@
 /* eslint-disable sonarjs/no-nested-template-literals, no-console, sonarjs/cognitive-complexity */
-import { isArray, isNotEmptyArray } from 'sat-utils';
+import { isArray, isNotEmptyArray, camelize } from 'sat-utils';
 import { config } from '../../config/config';
 import { getActionInstanceFields } from '../utils';
 import { getPageActionMethodNames } from '../namings';
+import { getFragmentTypeReference } from '../fragment-types';
 
 import { getFlowRestArguments, getFlowTypes, shouldResultTypeBeBasedOnArgument } from './common';
 
 const { repeatingActions = [], baseLibraryDescription = {}, prettyMethodName = {}, actionWithWaitOpts } = config.get();
+
+interface TypeGenerationOptions {
+  /** When true, generates inline types. When false, references fragment types. */
+  inlineTypes?: boolean;
+}
 
 function getTemplatedCode({ name, typeName, flowArgumentType, flowResultType, optionsSecondArgument, action, field }) {
   const isActionVoid = flowResultType === 'void';
@@ -134,4 +140,138 @@ ${pageElementAction}
 `;
 }
 
-export { createFlowTemplates, getActionFlowsTypes };
+/**
+ * Generates function declarations that directly reference fragment types (no intermediate aliases)
+ */
+function getTemplatedCodeWithFragmentRef({
+  name,
+  fragmentId,
+  action,
+  optionsSecondArgument,
+  flowResultType,
+}: {
+  name: string;
+  fragmentId: string;
+  action: string;
+  optionsSecondArgument: string;
+  flowResultType: string;
+}) {
+  const entryTypeName = getFragmentTypeReference(fragmentId, action, 'Entry');
+  const resultTypeName = getFragmentTypeReference(fragmentId, action, 'Result');
+
+  const isActionVoid = flowResultType === 'void';
+
+  let resultTypeClarification: string;
+  if (flowResultType === 'void' && optionsSecondArgument && actionWithWaitOpts?.includes(action)) {
+    resultTypeClarification = 'boolean';
+  } else if (
+    flowResultType === 'void' &&
+    optionsSecondArgument &&
+    optionsSecondArgument.includes(baseLibraryDescription.generalActionOptionsId)
+  ) {
+    resultTypeClarification = 'void';
+  } else {
+    resultTypeClarification = flowResultType;
+  }
+
+  const isRepeatingAllowed = isNotEmptyArray(repeatingActions) && repeatingActions.includes(action) && isActionVoid;
+
+  // Determine the actual result type to use
+  const actualResultType =
+    resultTypeClarification === 'void' || resultTypeClarification === 'boolean'
+      ? resultTypeClarification
+      : resultTypeName;
+
+  let entryDataType: string;
+  let callResultType: string;
+  let entryGeneric: string;
+
+  const baseOnArg = shouldResultTypeBeBasedOnArgument(resultTypeClarification, entryTypeName);
+
+  if (baseOnArg) {
+    entryDataType = isRepeatingAllowed
+      ? `Tentry | Tentry[]${optionsSecondArgument}`
+      : `Tentry${optionsSecondArgument}`;
+    entryGeneric = `<Tentry extends ${entryTypeName}>`;
+    callResultType = `TresultBasedOnArgument<Tentry, ${actualResultType}>`;
+  } else {
+    entryDataType = isRepeatingAllowed
+      ? `${entryTypeName} | ${entryTypeName}[]${optionsSecondArgument}`
+      : `${entryTypeName}${optionsSecondArgument}`;
+    entryGeneric = '';
+    callResultType = actualResultType;
+  }
+
+  // Directly use fragment types in function declaration - no intermediate aliases
+  return `declare function ${name}${entryGeneric}(data: ${entryDataType}): Promise<${callResultType}>;`;
+}
+
+/**
+ * Creates flow templates using fragment type references
+ */
+function createFlowTemplatesWithFragmentRef(
+  name: string,
+  action: string,
+  fragmentId: string,
+  fieldName: string,
+  instance: object,
+) {
+  const optionsSecondArgument = getFlowRestArguments(action);
+  const { flowResultType } = getFlowTypes(instance, action, fieldName);
+
+  return getTemplatedCodeWithFragmentRef({
+    name,
+    fragmentId,
+    action,
+    optionsSecondArgument,
+    flowResultType,
+  });
+}
+
+/**
+ * Gets action flow types using fragment type references
+ * This is the new approach that reuses fragment types at function level
+ */
+function getActionFlowsTypesWithFragmentRef(asActorAndPage: string, instance: object, action: string) {
+  const { elementFields, fragmentFields, collectionsFields } = getActionInstanceFields(instance, action);
+
+  const pageElementAction = elementFields.length
+    ? createFlowTemplateForPageElements(asActorAndPage, action, instance)
+    : '';
+
+  return `
+/** ====================== ${action} ================== */
+${[...fragmentFields, ...collectionsFields].reduce(
+  (template, fragmentFieldName) => {
+    const prettyFlowActionNamePart = prettyMethodName[action] || action;
+
+    const instanceFieldIdentifier = instance[fragmentFieldName][baseLibraryDescription.entityId];
+    const { flowChildActionName } = getPageActionMethodNames(
+      asActorAndPage,
+      prettyFlowActionNamePart,
+      instanceFieldIdentifier,
+    );
+
+    return `${template}\n${createFlowTemplatesWithFragmentRef(
+      flowChildActionName,
+      action,
+      instanceFieldIdentifier,
+      fragmentFieldName,
+      instance[fragmentFieldName],
+    )}\n`;
+  },
+  `\n
+`,
+)}
+${pageElementAction}
+/** ====================== ${action} ================== */
+`;
+}
+
+export {
+  createFlowTemplates,
+  getActionFlowsTypes,
+  createFlowTemplatesWithFragmentRef,
+  getActionFlowsTypesWithFragmentRef,
+  TypeGenerationOptions,
+};
