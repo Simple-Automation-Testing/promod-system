@@ -10,8 +10,8 @@ import {
   isPrimitive,
   isString,
   isNumber,
-  compareToPattern,
 } from 'sat-utils';
+import { compare as compareToPattern } from 'sat-compare';
 import { config } from '../config';
 
 const { prettyMethodName = {}, collectionDescription = {} } = config.get();

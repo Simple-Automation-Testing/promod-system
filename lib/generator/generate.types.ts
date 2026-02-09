@@ -1,19 +1,19 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import * as path from 'path';
 import * as fs from 'fs';
-import { isString, isRegExp, camelize } from 'sat-utils';
+import { camelize } from 'sat-utils';
 import { getBaseImport } from './get.base.import';
 import { getAllBaseElements } from './get.base';
 import { config } from '../config/config';
 import { getActionFlowsTypes, getActionFlowsTypesWithFragmentRef } from './based-actions/get.action.flows.types';
-import { getAllBaseActions } from './utils';
 import { getRandomResultsFlowsTypes } from './random-results-actions/get.random.results.flows.types';
 import { getCountFlowsTypes } from './collection-counts/get.entities.count.types';
 import { generateFragmentTypeDeclarations } from './fragment-types';
+import { loadPageModule, resolvePageFactory, resolvePathToLibFolder, getFilteredActions } from './resolve-page';
 
 const flowDeclarationMatcher = /(?<=function )[\w$]+/gim;
 
-const { pathToBase, baseLibraryDescription, collectionDescription } = config.get();
+const { pathToBase, baseLibraryDescription } = config.get();
 
 interface GenerationOptions {
   /** When true, generates types per fragment and reuses them at function level */
@@ -23,53 +23,9 @@ interface GenerationOptions {
 function createPageActionTypes(pagePath: string) {
   const flowMatcher = flowDeclarationMatcher;
 
-  const frameworkPath = process.cwd();
-  const pageRelativePath = path.basename(pagePath);
-  const pathToLibFolder =
-    pagePath
-      .replace(frameworkPath, '')
-      .replace(pageRelativePath, '')
-      .split('/')
-      .splice(2)
-      .map(() => '../')
-      .join('') || './';
-
-  let getPage: () => any;
-  let PageClass;
-  let pageModule: { [k: string]: any };
-
-  try {
-    pageModule = require(pagePath);
-  } catch (error) {
-    throw new Error(`Failed to load page module at '${pagePath}': ${(error as Error).message}`);
-  }
-
-  if (baseLibraryDescription.getPageInstance) {
-    getPage = pageModule[baseLibraryDescription.getPageInstance];
-
-    if (!getPage) {
-      throw new Error(
-        `Page "getPageInstance" method was not found. Search pattern is '${baseLibraryDescription.getPageInstance}', file path '${pagePath}'`,
-      );
-    }
-  } else {
-    PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
-      if (isString(baseLibraryDescription.pageId)) {
-        return name.includes(baseLibraryDescription.pageId);
-      } else if (isRegExp(baseLibraryDescription.pageId)) {
-        return name.match(baseLibraryDescription.pageId);
-      } else {
-        throw new TypeError('"pageId" should exist in "baseLibraryDescription", pageId should be a string or regexp');
-      }
-    });
-
-    if (!PageClass) {
-      throw new Error(`Page Class was not found. Search pattern is '${baseLibraryDescription.pageId}'`);
-    }
-
-    getPage = () => new PageClass();
-  }
-
+  const pathToLibFolder = resolvePathToLibFolder(pagePath);
+  const pageModule = loadPageModule(pagePath);
+  const getPage = resolvePageFactory(pageModule, pagePath);
   const pageInstance = getPage();
 
   const globalImport = `import type { TresultBasedOnArgument, TobjectFromStringArray } from 'promod-system'
@@ -83,7 +39,7 @@ import type {
 
   const asActorAndPage = `on ${pageName}`;
 
-  const actions = getAllBaseActions().filter(action => !Object.values(collectionDescription).includes(action));
+  const actions = getFilteredActions();
 
   const interactionFlowsTemplate = actions.map(pageAction =>
     getActionFlowsTypes(asActorAndPage, pageInstance, pageAction),
@@ -164,53 +120,9 @@ export { ${getActionsName} }
 function createPageActionTypesWithFragments(pagePath: string) {
   const flowMatcher = flowDeclarationMatcher;
 
-  const frameworkPath = process.cwd();
-  const pageRelativePath = path.basename(pagePath);
-  const pathToLibFolder =
-    pagePath
-      .replace(frameworkPath, '')
-      .replace(pageRelativePath, '')
-      .split('/')
-      .splice(2)
-      .map(() => '../')
-      .join('') || './';
-
-  let getPage: () => any;
-  let PageClass;
-  let pageModule: { [k: string]: any };
-
-  try {
-    pageModule = require(pagePath);
-  } catch (error) {
-    throw new Error(`Failed to load page module at '${pagePath}': ${(error as Error).message}`);
-  }
-
-  if (baseLibraryDescription.getPageInstance) {
-    getPage = pageModule[baseLibraryDescription.getPageInstance];
-
-    if (!getPage) {
-      throw new Error(
-        `Page "getPageInstance" method was not found. Search pattern is '${baseLibraryDescription.getPageInstance}', file path '${pagePath}'`,
-      );
-    }
-  } else {
-    PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
-      if (isString(baseLibraryDescription.pageId)) {
-        return name.includes(baseLibraryDescription.pageId);
-      } else if (isRegExp(baseLibraryDescription.pageId)) {
-        return name.match(baseLibraryDescription.pageId);
-      } else {
-        throw new TypeError('"pageId" should exist in "baseLibraryDescription", pageId should be a string or regexp');
-      }
-    });
-
-    if (!PageClass) {
-      throw new Error(`Page Class was not found. Search pattern is '${baseLibraryDescription.pageId}'`);
-    }
-
-    getPage = () => new PageClass();
-  }
-
+  const pathToLibFolder = resolvePathToLibFolder(pagePath);
+  const pageModule = loadPageModule(pagePath);
+  const getPage = resolvePageFactory(pageModule, pagePath);
   const pageInstance = getPage();
 
   const globalImport = `import type { TresultBasedOnArgument, TobjectFromStringArray } from 'promod-system'
@@ -226,7 +138,7 @@ import type {
   // Generate fragment types first
   const { declarations: fragmentTypeDeclarations } = generateFragmentTypeDeclarations(pageInstance);
 
-  const actions = getAllBaseActions().filter(action => !Object.values(collectionDescription).includes(action));
+  const actions = getFilteredActions();
 
   // Generate function declarations using fragment type references
   const interactionFlowsTemplate = actions.map(pageAction =>

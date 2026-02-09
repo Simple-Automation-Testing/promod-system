@@ -1,5 +1,6 @@
 /* eslint-disable unicorn/consistent-function-scoping, no-console, no-only-tests/no-only-tests, sonarjs/cognitive-complexity */
-import { isNumber, sleep, isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
+import { isNumber, isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
+import { sleep } from 'sat-wait';
 import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 
 const { PROMOD_S_SHORE_REPORTER_ERRORS, PROMOD_S_DEBUG_CASE, PROMOD_S_DEBUG_CASE_TIME } = process.env;

@@ -1,79 +1,24 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import * as path from 'path';
 import * as fs from 'fs';
-import { isString, isRegExp, camelize } from 'sat-utils';
+import { camelize } from 'sat-utils';
 import { getBaseImport } from './get.base.import';
 import { getAllBaseElements } from './get.base';
 import { config } from '../config/config';
 import { getActionFlows } from './based-actions/get.action.flows';
-import { getAllBaseActions } from './utils';
 import { getRandomResultsFlows } from './random-results-actions/get.random.results.flows';
 import { getCountFlows } from './collection-counts/get.entities.count';
+import { loadPageModule, resolvePageBaseLine, resolvePathToLibFolder, getFilteredActions, getFlowMatcher } from './resolve-page';
 
 const { PROMOD_S_GENERATE_DEFAULT_IMPORT, PROMOD_S_GENERATE_ACTIONS_TYPE } = process.env;
 
-const flowExpressionMatcher = /(?<=const ).*(?= = async)/gim;
-const flowDeclarationMatcher = /(?<=function )[\w$]+/gim;
-
-const { pathToBase, baseLibraryDescription, promod = {}, collectionDescription } = config.get();
+const { pathToBase, baseLibraryDescription } = config.get();
 
 function createPageStructure(pagePath: string) {
-  const flowMatcher = promod.actionsDeclaration === 'declaration' ? flowDeclarationMatcher : flowExpressionMatcher;
-
-  const frameworkPath = process.cwd();
-  const pageRelativePath = path.basename(pagePath);
-  const pageRelativeTsPath = pageRelativePath.replace('.ts', '');
-  const pathToLibFolder =
-    pagePath
-      .replace(frameworkPath, '')
-      .replace(pageRelativePath, '')
-      .split('/')
-      .splice(2)
-      .map(() => '../')
-      .join('') || './';
-
-  let getPage: () => any;
-  let pageBaseLine;
-  let pageModule: { [k: string]: any };
-
-  try {
-    pageModule = require(pagePath);
-  } catch (error) {
-    throw new Error(`Failed to load page module at '${pagePath}': ${(error as Error).message}`);
-  }
-
-  if (baseLibraryDescription.getPageInstance) {
-    getPage = pageModule[baseLibraryDescription.getPageInstance];
-
-    if (!getPage) {
-      throw new Error(
-        `Page "getPageInstance" method was not found. Search pattern is '${baseLibraryDescription.getPageInstance}', file path '${pagePath}'`,
-      );
-    }
-
-    pageBaseLine = `import { ${baseLibraryDescription.getPageInstance} } from './${pageRelativeTsPath}';`;
-  } else {
-    const PageClass = Object.values(pageModule as { [k: string]: any }).find(({ name }: { name: string }) => {
-      if (isString(baseLibraryDescription.pageId)) {
-        return name.includes(baseLibraryDescription.pageId);
-      } else if (isRegExp(baseLibraryDescription.pageId)) {
-        return name.match(baseLibraryDescription.pageId);
-      } else {
-        throw new TypeError('"pageId" should exist in "baseLibraryDescription", pageId should be a string or regexp');
-      }
-    });
-
-    if (!PageClass) {
-      throw new Error(`Page Class was not found. Search pattern is '${baseLibraryDescription.pageId}'`);
-    }
-
-    pageBaseLine = `import { ${PageClass.prototype.constructor.name} } from './${pageRelativeTsPath}';
-
-const page = new ${PageClass.prototype.constructor.name}();`;
-
-    getPage = () => new PageClass();
-  }
-
+  const flowMatcher = getFlowMatcher();
+  const pathToLibFolder = resolvePathToLibFolder(pagePath);
+  const pageModule = loadPageModule(pagePath);
+  const { getPage, pageBaseLine } = resolvePageBaseLine(pagePath, pageModule);
   const pageInstance = getPage();
 
   const globalImport = `import { toArray, getRandomArrayItem } from 'sat-utils';
@@ -91,7 +36,7 @@ ${pageBaseLine}
   const asActorAndPage = `on ${pageName}`;
   const mainActions = camelize(`${pageName} Actions`);
 
-  const actions = getAllBaseActions().filter(action => !Object.values(collectionDescription).includes(action));
+  const actions = getFilteredActions();
 
   const interactionFlowsTemplate = actions.map(pageAction => getActionFlows(asActorAndPage, pageInstance, pageAction));
   const randomResultsFlowsTemplate = getRandomResultsFlows(asActorAndPage, pageInstance);

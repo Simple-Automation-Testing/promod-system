@@ -1,4 +1,6 @@
-import { waitForCondition, isObject, toArray, compareToPattern } from 'sat-utils';
+import { isObject, toArray } from 'sat-utils';
+import { waitFor as waitForCondition } from 'sat-wait';
+import { compare as compareToPattern } from 'sat-compare';
 import { config } from '../config';
 
 import type { IWaitConditionOpts } from './interfaces';

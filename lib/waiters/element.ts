@@ -1,4 +1,5 @@
-import { waitForCondition, execNumberExpression } from 'sat-utils';
+import { execNumberExpression } from 'sat-utils';
+import { waitFor as waitForCondition } from 'sat-wait';
 
 import { IWaitConditionOpts } from './interfaces';
 import { config } from '../config';

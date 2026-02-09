@@ -1,3 +1,3 @@
-import type { IWaiterOpts } from 'sat-utils';
+import type { IWaiterOpts } from 'sat-wait';
 
 export type IWaitConditionOpts = IWaiterOpts;

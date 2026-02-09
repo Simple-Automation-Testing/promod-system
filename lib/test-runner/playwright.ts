@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/consistent-function-scoping, no-console, no-only-tests/no-only-tests, sonarjs/cognitive-complexity */
 import { test as base } from '@playwright/test';
-import { isNumber, sleep, isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
+import { isNumber, isString, isNotEmptyArray, toArray, isObject, isFunction, isAsyncFunction } from 'sat-utils';
+import { sleep } from 'sat-wait';
 import { getArgumentTags, shouldRecallAfterEachOnFail } from './setup';
 
 import type { TcheckTestCondition, TdescribeBody, TreporterInstance, TtestBody, TtestOpts } from './commons';
@@ -322,10 +323,10 @@ function getPwPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any
     }
 
     // @ts-expect-error
-    if ((opts as TrequiredOpts)?.isRunnable && opts.isRunnable(testName, opts as TrequiredOpts)) {
+    if ((opts as TrequiredOpts)?.isRunnable && opts.isRunnable(testName, opts as TrequiredOpts, fn.toString())) {
       base(testName, testBodyWrapper(testName, fn, opts));
       // @ts-expect-error
-    } else if ((opts as TrequiredOpts)?.isRunnable && !opts.isRunnable(testName, opts as TrequiredOpts)) {
+    } else if ((opts as TrequiredOpts)?.isRunnable && !opts.isRunnable(testName, opts as TrequiredOpts, fn.toString())) {
       base.skip(testName, testBodyWrapper(testName, fn, opts));
     } else {
       base(testName, testBodyWrapper(testName, fn, opts));
@@ -388,6 +389,7 @@ function getPwPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any
         testName = result;
       }
     }
+    console.log(testName, opts, fn);
     base.only(testName as string, async function () {
       try {
         await testBodyWrapper(testName, fn, opts)();
@@ -542,7 +544,12 @@ function getPwPreparedRunner<TRunnerFixtures, TrequiredOpts = { [k: string]: any
 
   function beforeAll(fn: TtestBody<Tfixtures>) {
     _beforeAllCases = async function () {
-      await fn.call(this, fixtures);
+      try {
+        await fn.call(this, fixtures);
+      } catch (error) {
+        console.error('Error in beforeAll:', error);
+        throw error;
+      }
     };
 
     return runner;

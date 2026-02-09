@@ -1,5 +1,7 @@
-import yargs from 'yargs';
+// @ts-ignore -- yargs v18 has no type declarations for helpers subpath
 import { hideBin } from 'yargs/helpers';
+// @ts-ignore -- yargs v18 has no default export types
+import yargs from 'yargs';
 
 const argv = yargs(hideBin(process.argv)).argv;
 

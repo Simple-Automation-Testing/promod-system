@@ -184,6 +184,7 @@ function getCollectionRecomposedData(recomposedData, component) {
     } else if (collectionActionProps.has(key) && !isPrimitive(rest[key])) {
       rest[key] = { ...rest[key] };
     } else if (collectionActionProps.has(key) && isPrimitive(rest[key])) {
+      // oxlint-disable-next-line no-self-assign -- intentional no-op: keep primitive value as-is
       rest[key] = rest[key];
     } else {
       rest[key] = null;
